@@ -42,11 +42,10 @@ class _KretenLoginWidgetState extends State<KretenLoginWidget>
   bool _initialPageLoaded = false;
   bool _hasFadedIn = false;
   bool _hasError = false;
-  String _errorMessage = '';
   bool _hasTimedOut = false;
   Timer? _timeoutTimer;
   int _autoRetryCount = 0;
-  static const int _maxAutoRetries = 1;
+  static const int _maxAutoRetries = 3;
   bool _hasLoadedOnce = false;
 
   static const _loginUrl =
@@ -105,7 +104,7 @@ class _KretenLoginWidgetState extends State<KretenLoginWidget>
           setState(() {
             currentUrl = url;
             _hasError = false;
-            _errorMessage = '';
+
             _hasTimedOut = false;
 
             if (!_initialPageLoaded) {
@@ -146,17 +145,18 @@ class _KretenLoginWidgetState extends State<KretenLoginWidget>
 
           if (!mounted) return;
 
-          // Auto-retry once on first error before showing the error UI,
+          // Auto-retry on first errors before showing the error UI,
           // to handle transient network issues on initial load.
           if (!_hasLoadedOnce && _autoRetryCount < _maxAutoRetries) {
             _autoRetryCount++;
-            _retryLoad();
+            Future.delayed(Duration(seconds: _autoRetryCount), () {
+              if (mounted) _retryLoad();
+            });
             return;
           }
 
           setState(() {
             _hasError = true;
-            _errorMessage = error.description;
           });
         },
       ))
@@ -181,7 +181,6 @@ class _KretenLoginWidgetState extends State<KretenLoginWidget>
   void _retryLoad() {
     setState(() {
       _hasError = false;
-      _errorMessage = '';
       _hasTimedOut = false;
       _initialPageLoaded = false;
       loadingPercentage = 0;
@@ -193,7 +192,6 @@ class _KretenLoginWidgetState extends State<KretenLoginWidget>
   void _retry() {
     setState(() {
       _hasError = false;
-      _errorMessage = '';
       _hasTimedOut = false;
       _initialPageLoaded = false;
       loadingPercentage = 0;
@@ -232,30 +230,29 @@ class _KretenLoginWidgetState extends State<KretenLoginWidget>
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
-                Icons.error_outline,
+                Icons.wifi_off_rounded,
                 size: 48,
-                color: Theme.of(context).colorScheme.error,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
               const SizedBox(height: 16),
               Text(
-                'A bejelentkezési oldal nem tölthető be',
+                'A bejelentkezési oldal nem érhető el',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 16,
+                  fontWeight: FontWeight.w600,
                   color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
-              if (_errorMessage.isNotEmpty) ...[
-                const SizedBox(height: 8),
-                Text(
-                  _errorMessage,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+              const SizedBox(height: 8),
+              Text(
+                'Az e-KRÉTA bejelentkezés csak magyarországi hálózatról érhető el. Kérjük, ellenőrizd az internetkapcsolatod.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 13,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
-              ],
+              ),
               const SizedBox(height: 24),
               FilledButton.icon(
                 onPressed: _retry,
