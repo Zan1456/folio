@@ -24,10 +24,11 @@ import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 class KretenLoginWidget extends StatefulWidget {
-  const KretenLoginWidget({super.key, required this.onLogin});
+  const KretenLoginWidget({super.key, required this.onLogin, this.onDemoMode});
 
   // final String selectedSchool;
   final void Function(String code) onLogin;
+  final VoidCallback? onDemoMode;
 
   @override
   State<KretenLoginWidget> createState() => _KretenLoginWidgetState();
@@ -259,6 +260,13 @@ class _KretenLoginWidgetState extends State<KretenLoginWidget>
                 icon: const Icon(Icons.refresh),
                 label: const Text('Próbáld újra'),
               ),
+              if (widget.onDemoMode != null) ...[
+                const SizedBox(height: 12),
+                OutlinedButton(
+                  onPressed: widget.onDemoMode,
+                  child: const Text('Kipróbálom fiók nélkül'),
+                ),
+              ],
               const SizedBox(height: 12),
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
