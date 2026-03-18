@@ -155,6 +155,13 @@ class _KretenLoginWidgetState extends State<KretenLoginWidget>
             return;
           }
 
+          // If demo mode is available, auto-launch it instead of
+          // showing an error UI (e.g. when outside Hungary).
+          if (widget.onDemoMode != null) {
+            widget.onDemoMode!();
+            return;
+          }
+
           setState(() {
             _hasError = true;
           });
@@ -171,6 +178,10 @@ class _KretenLoginWidgetState extends State<KretenLoginWidget>
     _timeoutTimer?.cancel();
     _timeoutTimer = Timer(const Duration(seconds: 15), () {
       if (mounted && !_initialPageLoaded && !_hasError) {
+        if (widget.onDemoMode != null) {
+          widget.onDemoMode!();
+          return;
+        }
         setState(() {
           _hasTimedOut = true;
         });
