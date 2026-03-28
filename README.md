@@ -9,4 +9,11 @@
 Építési segédlethez és hozzájárulási útmutatóhoz
 **nézd meg a [Hozzájárulási útmutató](CONTRIBUTING.md)t!**
 
+# GYIK
+## Mi a projekt célja?
+A régi alkalmazás optimalizálása és a régóta ígért funkciók lefejlesztése.
+
+## Elérhető lesz IOS-re?
+Nem, mivel teljes mértékben a Material You-ra épül
+
 ***annon:** a régi Filc Napló fejlesztője (ez az app, ha bár sokban változott, alapjaiban a Filc-re, valamint a reFilc-re épül)*
