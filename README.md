@@ -1,5 +1,5 @@
 <h1 align="left">
-<img src="https://github.com/Zan1456/folio/blob/master/refilc/assets/icons/ic_android.png?raw=true" alt="Folio icon" width="30px" style="vertical-align: middle;">
+<img src="https://github.com/Zan1456/folio/blob/master/refilc/assets/icons/ic_rounded.png" alt="Folio icon" width="30px" style="vertical-align: middle;">
 <span style="vertical-align: middle;">Folio</span>
 </h1>
 
