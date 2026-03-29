@@ -17,22 +17,6 @@ class DayTitle extends StatefulWidget {
 
 class _DayTitleState extends State<DayTitle> {
   @override
-  void initState() {
-    super.initState();
-    widget.controller.addListener(listener);
-  }
-
-  void listener() {
-    if (mounted) setState(() {});
-  }
-
-  @override
-  void dispose() {
-    widget.controller.removeListener(listener);
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
 

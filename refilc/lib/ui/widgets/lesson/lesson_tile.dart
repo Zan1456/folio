@@ -44,7 +44,7 @@ class LessonTile extends StatelessWidget {
     List<Widget> subtiles = [];
 
     final colorScheme = Theme.of(context).colorScheme;
-    SettingsProvider settingsProvider = Provider.of<SettingsProvider>(context);
+    SettingsProvider settingsProvider = Provider.of<SettingsProvider>(context, listen: false);
 
     String lessonIndexTrailing = "";
     if (RegExp(r'\d').hasMatch(lesson.lessonIndex)) lessonIndexTrailing = ".";

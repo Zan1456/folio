@@ -43,8 +43,8 @@ class LessonViewableState extends State<LessonViewable> {
 
   @override
   Widget build(BuildContext context) {
-    user = Provider.of<UserProvider>(context);
-    databaseProvider = Provider.of<DatabaseProvider>(context);
+    user = Provider.of<UserProvider>(context, listen: false);
+    databaseProvider = Provider.of<DatabaseProvider>(context, listen: false);
 
     if (widget.customDesc.replaceAll(' ', '') != '' &&
         widget.customDesc != widget.lesson.description) {

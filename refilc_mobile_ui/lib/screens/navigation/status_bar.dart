@@ -86,12 +86,14 @@ class StatusBarState extends State<StatusBar> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         if (currentStatus == Status.syncing) ...[
-                          SizedBox(
-                            width: 12.0,
-                            height: 12.0,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 1.5,
-                              color: progressColor,
+                          RepaintBoundary(
+                            child: SizedBox(
+                              width: 12.0,
+                              height: 12.0,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 1.5,
+                                color: progressColor,
+                              ),
                             ),
                           ),
                           const SizedBox(width: 8.0),

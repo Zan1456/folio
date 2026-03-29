@@ -126,6 +126,8 @@ class TimetablePageState extends State<TimetablePage>
     // Only update the TabController on week changes
     _controller.addListener(() {
       if (_controller.days == null) return;
+      // Refresh custom descriptions when timetable data changes
+      getCustom();
       setState(() {
         _tabController = TabController(
           length: _controller.days!.length,
@@ -168,6 +170,7 @@ class TimetablePageState extends State<TimetablePage>
 
     // listen for lesson customization
     db = Provider.of<DatabaseProvider>(context, listen: false);
+    getCustom();
 
     // Register listening for app state changes to refresh the timetable
     WidgetsBinding.instance.addObserver(this);
@@ -200,11 +203,21 @@ class TimetablePageState extends State<TimetablePage>
 
   @override
   Widget build(BuildContext context) {
-    user = Provider.of<UserProvider>(context);
-    timetableProvider = Provider.of<TimetableProvider>(context);
+    user = Provider.of<UserProvider>(context, listen: false);
+    timetableProvider = Provider.of<TimetableProvider>(context, listen: false);
     settingsProvider = Provider.of<SettingsProvider>(context);
 
-    getCustom();
+    // Pre-compute per-day values once per build, not inside itemBuilder
+    final now = DateTime.now();
+    final df = DateFormat("H:mm", I18n.of(context).locale.languageCode);
+    final swapDescPerDay = _controller.days != null
+        ? List<bool>.generate(_controller.days!.length, (i) {
+            final day = _controller.days![i];
+            if (day.isEmpty) return false;
+            final swapCount = day.fold<int>(0, (s, l) => s + (l.swapDesc ? 1 : 0));
+            return swapCount >= day.length * .5;
+          })
+        : <bool>[];
 
     return Scaffold(
       key: _scaffoldKey,
@@ -510,16 +523,11 @@ class TimetablePageState extends State<TimetablePage>
                                                   ? _controller.days![tab]
                                                       [index - 1]
                                                   : null;
-                                          final bool swapDescDay = _controller
-                                                  .days![tab]
-                                                  .map(
-                                                      (l) => l.swapDesc ? 1 : 0)
-                                                  .reduce((a, b) => a + b) >=
-                                              _controller.days![tab].length *
-                                                  .5;
+                                          final bool swapDescDay = swapDescPerDay[tab];
 
-                                          return Column(
-                                            children: [
+                                          return RepaintBoundary(
+                                            child: Column(
+                                              children: [
                                               if (before != null &&
                                                   (before.end.hour != 0 &&
                                                       lesson.start.hour != 0) &&
@@ -594,7 +602,7 @@ class TimetablePageState extends State<TimetablePage>
                                                             const SizedBox(
                                                                 width: 10.0),
                                                             Text(
-                                                              '${DateFormat("H:mm", I18n.of(context).locale.languageCode).format(before.end)} - ${DateFormat("H:mm", I18n.of(context).locale.languageCode).format(lesson.start)}',
+                                                              '${df.format(before.end)} - ${df.format(lesson.start)}',
                                                               style:
                                                                   const TextStyle(
                                                                 fontSize: 12.5,
@@ -605,12 +613,8 @@ class TimetablePageState extends State<TimetablePage>
                                                             ),
                                                           ],
                                                         ),
-                                                        if (DateTime.now()
-                                                                .isBefore(lesson
-                                                                    .start) &&
-                                                            DateTime.now()
-                                                                .isAfter(
-                                                                    before.end))
+                                                        if (now.isBefore(lesson.start) &&
+                                                            now.isAfter(before.end))
                                                           Dot(
                                                             color: Theme.of(
                                                                     context)
@@ -636,6 +640,7 @@ class TimetablePageState extends State<TimetablePage>
                                                         .qTimetableSubTiles,
                                               ),
                                             ],
+                                            ),
                                           );
                                         },
                                       ),
