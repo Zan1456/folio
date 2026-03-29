@@ -7,9 +7,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:requestLegacyExternalStorage="true" android:enableOnBackInvokedCallback="false">
 
-        <!-- Force OpenGL -->
+        <!-- Enable Impeller (Vulkan) -->
         <meta-data
-            android:name="flutter.embedding.android.SurfaceView"
+            android:name="io.flutter.embedding.android.EnableImpeller"
             android:value="true" />
 
         <activity android:exported="true" android:name="app.zan1456.folio.MainActivity"
