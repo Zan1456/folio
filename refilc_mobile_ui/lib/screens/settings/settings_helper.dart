@@ -960,7 +960,7 @@ class CountdownBeforeMinutesSetting extends StatefulWidget {
 class _CountdownBeforeMinutesSettingState
     extends State<CountdownBeforeMinutesSetting> {
   static const int _minMinutes = 1;
-  static const int _maxMinutes = 30;
+  static const int _maxMinutes = 90;
   late FixedExtentScrollController _scrollController;
   late int _selected;
 

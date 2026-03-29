@@ -866,17 +866,36 @@ class SettingsScreenState extends State<SettingsScreen>
                                   setState(() => devmodeCountdown--);
                                 }
                               },
-                              child: Text(
-                                "v1.0.0, Zan1456 módosította",
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodySmall!
-                                    .copyWith(
-                                      fontWeight: FontWeight.w500,
+                              child: FutureBuilder<Map>(
+                                future: futureRelease,
+                                builder: (context, snapshot) {
+                                  final version = snapshot.hasData
+                                      ? 'v${snapshot.data!['version']}+${snapshot.data!['build_number']}'
+                                      : '...';
+                                  return Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 12.0, vertical: 6.0),
+                                    decoration: BoxDecoration(
                                       color: AppColors.of(context)
                                           .text
-                                          .withValues(alpha: 0.35),
+                                          .withValues(alpha: 0.08),
+                                      borderRadius:
+                                          BorderRadius.circular(20.0),
                                     ),
+                                    child: Text(
+                                      version,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall!
+                                          .copyWith(
+                                            fontWeight: FontWeight.w600,
+                                            color: AppColors.of(context)
+                                                .text
+                                                .withValues(alpha: 0.55),
+                                          ),
+                                    ),
+                                  );
+                                },
                               ),
                             ),
                           ),
