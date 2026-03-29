@@ -1,8 +1,6 @@
 import 'dart:io';
 
-// import 'package:refilc/theme/colors/dark_desktop.dart';
 import 'package:refilc/theme/colors/dark_mobile.dart';
-// import 'package:refilc/theme/colors/light_desktop.dart';
 import 'package:refilc/theme/colors/light_mobile.dart';
 import 'package:flutter/material.dart';
 

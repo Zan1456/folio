@@ -1,9 +1,9 @@
 import 'package:i18n_extension/i18n_extension.dart';
 
 extension Localization on String {
-  static final _t = Translations.byLocale("hu_hu") +
+  static final _t = Translations.byLocale("hu-HU") +
       {
-        "en_en": {
+        "en-US": {
           "excused": "excused %s",
           "pending": "%s to be excused",
           "unexcused": "unexcused %s",
@@ -11,7 +11,7 @@ extension Localization on String {
           "delay": "delay",
           "minute": " minute(s) of ",
         },
-        "hu_hu": {
+        "hu-HU": {
           "excused": "igazolt %s",
           "pending": "igazolandó %s",
           "unexcused": "igazolatlan %s",
@@ -19,7 +19,7 @@ extension Localization on String {
           "delay": "késés",
           "minute": " perc ",
         },
-        "de_de": {
+        "de-DE": {
           "excused": "anerkannt %s",
           "pending": "%s zu anerkennen",
           "unexcused": "unanerkannt %s",
@@ -34,3 +34,4 @@ extension Localization on String {
   String plural(int value) => localizePlural(value, this, _t);
   String version(Object modifier) => localizeVersion(modifier, this, _t);
 }
+

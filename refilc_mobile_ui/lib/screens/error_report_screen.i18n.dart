@@ -1,9 +1,9 @@
 import 'package:i18n_extension/i18n_extension.dart';
 
 extension SettingsLocalization on String {
-  static final _t = Translations.byLocale("hu_hu") +
+  static final _t = Translations.byLocale("hu-HU") +
       {
-        "en_en": {
+        "en-US": {
           "ekretaYou": "e-KRÉTA, you",
           "description": "Unexpected error while using the application!",
           "submit": "Submit",
@@ -17,7 +17,7 @@ extension SettingsLocalization on String {
           "smth_went_wrong":
               "An unexpected error occurred while using the app.",
         },
-        "hu_hu": {
+        "hu-HU": {
           "ekretaYou": "e-KRÉTA, te",
           "description": "Váratlan hiba az alkalmazás használata közben!",
           "submit": "Hiba jelentése",
@@ -31,7 +31,7 @@ extension SettingsLocalization on String {
           "smth_went_wrong":
               "Nem várt hiba következett be az alkalmazás használata közben.",
         },
-        "de_de": {
+        "de-DE": {
           "ekretaYou": "e-KRÉTA, du",
           "description": "Unerwarteter Fehler bei der Benutzung der Anwendung!",
           "submit": "Abschicken",
@@ -52,3 +52,4 @@ extension SettingsLocalization on String {
   String plural(int value) => localizePlural(value, this, _t);
   String version(Object modifier) => localizeVersion(modifier, this, _t);
 }
+

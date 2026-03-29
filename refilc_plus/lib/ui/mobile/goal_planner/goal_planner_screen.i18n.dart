@@ -1,9 +1,9 @@
 import 'package:i18n_extension/i18n_extension.dart';
 
 extension Localization on String {
-  static final _t = Translations.byLocale("hu_hu") +
+  static final _t = Translations.byLocale("hu-HU") +
       {
-        "en_en": {
+        "en-US": {
           "goal_planner_title": "Goal Planning",
           "set_a_goal": "Your Goal",
           "select_subject": "Subject",
@@ -22,7 +22,7 @@ extension Localization on String {
               "You can achieve your goal with these tickets, choose one that you like the most! You can change this later.",
           "show_my_ways": "Show me my options!",
         },
-        "hu_hu": {
+        "hu-HU": {
           "goal_planner_title": "Cél követés",
           "set_a_goal": "Kitűzött cél",
           "select_subject": "Tantárgy",
@@ -41,7 +41,7 @@ extension Localization on String {
               "Ezekkel a jegyekkel érheted el a célodat, válassz egyet, ami a legjobban tetszik! Ezt később változtathatod.",
           "show_my_ways": "Mutasd a lehetőségeimet!",
         },
-        "de_de": {
+        "de-DE": {
           "goal_planner_title": "Zielplanung",
           "set_a_goal": "Dein Ziel",
           "select_subject": "Thema",
@@ -68,3 +68,4 @@ extension Localization on String {
   String plural(int value) => localizePlural(value, this, _t);
   String version(Object modifier) => localizeVersion(modifier, this, _t);
 }
+

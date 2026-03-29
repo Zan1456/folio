@@ -213,6 +213,8 @@ Future loginAPI({
 Future newLoginAPI({
   required String code,
   required BuildContext context,
+  String? idpApplication,
+  String? idpRememberBrowser,
   void Function(User)? onLogin,
   void Function()? onSuccess,
 }) async {
@@ -262,6 +264,7 @@ Future newLoginAPI({
               res["access_token"];
           Provider.of<KretaClient>(context, listen: false).refreshToken =
               res["refresh_token"];
+          Provider.of<KretaClient>(context, listen: false).idpApplicationCookie = idpApplication;
 
           String instituteCode =
               JwtUtils.getInstituteFromJWT(res["access_token"])!;
@@ -285,6 +288,8 @@ Future newLoginAPI({
                 DateTime.now().add(Duration(seconds: (res["expires_in"] - 30))),
             refreshToken: res["refresh_token"],
           );
+          user.idpApplication = idpApplication ?? '';
+          user.idpRememberBrowser = idpRememberBrowser ?? '';
 
           if (onLogin != null) onLogin(user);
 

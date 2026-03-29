@@ -4,7 +4,6 @@ import 'package:refilc_kreta_api/providers/grade_provider.dart';
 import 'package:refilc_mobile_ui/screens/summary/summary_screen.dart';
 import 'package:refilc_mobile_ui/screens/summary/summary_screen.i18n.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:provider/provider.dart';
 import 'package:wtf_sliding_sheet/wtf_sliding_sheet.dart';
 
@@ -72,7 +71,7 @@ class StartBodyState extends State<StartBody> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 const Icon(
-                  FeatherIcons.arrowRight,
+                  Icons.arrow_forward_rounded,
                   size: 145,
                   color: Colors.white,
                   grade: 0.001,

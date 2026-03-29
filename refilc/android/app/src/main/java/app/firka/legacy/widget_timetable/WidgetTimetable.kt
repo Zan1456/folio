@@ -1,4 +1,4 @@
-package app.firka.legacy.widget_timetable
+package app.zan1456.folio.widget_timetable
 
 import android.app.PendingIntent
 import android.app.UiModeManager
@@ -30,11 +30,11 @@ import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.Date
 
-import app.firka.legacy.database.DBManager
-import app.firka.legacy.MainActivity
-import app.firka.legacy.R
+import app.zan1456.folio.database.DBManager
+import app.zan1456.folio.MainActivity
+import app.zan1456.folio.R
 
-import app.firka.legacy.utils.Week
+import app.zan1456.folio.utils.Week
 
 import es.antonborri.home_widget.HomeWidgetBackgroundIntent
 import es.antonborri.home_widget.HomeWidgetLaunchIntent
@@ -249,7 +249,7 @@ class WidgetTimetable : HomeWidgetProvider() {
                 if (rday == -1) return DayOfWeek.of(1).getDisplayName(TextStyle.FULL, loc)
                 dayOfWeek = DayOfWeek.of(rday + 1).getDisplayName(TextStyle.FULL, loc)
             }
-            return dayOfWeek.substring(0, 1).toUpperCase() + dayOfWeek.substring(1).toLowerCase()
+            return dayOfWeek.substring(0, 1).uppercase() + dayOfWeek.substring(1).lowercase()
         }
 
         fun setSelectedDay(context: Context, wid: Int, day: Int) {
@@ -372,7 +372,7 @@ class WidgetTimetable : HomeWidgetProvider() {
                 val loc: String = dbManager.fetchLocale().getString(0)
                 dbManager.close()
                 if (loc.equals("hu") || loc.equals("de")) {
-                    return Locale(loc, loc.toUpperCase())
+                    return Locale(loc, loc.uppercase())
                 }
             } catch (e: Exception) {
                 e.printStackTrace()

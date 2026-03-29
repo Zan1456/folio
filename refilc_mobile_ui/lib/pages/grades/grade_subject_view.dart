@@ -4,29 +4,20 @@ import 'package:animations/animations.dart';
 import 'package:refilc/api/providers/database_provider.dart';
 import 'package:refilc/api/providers/user_provider.dart';
 import 'package:refilc/models/settings.dart';
-import 'package:refilc/ui/widgets/lesson/lesson_tile.dart';
 import 'package:refilc/utils/format.dart';
-import 'package:refilc_kreta_api/controllers/timetable_controller.dart';
 import 'package:refilc_kreta_api/models/exam.dart';
-import 'package:refilc_kreta_api/models/lesson.dart';
 import 'package:refilc_kreta_api/providers/exam_provider.dart';
-// import 'package:refilc_kreta_api/client/api.dart';
-// import 'package:refilc_kreta_api/client/client.dart';
 import 'package:refilc_kreta_api/providers/grade_provider.dart';
 import 'package:refilc/helpers/average_helper.dart';
 import 'package:refilc/helpers/subject.dart';
 import 'package:refilc_kreta_api/models/grade.dart';
 import 'package:refilc_kreta_api/models/subject.dart';
-import 'package:refilc_mobile_ui/common/average_display.dart';
 import 'package:refilc_mobile_ui/common/bottom_sheet_menu/rounded_bottom_sheet.dart';
 import 'package:refilc_mobile_ui/common/empty.dart';
-import 'package:refilc_mobile_ui/common/filter_bar.dart';
 import 'package:refilc_mobile_ui/common/panel/panel.dart';
-import 'package:refilc_mobile_ui/common/splitted_panel/splitted_panel.dart';
 import 'package:refilc_mobile_ui/common/trend_display.dart';
 import 'package:refilc_mobile_ui/common/widgets/cretification/certification_tile.dart';
 import 'package:refilc/ui/widgets/grade/grade_tile.dart';
-import 'package:refilc_mobile_ui/common/widgets/exam/exam_viewable.dart';
 import 'package:refilc_mobile_ui/common/widgets/grade/grade_viewable.dart';
 import 'package:refilc_mobile_ui/common/hero_scrollview.dart';
 import 'package:refilc_mobile_ui/pages/grades/calculator/grade_calculator.dart';
@@ -40,8 +31,6 @@ import 'package:refilc_plus/ui/mobile/goal_planner/goal_state_screen.dart';
 // import 'package:refilc_plus/ui/mobile/plus/upsell.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
-import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:provider/provider.dart';
 import 'package:refilc_plus/ui/mobile/goal_planner/goal_track_popup.dart';
 import 'grades_page.i18n.dart';
@@ -69,7 +58,6 @@ class _GradeSubjectViewState extends State<GradeSubjectView>
   // Controllers
   PersistentBottomSheetController? _sheetController;
   final ScrollController _scrollController = ScrollController();
-  late TabController _tabController;
 
   List<Widget> gradeTiles = [];
 
@@ -80,8 +68,6 @@ class _GradeSubjectViewState extends State<GradeSubjectView>
   late DatabaseProvider dbProvider;
   late UserProvider user;
   late ExamProvider examProvider;
-
-  late TimetableController _timetableController;
 
   late double average;
   late Widget gradeGraph;
@@ -109,11 +95,7 @@ class _GradeSubjectViewState extends State<GradeSubjectView>
     return subjectGrades.where((e) => e.type == GradeType.midYear).length > 1;
   }
 
-  void buildTiles(
-    List<Grade> subjectGrades, {
-    List<Lesson>? nextWeekLessons,
-    List<Exam>? subjectExams,
-  }) {
+  void buildTiles(List<Grade> subjectGrades) {
     List<Widget> tiles = [];
 
     tiles.add(Panel(
@@ -148,88 +130,46 @@ class _GradeSubjectViewState extends State<GradeSubjectView>
       ),
     ));
 
-    if (!gradeCalcMode) {
-      tiles.addAll([
-        const SizedBox(
-          height: 5.0,
-        ),
-        FilterBar(
-          padding: EdgeInsets.zero,
-          items: [
-            Tab(text: "grades".i18n),
-            Tab(text: "timetable".i18n),
-            Tab(text: "exams".i18n),
-          ],
-          controller: _tabController,
-          disableFading: true,
-        ),
-      ]);
-    }
-
-    if (showGraph(subjectGrades) && _tabController.index == 0) {
+    if (showGraph(subjectGrades)) {
       tiles.add(gradeGraph);
     } else {
       tiles.add(Container(height: 20.0));
     }
 
-    if (_tabController.index == 0) {
-      tiles.add(Padding(
-        padding: const EdgeInsets.only(bottom: 24.0),
-        child: Panel(
-          child: GradesCount(grades: getSubjectGrades(widget.subject).toList()),
-        ),
-      ));
-    }
+    tiles.add(Padding(
+      padding: const EdgeInsets.only(bottom: 24.0),
+      child: Panel(
+        child: GradesCount(grades: getSubjectGrades(widget.subject).toList()),
+      ),
+    ));
 
     // ignore: no_leading_underscores_for_local_identifiers
     List<Widget> _tiles = [];
 
     if (!gradeCalcMode) {
-      if (_tabController.index == 0) {
-        subjectGrades.sort((a, b) => -a.date.compareTo(b.date));
+      subjectGrades.sort((a, b) => -a.date.compareTo(b.date));
 
-        _tiles.add(const SizedBox(
-          height: 4.0,
-        ));
+      _tiles.add(const SizedBox(
+        height: 4.0,
+      ));
 
-        for (var grade in subjectGrades) {
-          if (grade.type == GradeType.midYear) {
-            _tiles.add(GradeViewable(grade));
-          } else {
-            _tiles.add(CertificationTile(
-              grade,
-              padding: EdgeInsets.only(
-                  bottom: 8.0,
-                  top: (subjectGrades.first.id == grade.id) ? 0.0 : 8.0),
-              newStyle: true,
-            ));
-          }
-        }
-
-        _tiles.add(const SizedBox(
-          height: 4.0,
-        ));
-      }
-      if (_tabController.index == 1) {
-        nextWeekLessons!.sort((a, b) => -a.date.compareTo(b.date));
-
-        for (var lesson in nextWeekLessons) {
-          _tiles.add(LessonTile(
-            lesson,
-            subjectPageView: true,
+      for (var grade in subjectGrades) {
+        if (grade.type == GradeType.midYear) {
+          _tiles.add(GradeViewable(grade));
+        } else {
+          _tiles.add(CertificationTile(
+            grade,
+            padding: EdgeInsets.only(
+                bottom: 8.0,
+                top: (subjectGrades.first.id == grade.id) ? 0.0 : 8.0),
+            newStyle: true,
           ));
         }
       }
-      if (_tabController.index == 2) {
-        subjectExams!.sort((a, b) => -a.writeDate.compareTo(b.writeDate));
 
-        for (var exam in subjectExams) {
-          _tiles.add(ExamViewable(
-            exam,
-            showSubject: false,
-          ));
-        }
-      }
+      _tiles.add(const SizedBox(
+        height: 4.0,
+      ));
     } else if (subjectGrades.isNotEmpty) {
       _tiles.add(const SizedBox(
         height: 8.0,
@@ -260,28 +200,14 @@ class _GradeSubjectViewState extends State<GradeSubjectView>
           );
         },
         child: _tiles.isNotEmpty
-            ? (_tabController.index == 0
-                ? Panel(
-                    key: ValueKey(gradeCalcMode),
-                    title: Text(
-                      gradeCalcMode ? "Ghost Grades".i18n : "Grades".i18n,
-                    ),
-                    child: Column(
-                      children: _tiles,
-                    ))
-                : _tabController.index == 1
-                    ? SplittedPanel(
-                        padding: EdgeInsets.zero,
-                        cardPadding: const EdgeInsets.only(
-                            left: 6.0, right: 12.0, top: 6.0, bottom: 6.0),
-                        title: Text("upcoming_lessons".i18n),
-                        children: _tiles,
-                      )
-                    : SplittedPanel(
-                        padding: EdgeInsets.zero,
-                        title: Text("exams".i18n),
-                        children: _tiles,
-                      ))
+            ? Panel(
+                key: ValueKey(gradeCalcMode),
+                title: Text(
+                  gradeCalcMode ? "Ghost Grades".i18n : "Grades".i18n,
+                ),
+                child: Column(
+                  children: _tiles,
+                ))
             : const Empty(),
       ),
     );
@@ -296,15 +222,6 @@ class _GradeSubjectViewState extends State<GradeSubjectView>
     super.initState();
     user = Provider.of<UserProvider>(context, listen: false);
     dbProvider = Provider.of<DatabaseProvider>(context, listen: false);
-
-    _tabController = TabController(length: 3, vsync: this);
-
-    _timetableController = TimetableController();
-    _timetableController.jump(_timetableController.currentWeek,
-        context: context, initial: true, skip: true);
-    if (DateTime.now().day > 5) {
-      _timetableController.next(context);
-    }
 
     fetchGoalPlans();
   }
@@ -323,12 +240,6 @@ class _GradeSubjectViewState extends State<GradeSubjectView>
     settingsProvider = Provider.of<SettingsProvider>(context);
     examProvider = Provider.of<ExamProvider>(context);
 
-    List<Lesson> nextWeekLessons = (_timetableController.days ?? [])
-        .expand((e) => e)
-        .where((e) => e.subject.id == widget.subject.id)
-        .toList();
-    List<Exam> subjectExams = getSubjectExams(widget.subject);
-
     List<Grade> subjectGrades = getSubjectGrades(widget.subject).toList();
     average = AverageHelper.averageEvals(subjectGrades);
     final prevAvg = subjectGrades.isNotEmpty
@@ -343,14 +254,14 @@ class _GradeSubjectViewState extends State<GradeSubjectView>
     gradeGraph = Padding(
       padding: const EdgeInsets.only(top: 16.0, bottom: 8.0),
       child: Panel(
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text("annual_average".i18n),
-            if (average != prevAvg)
-              TrendDisplay(current: average, previous: prevAvg),
-          ],
-        ),
+        title: average != prevAvg
+            ? Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TrendDisplay(current: average, previous: prevAvg),
+                ],
+              )
+            : null,
         child: Container(
           padding: const EdgeInsets.only(top: 16.0, right: 12.0),
           child: GradeGraph(subjectGrades,
@@ -360,11 +271,7 @@ class _GradeSubjectViewState extends State<GradeSubjectView>
     );
 
     if (!gradeCalcMode) {
-      buildTiles(
-        subjectGrades,
-        nextWeekLessons: nextWeekLessons,
-        subjectExams: subjectExams,
-      );
+      buildTiles(subjectGrades);
     } else {
       List<Grade> ghostGrades = calculatorProvider.ghosts
           .where((e) => e.subject == widget.subject)
@@ -374,67 +281,6 @@ class _GradeSubjectViewState extends State<GradeSubjectView>
 
     return Scaffold(
         key: _scaffoldKey,
-        floatingActionButtonLocation: ExpandableFab.location,
-        floatingActionButton: Visibility(
-          visible: !gradeCalcMode &&
-              subjectGrades
-                  .where((e) => e.type == GradeType.midYear)
-                  .isNotEmpty,
-          child: ExpandableFab(
-            openButtonBuilder: FloatingActionButtonBuilder(
-              size: 20.0,
-              builder: (context, onPressed, progress) =>
-                  FloatingActionButton.small(
-                onPressed: onPressed,
-                backgroundColor: Theme.of(context).colorScheme.tertiary,
-                child: const Icon(Icons.more_horiz_outlined),
-              ),
-            ),
-            closeButtonBuilder: FloatingActionButtonBuilder(
-              size: 20.0,
-              builder: (context, onPressed, progress) =>
-                  FloatingActionButton.small(
-                onPressed: onPressed,
-                backgroundColor: Theme.of(context).colorScheme.tertiary,
-                child: const Icon(Icons.close),
-              ),
-            ),
-            type: ExpandableFabType.up,
-            distance: 50,
-            // childrenOffset: const Offset(-8.8, 0.0),
-            children: [
-              FloatingActionButton.small(
-                heroTag: "btn_ghost_grades",
-                backgroundColor: Theme.of(context).colorScheme.tertiary,
-                onPressed: () {
-                  gradeCalc(context);
-                },
-                child: const Icon(FeatherIcons.plus),
-              ),
-              FloatingActionButton.small(
-                heroTag: "btn_goal_planner",
-                backgroundColor: Theme.of(context).colorScheme.tertiary,
-                onPressed: () {
-                  // if (!Provider.of<PlusProvider>(context, listen: false)
-                  //     .hasScope(PremiumScopes.goalPlanner)) {
-                  //   PlusLockedFeaturePopup.show(
-                  //       context: context, feature: PremiumFeature.goalplanner);
-                  //   return;
-                  // }
-
-                  // ScaffoldMessenger.of(context).showSnackBar(
-                  //     const SnackBar(content: Text("Hamarosan...")));
-
-                  // Navigator.of(context).push(CupertinoPageRoute(
-                  //     builder: (context) =>
-                  //         GoalPlannerScreen(subject: widget.subject)));
-                  GoalTrackPopup.show(context, subject: widget.subject);
-                },
-                child: const Icon(FeatherIcons.flag, size: 20.0),
-              ),
-            ],
-          ),
-        ),
         body: RefreshIndicator(
           onRefresh: () async {},
           color: Theme.of(context).colorScheme.secondary,
@@ -448,64 +294,119 @@ class _GradeSubjectViewState extends State<GradeSubjectView>
               }
             },
             navBarItems: [
-              const SizedBox(width: 6.0),
-              if (widget.groupAverage != 0)
-                Center(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).scaffoldBackgroundColor,
-                      borderRadius: BorderRadius.circular(50.0),
-                    ),
-                    child: AverageDisplay(
-                        average: widget.groupAverage, border: true),
+              // Averages (compact)
+              if (widget.groupAverage != 0) ...[
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 10.0, vertical: 6.0),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(16.0),
                   ),
-                ),
-              const SizedBox(width: 6.0),
-              if (average != 0)
-                Center(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).scaffoldBackgroundColor,
-                      borderRadius: BorderRadius.circular(50.0),
-                    ),
-                    child: AverageDisplay(average: average),
-                  ),
-                ),
-              const SizedBox(width: 6.0),
-              if (plan != '')
-                Center(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).scaffoldBackgroundColor,
-                      borderRadius: BorderRadius.circular(50.0),
-                    ),
-                    child: GestureDetector(
-                      onTap: () {
-                        Navigator.of(context).push(CupertinoPageRoute(
-                            builder: (context) =>
-                                GoalStateScreen(subject: widget.subject)));
-                      },
-                      child: Container(
-                        width: 54.0,
-                        padding: const EdgeInsets.symmetric(vertical: 8.0),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(45.0),
-                          color: Theme.of(context)
-                              .colorScheme
-                              .primary
-                              .withValues(alpha: .15),
-                        ),
-                        child: Icon(
-                          FeatherIcons.flag,
-                          size: 17.0,
-                          weight: 2.5,
-                          color: Theme.of(context).colorScheme.primary,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        widget.groupAverage.toStringAsFixed(2),
+                        style: TextStyle(
+                          fontSize: 14.0,
+                          fontWeight: FontWeight.w700,
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 6.0),
+              ],
+              if (average != 0) ...[
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 10.0, vertical: 6.0),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primaryContainer,
+                    borderRadius: BorderRadius.circular(16.0),
+                  ),
+                  child: Text(
+                    average.toStringAsFixed(2),
+                    style: TextStyle(
+                      fontSize: 15.0,
+                      fontWeight: FontWeight.w700,
+                      color: Theme.of(context).colorScheme.onPrimaryContainer,
                     ),
                   ),
                 ),
-              const SizedBox(width: 12.0),
+                const SizedBox(width: 6.0),
+              ],
+              // Action icon buttons
+              if (!gradeCalcMode &&
+                  subjectGrades
+                      .where((e) => e.type == GradeType.midYear)
+                      .isNotEmpty) ...[
+                GestureDetector(
+                  onTap: () => gradeCalc(context),
+                  child: Container(
+                    padding: const EdgeInsets.all(8.0),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .surfaceContainerHighest,
+                      borderRadius: BorderRadius.circular(12.0),
+                    ),
+                    child: Icon(Icons.add_rounded,
+                        size: 16.0,
+                        color: Theme.of(context).colorScheme.onSurface),
+                  ),
+                ),
+                const SizedBox(width: 6.0),
+                GestureDetector(
+                  onTap: () =>
+                      GoalTrackPopup.show(context, subject: widget.subject),
+                  child: Container(
+                    padding: const EdgeInsets.all(8.0),
+                    decoration: BoxDecoration(
+                      color: plan != ''
+                          ? Theme.of(context).colorScheme.secondaryContainer
+                          : Theme.of(context)
+                              .colorScheme
+                              .surfaceContainerHighest,
+                      borderRadius: BorderRadius.circular(12.0),
+                    ),
+                    child: Icon(Icons.flag_rounded,
+                        size: 16.0,
+                        color: plan != ''
+                            ? Theme.of(context)
+                                .colorScheme
+                                .onSecondaryContainer
+                            : Theme.of(context).colorScheme.onSurface),
+                  ),
+                ),
+                const SizedBox(width: 6.0),
+              ],
+              // Goal state icon
+              if (plan != '') ...[
+                GestureDetector(
+                  onTap: () => Navigator.of(context).push(CupertinoPageRoute(
+                      builder: (context) =>
+                          GoalStateScreen(subject: widget.subject))),
+                  child: Container(
+                    padding: const EdgeInsets.all(8.0),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.secondaryContainer,
+                      borderRadius: BorderRadius.circular(12.0),
+                    ),
+                    child: Icon(Icons.track_changes_rounded,
+                        size: 16.0,
+                        color: Theme.of(context)
+                            .colorScheme
+                            .onSecondaryContainer),
+                  ),
+                ),
+                const SizedBox(width: 6.0),
+              ],
+              const SizedBox(width: 6.0),
             ],
             icon: SubjectIcon.resolveVariant(
                 subject: widget.subject, context: context),
@@ -548,14 +449,12 @@ class _GradeSubjectViewState extends State<GradeSubjectView>
 
     _sheetController = _scaffoldKey.currentState?.showBottomSheet(
       (context) => RoundedBottomSheet(
-          borderRadius: 14.0, child: GradeCalculator(widget.subject)),
+          borderRadius: 14.0,
+          showHandle: false,
+          child: GradeCalculator(widget.subject)),
       backgroundColor: const Color(0x00000000),
       elevation: 12.0,
     );
-
-    // set tab
-    int tabIndex = _tabController.index;
-    _tabController.animateTo(0);
 
     // Hide the fab and grades
     setState(() {
@@ -565,9 +464,6 @@ class _GradeSubjectViewState extends State<GradeSubjectView>
     _sheetController!.closed.then((value) {
       // Show fab and grades
       if (mounted) {
-        // set tab
-        _tabController.animateTo(tabIndex);
-
         setState(() {
           gradeCalcMode = false;
         });

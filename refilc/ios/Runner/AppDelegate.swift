@@ -3,6 +3,7 @@ import background_fetch
 import ActivityKit
 import Flutter
 import Security
+import WebKit
 
 @main
 @objc class AppDelegate: FlutterAppDelegate {
@@ -18,13 +19,14 @@ import Security
             fatalError("rootViewController is not type FlutterViewController")
         }
         methodChannel = FlutterMethodChannel(
-            name: "app.firka/liveactivity",
+            name: "app.zan1456.folio/liveactivity",
             binaryMessenger: controller as! FlutterBinaryMessenger
         )
         methodChannel?.setMethodCallHandler({ [weak self] (call: FlutterMethodCall, result: @escaping FlutterResult) -> Void in
             guard call.method == "createLiveActivity"
                 || call.method == "endLiveActivity"
                 || call.method == "updateLiveActivity"
+                || call.method == "getCookies"
             else {
                 result(FlutterMethodNotImplemented)
                 return
@@ -133,6 +135,25 @@ import Security
                 LiveActivityManager.stop()
             }
             result(nil)
+        } else if call.method == "getCookies" {
+            guard let args = call.arguments as? [String: Any],
+                  let urlString = args["url"] as? String else {
+                result("")
+                return
+            }
+            if #available(iOS 11.0, *) {
+                WKWebsiteDataStore.default().httpCookieStore.getAllCookies { cookies in
+                    let host = URL(string: urlString)?.host ?? ""
+                    let filtered = cookies.filter { cookie in
+                        let d = cookie.domain.hasPrefix(".") ? String(cookie.domain.dropFirst()) : cookie.domain
+                        return host.hasSuffix(d) || d.hasSuffix(host)
+                    }
+                    let cookieString = filtered.map { "\($0.name)=\($0.value)" }.joined(separator: "; ")
+                    result(cookieString)
+                }
+            } else {
+                result("")
+            }
         }
     }
 

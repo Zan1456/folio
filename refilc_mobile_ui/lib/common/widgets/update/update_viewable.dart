@@ -1,6 +1,6 @@
 import 'package:refilc/models/release.dart';
 import 'package:refilc_mobile_ui/common/widgets/update/update_tile.dart';
-import 'package:refilc_mobile_ui/common/widgets/update/updates_view.dart';
+import 'package:refilc_mobile_ui/common/widgets/update/update_dialog.dart';
 import 'package:flutter/material.dart';
 
 class UpdateViewable extends StatelessWidget {
@@ -12,7 +12,7 @@ class UpdateViewable extends StatelessWidget {
   Widget build(BuildContext context) {
     return UpdateTile(
       release,
-      onTap: () => UpdateView.show(release, context: context),
+      onTap: () => UpdateDialog.show(context, release),
     );
   }
 }

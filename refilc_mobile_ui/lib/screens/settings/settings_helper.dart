@@ -2,7 +2,6 @@
 
 import 'dart:io';
 
-import 'package:flutter_svg/svg.dart';
 import 'package:refilc/api/providers/database_provider.dart';
 import 'package:refilc/api/providers/live_card_provider.dart';
 import 'package:refilc/api/providers/user_provider.dart';
@@ -27,7 +26,6 @@ import 'package:refilc_mobile_ui/common/system_chrome.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:i18n_extension/i18n_extension.dart';
 import 'package:provider/provider.dart';
@@ -212,52 +210,39 @@ class SettingsHelper {
   }
 
   static void startPage(BuildContext context) {
-    Map<Pages, Widget> pageIcons = {
-      Pages.home: SvgPicture.asset(
-        'assets/svg/menu_icons/today.svg',
-        color: Theme.of(context).colorScheme.secondary,
-        height: 24,
-      ),
-      Pages.grades: SvgPicture.asset(
-        'assets/svg/menu_icons/grades.svg',
-        color: Theme.of(context).colorScheme.secondary,
-        height: 22,
-      ),
-      Pages.timetable: SvgPicture.asset(
-        'assets/svg/menu_icons/timetable.svg',
-        color: Theme.of(context).colorScheme.secondary,
-        height: 22,
-      ),
-      Pages.notes: SvgPicture.asset(
-        'assets/svg/menu_icons/notes.svg',
-        color: Theme.of(context).colorScheme.secondary,
-        height: 22,
-      ),
-      Pages.absences: SvgPicture.asset(
-        'assets/svg/menu_icons/absences.svg',
-        color: Theme.of(context).colorScheme.secondary,
-        height: 24,
-      ),
+    const Map<Pages, IconData> pageIcons = {
+      Pages.home: Icons.home_rounded,
+      Pages.grades: Icons.bar_chart_rounded,
+      Pages.timetable: Icons.calendar_today_rounded,
+      Pages.notes: Icons.sticky_note_2_rounded,
+      Pages.absences: Icons.sick_rounded,
     };
 
     showBottomSheetMenu(
       context,
       items: List.generate(Pages.values.length, (index) {
+        final page = Pages.values[index];
+        final isSelected =
+            Provider.of<SettingsProvider>(context, listen: false).startPage ==
+                page;
         return BottomSheetMenuItem(
           onPressed: () {
             Provider.of<SettingsProvider>(context, listen: false)
-                .update(startPage: Pages.values[index]);
+                .update(startPage: page);
             Navigator.of(context).maybePop();
           },
+          icon: Icon(
+            pageIcons[page] ?? Icons.circle_outlined,
+            size: 22.0,
+            color: isSelected
+                ? Theme.of(context).colorScheme.secondary
+                : AppColors.of(context).text.withValues(alpha: .75),
+          ),
           title: Row(
             children: [
-              pageIcons[Pages.values[index]] ?? Container(),
-              const SizedBox(width: 16.0),
-              Text(localizedPageTitles()[Pages.values[index]] ?? ""),
+              Text(localizedPageTitles()[page] ?? ""),
               const Spacer(),
-              if (Pages.values[index] ==
-                  Provider.of<SettingsProvider>(context, listen: false)
-                      .startPage)
+              if (isSelected)
                 Icon(
                   Icons.check_circle,
                   color: Theme.of(context).colorScheme.secondary,
@@ -299,61 +284,55 @@ class SettingsHelper {
     showBottomSheetMenu(context, items: [
       BottomSheetMenuItem(
         onPressed: () => setTheme(ThemeMode.system),
+        icon: Icon(Icons.smartphone_rounded,
+            size: 22.0,
+            color: settings.theme == ThemeMode.system
+                ? Theme.of(context).colorScheme.secondary
+                : AppColors.of(context).text.withValues(alpha: .75)),
         title: Row(
           children: [
-            Padding(
-              padding: const EdgeInsets.only(right: 16.0),
-              child: Icon(FeatherIcons.smartphone,
-                  size: 20.0, color: Theme.of(context).colorScheme.secondary),
-            ),
             Text(SettingsLocalization("system").i18n),
             const Spacer(),
             if (settings.theme == ThemeMode.system)
-              Icon(
-                Icons.check_circle,
-                color: Theme.of(context).colorScheme.secondary,
-              ),
+              Icon(Icons.check_circle,
+                  color: Theme.of(context).colorScheme.secondary),
           ],
         ),
       ),
       BottomSheetMenuItem(
         onPressed: () => setTheme(ThemeMode.light),
+        icon: Icon(Icons.wb_sunny_rounded,
+            size: 22.0,
+            color: settings.theme == ThemeMode.light
+                ? Theme.of(context).colorScheme.secondary
+                : AppColors.of(context).text.withValues(alpha: .75)),
         title: Row(
           children: [
-            Padding(
-              padding: const EdgeInsets.only(right: 16.0),
-              child: Icon(FeatherIcons.sun,
-                  size: 20.0, color: Theme.of(context).colorScheme.secondary),
-            ),
             Text(SettingsLocalization("light").i18n),
             const Spacer(),
             if (settings.theme == ThemeMode.light)
-              Icon(
-                Icons.check_circle,
-                color: Theme.of(context).colorScheme.secondary,
-              ),
+              Icon(Icons.check_circle,
+                  color: Theme.of(context).colorScheme.secondary),
           ],
         ),
       ),
       BottomSheetMenuItem(
         onPressed: () => setTheme(ThemeMode.dark),
+        icon: Icon(Icons.nightlight_round,
+            size: 22.0,
+            color: settings.theme == ThemeMode.dark
+                ? Theme.of(context).colorScheme.secondary
+                : AppColors.of(context).text.withValues(alpha: .75)),
         title: Row(
           children: [
-            Padding(
-              padding: const EdgeInsets.only(right: 16.0),
-              child: Icon(FeatherIcons.moon,
-                  size: 20.0, color: Theme.of(context).colorScheme.secondary),
-            ),
             Text(SettingsLocalization("dark").i18n),
             const Spacer(),
             if (settings.theme == ThemeMode.dark)
-              Icon(
-                Icons.check_circle,
-                color: Theme.of(context).colorScheme.secondary,
-              ),
+              Icon(Icons.check_circle,
+                  color: Theme.of(context).colorScheme.secondary),
           ],
         ),
-      )
+      ),
     ]);
   }
 
@@ -428,6 +407,13 @@ class SettingsHelper {
     );
   }
 
+  static void countdownBeforeMinutes(BuildContext context) {
+    showRoundedModalBottomSheet(
+      context,
+      child: const CountdownBeforeMinutesSetting(),
+    );
+  }
+
   // v5 user changer
   static void changeCurrentUser(BuildContext context, List<Widget> accountTiles,
       int len, String addUsrLocTxt) {
@@ -474,7 +460,7 @@ class SettingsHelper {
             title: Text(addUsrLocTxt),
             leading: const Padding(
               padding: EdgeInsets.only(left: 8.22, right: 6.9),
-              child: Icon(FeatherIcons.userPlus),
+              child: Icon(Icons.person_add_rounded),
             ),
           );
         } else {
@@ -522,7 +508,7 @@ class SettingsHelper {
             children: [
               Text(SettingsLocalization('copy_plus_id').i18n),
               Icon(
-                FeatherIcons.copy,
+                Icons.content_copy_rounded,
                 color: Theme.of(context).colorScheme.secondary,
               ),
             ],
@@ -628,7 +614,7 @@ class _RoundingSettingState extends State<RoundingSetting> {
               style: TextStyle(fontSize: 26.0, fontWeight: FontWeight.w500)),
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 24.0),
-            child: Icon(FeatherIcons.arrowRight, color: Colors.grey),
+            child: Icon(Icons.arrow_forward_rounded, color: Colors.grey),
           ),
           GradeValueWidget(GradeValue(roundingResult, "", "", 100),
               fill: true, size: 32.0),
@@ -960,5 +946,84 @@ class _LiveActivityColorSettingState extends State<LiveActivityColorSetting> {
         ),
       ),
     ]);
+  }
+}
+
+class CountdownBeforeMinutesSetting extends StatefulWidget {
+  const CountdownBeforeMinutesSetting({super.key});
+
+  @override
+  State<CountdownBeforeMinutesSetting> createState() =>
+      _CountdownBeforeMinutesSettingState();
+}
+
+class _CountdownBeforeMinutesSettingState
+    extends State<CountdownBeforeMinutesSetting> {
+  static const int _minMinutes = 1;
+  static const int _maxMinutes = 30;
+  late FixedExtentScrollController _scrollController;
+  late int _selected;
+
+  @override
+  void initState() {
+    super.initState();
+    _selected = Provider.of<SettingsProvider>(context, listen: false)
+        .liveCountdownBeforeMinutes
+        .clamp(_minMinutes, _maxMinutes);
+    _scrollController =
+        FixedExtentScrollController(initialItem: _selected - _minMinutes);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        SizedBox(
+          height: 200,
+          child: CupertinoTheme(
+            data: CupertinoThemeData(brightness: Theme.of(context).brightness),
+            child: CupertinoPicker(
+              scrollController: _scrollController,
+              itemExtent: 44.0,
+              onSelectedItemChanged: (i) {
+                HapticFeedback.selectionClick();
+                setState(() => _selected = _minMinutes + i);
+              },
+              children: List.generate(
+                _maxMinutes - _minMinutes + 1,
+                (i) => Center(
+                  child: Text(
+                    SettingsLocalization('min_before')
+                        .i18n
+                        .replaceFirst('%s', '${_minMinutes + i}'),
+                    style: TextStyle(
+                      fontSize: 18.0,
+                      color: AppColors.of(context).text,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(bottom: 12.0, top: 6.0),
+          child: MaterialActionButton(
+            child: Text(SettingsLocalization('done').i18n),
+            onPressed: () {
+              Provider.of<SettingsProvider>(context, listen: false)
+                  .update(liveCountdownBeforeMinutes: _selected);
+              Navigator.of(context).maybePop();
+            },
+          ),
+        ),
+      ],
+    );
   }
 }

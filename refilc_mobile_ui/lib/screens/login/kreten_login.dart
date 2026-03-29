@@ -19,8 +19,12 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:refilc/api/login.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 class KretenLoginWidget extends StatefulWidget {
@@ -230,6 +234,7 @@ class _KretenLoginWidgetState extends State<KretenLoginWidget>
     super.dispose();
   }
 
+
   @override
   Widget build(BuildContext context) {
     // Show error UI if there was a web resource error or a timeout
@@ -335,5 +340,208 @@ class _KretenLoginWidgetState extends State<KretenLoginWidget>
           ),
       ],
     );
+  }
+}
+
+class KretaBgLoginWidget extends StatefulWidget {
+  const KretaBgLoginWidget({
+    super.key,
+    required this.instituteCode,
+    required this.username,
+    required this.password,
+    this.rememberbrowserCookie,
+    required this.onLogin,
+    this.onError,
+  });
+
+  final String instituteCode;
+  final String username;
+  final String password;
+  final String? rememberbrowserCookie;
+  final void Function(String code, String? idpApplication,
+      String? idpRememberBrowser) onLogin;
+  final void Function(LoginState)? onError;
+
+  @override
+  State<KretaBgLoginWidget> createState() => _KretaBgLoginWidgetState();
+}
+
+class _KretaBgLoginWidgetState extends State<KretaBgLoginWidget> {
+  late final WebViewController controller;
+  bool _credentialsInjected = false;
+  bool _loginCompleted = false;
+  Timer? _loginTimer;
+  String? _savedIdpApplication;
+  String? _savedIdpRememberBrowser;
+
+  // Same authorize URL as KretenLoginWidget — goes directly to IDP login page
+  static const _loginUrl =
+      'https://idp.e-kreta.hu/connect/authorize?prompt=login&nonce=wylCrqT4oN6PPgQn2yQB0euKei9nJeZ6_ffJ-VpSKZU&response_type=code&code_challenge_method=S256&scope=openid%20email%20offline_access%20kreta-ellenorzo-webapi.public%20kreta-eugyintezes-webapi.public%20kreta-fileservice-webapi.public%20kreta-mobile-global-webapi.public%20kreta-dkt-webapi.public%20kreta-ier-webapi.public&code_challenge=HByZRRnPGb-Ko_wTI7ibIba1HQ6lor0ws4bcgReuYSQ&redirect_uri=https://mobil.e-kreta.hu/ellenorzo-student/prod/oauthredirect&client_id=kreta-ellenorzo-student-mobile-ios&state=refilc_student_mobile';
+
+  static final Uri _redirectUri = Uri.parse(
+    'https://mobil.e-kreta.hu/ellenorzo-student/prod/oauthredirect',
+  );
+
+  bool _isRedirectUri(Uri uri) =>
+      uri.scheme == _redirectUri.scheme &&
+      uri.host == _redirectUri.host &&
+      uri.path == _redirectUri.path;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = WebViewController()
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setUserAgent(
+          'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1')
+      ..setNavigationDelegate(NavigationDelegate(
+        onNavigationRequest: (n) async {
+          final Uri? uri = Uri.tryParse(n.url);
+          if (uri != null && _isRedirectUri(uri)) {
+            final String? code = uri.queryParameters['code'];
+            if (code != null && code.isNotEmpty && !_loginCompleted) {
+              _loginCompleted = true;
+              _loginTimer?.cancel();
+              if (mounted) {
+                widget.onLogin(
+                    code, _savedIdpApplication, _savedIdpRememberBrowser);
+              }
+              return NavigationDecision.prevent;
+            }
+          }
+          return NavigationDecision.navigate;
+        },
+        onPageFinished: (url) async {
+          if (!mounted || _loginCompleted) return;
+          if (url.contains('idp.e-kreta.hu')) {
+            if (!_credentialsInjected) {
+              await _tryInjectCredentials();
+            } else {
+              await Future.delayed(const Duration(milliseconds: 300));
+              if (!mounted || _loginCompleted) return;
+              try {
+                // Check for "Tovább az alkalmazásba" continue button
+                final hasContinueBtn =
+                    await controller.runJavaScriptReturningResult(
+                        "document.querySelector('a.btn-kreta') !== null");
+                if (hasContinueBtn.toString() == 'true') {
+                  // Save cookies before navigating away
+                  await _saveCookies();
+                  await controller
+                      .runJavaScript("document.querySelector('a.btn-kreta').click();");
+                  return;
+                }
+                // Login form reappeared → wrong credentials
+                final hasLoginForm =
+                    await controller.runJavaScriptReturningResult(
+                        "document.getElementById('UserName') !== null");
+                if (hasLoginForm.toString() == 'true') {
+                  _loginTimer?.cancel();
+                  if (mounted) widget.onError?.call(LoginState.invalidGrant);
+                }
+              } catch (_) {}
+            }
+          }
+        },
+        onWebResourceError: (error) {
+          if (!mounted || _loginCompleted) return;
+          if (error.isForMainFrame == false) return;
+          if (!_credentialsInjected) {
+            widget.onError?.call(LoginState.failed);
+          }
+        },
+      ));
+    _loadWithCookie();
+  }
+
+  Future<void> _saveCookies() async {
+    try {
+      final cookieStr = await _getCookiesForUrl('https://idp.e-kreta.hu');
+      if (cookieStr != null && cookieStr.isNotEmpty) {
+        final cookies = _parseCookies(cookieStr);
+        _savedIdpApplication = cookies['idp.application'];
+        _savedIdpRememberBrowser = cookies['idp.rememberbrowser'];
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _loadWithCookie() async {
+    if (widget.rememberbrowserCookie != null &&
+        widget.rememberbrowserCookie!.isNotEmpty) {
+      try {
+        await WebViewCookieManager().setCookie(WebViewCookie(
+          name: 'idp.rememberbrowser',
+          value: widget.rememberbrowserCookie!,
+          domain: 'idp.e-kreta.hu',
+          path: '/',
+        ));
+      } catch (_) {}
+    }
+    controller.loadRequest(Uri.parse(_loginUrl));
+  }
+
+  Future<void> _tryInjectCredentials() async {
+    try {
+      final hasForm = await controller.runJavaScriptReturningResult(
+          "document.getElementById('UserName') !== null && document.getElementById('Password') !== null");
+      if (hasForm.toString() == 'true') {
+        _credentialsInjected = true;
+        final usernameJson = jsonEncode(widget.username);
+        final passwordJson = jsonEncode(widget.password);
+        final instituteJson = jsonEncode(widget.instituteCode);
+        await controller.runJavaScript("""
+(function() {
+  var u = document.getElementById('UserName');
+  var p = document.getElementById('Password');
+  var s = document.getElementById('instituteSelector');
+  var b = document.getElementById('submit-btn');
+  if (u) u.value = $usernameJson;
+  if (p) p.value = $passwordJson;
+  if (s) s.value = $instituteJson;
+  if (b) b.click();
+})();
+""");
+        _loginTimer = Timer(const Duration(seconds: 30), () {
+          if (mounted && !_loginCompleted) {
+            widget.onError?.call(LoginState.failed);
+          }
+        });
+      }
+    } catch (_) {}
+  }
+
+  Future<String?> _getCookiesForUrl(String url) async {
+    try {
+      if (Platform.isAndroid) {
+        return await const MethodChannel(
+                'app.zan1456.folio/android_live_activity')
+            .invokeMethod<String>('getCookies', {'url': url});
+      } else if (Platform.isIOS) {
+        return await const MethodChannel('app.zan1456.folio/liveactivity')
+            .invokeMethod<String>('getCookies', {'url': url});
+      }
+    } catch (_) {}
+    return null;
+  }
+
+  Map<String, String> _parseCookies(String cookieString) {
+    final map = <String, String>{};
+    for (final part in cookieString.split(';')) {
+      final idx = part.indexOf('=');
+      if (idx < 0) continue;
+      map[part.substring(0, idx).trim()] = part.substring(idx + 1).trim();
+    }
+    return map;
+  }
+
+  @override
+  void dispose() {
+    _loginTimer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return WebViewWidget(controller: controller);
   }
 }

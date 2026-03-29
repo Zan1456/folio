@@ -21,6 +21,7 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 
+import 'package:html/parser.dart' show parse;
 import 'package:refilc/models/config.dart';
 import 'package:refilc/models/news.dart';
 import 'package:refilc/models/release.dart';
@@ -50,7 +51,7 @@ class FilcAPI {
 
   // updates path to github
   static const releases =
-      "https://api.github.com/repos/QwIT-Development/app-legacy/releases";
+      "https://api.github.com/repos/Zan1456/folio/releases";
 
   // theme sharing api
   static const themeShare = "$baseUrl/theme/";
@@ -83,6 +84,37 @@ class FilcAPI {
       }
     } on Exception catch (error, stacktrace) {
       log("ERROR: FilcAPI.getSchools: $error $stacktrace");
+    }
+    return null;
+  }
+
+  static const _schoolSearchBase =
+      "https://intezmenykereso.e-kreta.hu/instituteSelector/";
+
+  static Future<List<School>?> searchSchoolsFromKreta(String query) async {
+    if (query.length < 3) return null;
+    try {
+      final res = await http.get(
+        Uri.parse(
+            "$_schoolSearchBase${Uri.encodeComponent(query)}?showOnlyLive=true"),
+      );
+      if (res.statusCode == 200) {
+        final body = utf8.decode(res.bodyBytes);
+        final document = parse(body);
+        final items = document.querySelectorAll('a.dropdown-item');
+        return items
+            .map((item) {
+              final code = item.attributes['data-val'] ?? '';
+              final text = item.text.trim();
+              final nameMatch = RegExp(r'^(.+?)\s*\(').firstMatch(text);
+              final name = nameMatch?.group(1)?.trim() ?? text;
+              return School(instituteCode: code, name: name, city: '');
+            })
+            .where((s) => s.instituteCode.isNotEmpty)
+            .toList();
+      }
+    } catch (e) {
+      log("ERROR: FilcAPI.searchSchoolsFromKreta: $e");
     }
     return null;
   }

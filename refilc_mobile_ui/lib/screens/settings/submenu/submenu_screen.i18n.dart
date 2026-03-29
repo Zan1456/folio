@@ -1,9 +1,9 @@
 import 'package:i18n_extension/i18n_extension.dart';
 
 extension SettingsLocalization on String {
-  static final _t = Translations.byLocale("hu_hu") +
+  static final _t = Translations.byLocale("hu-HU") +
       {
-        "en_en": {
+        "en-US": {
           "general": "General",
           "personalization": "Personalization",
           "extras": "Extras",
@@ -40,7 +40,7 @@ extension SettingsLocalization on String {
           "goodstudent_disclaimer":
           "reFilc can not be held liable for the usage of this feature.\n\n(if your mother beats you up because you showed her fake grades, you can only blame yourself for it)",
         },
-        "hu_hu": {
+        "hu-HU": {
           "general": "Általános",
           "personalization": "Személyre szabás",
           "extras": "Extrák",
@@ -76,7 +76,7 @@ extension SettingsLocalization on String {
           "goodstudent_disclaimer":
           "A reFilc minden felelősséget elhárít a funkció használatával kapcsolatban.\n\n(Értsd: ha az anyád megver, mert megtévesztő ábrákat mutattál neki, azért csakis magadat hibáztathatod.)",
         },
-        "de_de": {
+        "de-DE": {
           "general": "Allgemeine",
           "personalization": "Personalisierung",
           "extras": "Extras",
@@ -120,3 +120,4 @@ extension SettingsLocalization on String {
   String plural(int value) => localizePlural(value, this, _t);
   String version(Object modifier) => localizeVersion(modifier, this, _t);
 }
+

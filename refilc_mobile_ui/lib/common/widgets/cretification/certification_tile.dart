@@ -5,7 +5,6 @@ import 'package:refilc_kreta_api/models/grade.dart';
 import 'package:refilc/ui/widgets/grade/grade_tile.dart';
 import 'package:refilc_mobile_ui/pages/grades/subject_grades_container.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:refilc/utils/format.dart';
 import 'package:provider/provider.dart';
 import 'certification_tile.i18n.dart';
@@ -89,7 +88,7 @@ class CertificationTile extends StatelessWidget {
                 ),
           minLeadingWidth: isSubjectView ? 32.0 : 42.0,
           trailing: isSubjectView
-              ? const Icon(FeatherIcons.award)
+              ? const Icon(Icons.emoji_events_rounded)
               : GradeValueWidget(
                   grade.value,
                   complemented: grade.description == 'Dicséret',

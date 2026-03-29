@@ -1,9 +1,9 @@
 import 'package:i18n_extension/i18n_extension.dart';
 
 extension ScreensLocalization on String {
-  static final _t = Translations.byLocale("hu_hu") +
+  static final _t = Translations.byLocale("hu-HU") +
       {
-        "en_en": {
+        "en-US": {
           "Absences": "Absences",
           "Delays": "Delays",
           "Misses": "Misses",
@@ -24,7 +24,7 @@ extension ScreensLocalization on String {
           "sept": "September",
           "now": "Now",
         },
-        "hu_hu": {
+        "hu-HU": {
           "Absences": "Hiányzások",
           "Delays": "Késések",
           "Misses": "Hiányok",
@@ -45,7 +45,7 @@ extension ScreensLocalization on String {
           "sept": "Szeptember",
           "now": "Most",
         },
-        "de_de": {
+        "de-DE": {
           "Absences": "Fehlen",
           "Delays": "Verspätung",
           "Misses": "Fehlt",
@@ -74,3 +74,4 @@ extension ScreensLocalization on String {
   String plural(int value) => localizePlural(value, this, _t);
   String version(Object modifier) => localizeVersion(modifier, this, _t);
 }
+

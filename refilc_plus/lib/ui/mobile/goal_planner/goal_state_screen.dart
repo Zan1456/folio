@@ -19,7 +19,6 @@ import 'package:refilc_plus/ui/mobile/goal_planner/goal_state_screen.i18n.dart';
 import 'package:refilc_plus/ui/mobile/goal_planner/goal_track_popup.dart';
 import 'package:refilc_plus/ui/mobile/goal_planner/route_option.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:provider/provider.dart';
 
 import 'graph.dart';
@@ -226,7 +225,7 @@ class _GoalStateScreenState extends State<GoalStateScreen> {
                               ),
                             );
                           },
-                          icon: const Icon(FeatherIcons.trash2),
+                          icon: const Icon(Icons.delete_rounded),
                         ),
                       ],
                     ),
@@ -381,8 +380,8 @@ class _GoalStateScreenState extends State<GoalStateScreen> {
                                       children: [
                                         Icon(
                                           avgDifference.isNegative
-                                              ? FeatherIcons.chevronDown
-                                              : FeatherIcons.chevronUp,
+                                              ? Icons.keyboard_arrow_down_rounded
+                                              : Icons.keyboard_arrow_up_rounded,
                                           color: avgDifference.isNegative
                                               ? Colors.redAccent.shade400
                                               : Colors.greenAccent.shade700,

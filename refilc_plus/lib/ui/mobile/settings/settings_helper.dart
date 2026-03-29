@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:provider/provider.dart';
 import 'package:refilc/api/providers/database_provider.dart';
 import 'package:refilc/api/providers/user_provider.dart';
@@ -99,7 +98,7 @@ class GradeRarityTextSettingState extends State<GradeRarityTextSetting> {
               border: const OutlineInputBorder(),
               label: Text(defaultRarities[int.parse(gradeIndex) - 1]),
               suffixIcon: IconButton(
-                icon: const Icon(FeatherIcons.x),
+                icon: const Icon(Icons.close_rounded),
                 onPressed: () {
                   setState(() {
                     _rarityText.clear();

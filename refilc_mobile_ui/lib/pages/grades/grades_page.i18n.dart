@@ -1,15 +1,16 @@
 import 'package:i18n_extension/i18n_extension.dart';
 
 extension Localization on String {
-  static final _t = Translations.byLocale("hu_hu") +
+  static final _t = Translations.byLocale("hu-HU") +
       {
-        "en_en": {
+        "en-US": {
           "Grades": "Grades",
           "page_title_grades": "Subjects",
           "Ghost Grades": "Ghost Grades",
           "Subjects": "Your Subjects",
           "Subjects_changes": "Subject Differences",
           "empty": "You don't have any subjects.",
+          "avg_period": "Average period",
           "annual_average": "Annual average",
           "3_months_average": "3 Monthly Average",
           "30_days_average": "Monthly Average",
@@ -30,14 +31,18 @@ extension Localization on String {
           "show_exams_homework": "Exams and Homework",
           "grade_calc": "Grade Calculator",
           "import_grades": "Import Grades (JSON)",
+          "goal": "Goal",
+          "goal_state": "Tracking",
+          "class": "class",
         },
-        "hu_hu": {
+        "hu-HU": {
           "Grades": "Jegyek",
-          "page_title_grades": "Tantárgyak",
+          "page_title_grades": "Jegyek",
           "Ghost Grades": "Szellem jegyek",
           "Subjects": "Tantárgyaid",
           "Subjects_changes": "Tantárgyi változások",
           "empty": "Még nincs egy tárgyad sem.",
+          "avg_period": "Átlag időszaka",
           "annual_average": "Éves átlag",
           "3_months_average": "Háromhavi átlag",
           "30_days_average": "Havi átlag",
@@ -58,14 +63,18 @@ extension Localization on String {
           "show_exams_homework": "Dolgozatok és házik",
           "grade_calc": "Jegy kalkulátor",
           "import_grades": "Jegyek importálása (JSON)",
+          "goal": "Célkitűzés",
+          "goal_state": "Követés",
+          "class": "osztály",
         },
-        "de_de": {
+        "de-DE": {
           "Grades": "Klassen",
           "page_title_grades": "Themen",
           "Ghost Grades": "Geist Noten",
           "Subjects": "Ihre Themen",
           "Subjects_changes": "Betreff Änderungen",
           "empty": "Sie haben keine Fächer.",
+          "avg_period": "Durchschnittszeitraum",
           "annual_average": "Jahresdurchschnitt",
           "3_months_average": "Drei-Monats-Durchschnitt",
           "30_days_average": "Monatsdurchschnitt",
@@ -86,6 +95,9 @@ extension Localization on String {
           "show_exams_homework": "Referate und Hausaufgaben",
           "grade_calc": "Noten-Rechner",
           "import_grades": "Noten importieren (JSON)",
+          "goal": "Ziel",
+          "goal_state": "Verfolgung",
+          "class": "Klasse",
         },
       };
 

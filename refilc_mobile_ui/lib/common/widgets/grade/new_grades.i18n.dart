@@ -1,9 +1,9 @@
 import 'package:i18n_extension/i18n_extension.dart';
 
 extension Localization on String {
-  static final _t = Translations.byLocale("hu_hu") +
+  static final _t = Translations.byLocale("hu-HU") +
       {
-        "en_en": {
+        "en-US": {
           "common": "Common",
           "uncommon": "Uncommon",
           "rare": "Rare",
@@ -14,7 +14,7 @@ extension Localization on String {
           "tap_to_open": "Tap to open now!",
           "open_subtitle": "Tap to open...",
         },
-        "hu_hu": {
+        "hu-HU": {
           "common": "Gyakori",
           "uncommon": "Nem gyakori",
           "rare": "Ritka",
@@ -25,7 +25,7 @@ extension Localization on String {
           "tap_to_open": "Nyisd ki őket!",
           "open_subtitle": "Nyomd meg a kinyitáshoz...",
         },
-        "de_de": {
+        "de-DE": {
           "common": "Gemeinsam",
           "uncommon": "Gelegentlich",
           "rare": "Selten",
@@ -43,3 +43,4 @@ extension Localization on String {
   String plural(int value) => localizePlural(value, this, _t);
   String version(Object modifier) => localizeVersion(modifier, this, _t);
 }
+

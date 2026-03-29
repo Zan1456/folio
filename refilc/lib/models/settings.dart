@@ -22,7 +22,7 @@ enum VibrationStrength { off, light, medium, strong }
 class SettingsProvider extends ChangeNotifier {
   final DatabaseProvider? _database;
 
-  // en_en, hu_hu, de_de
+  // en-US, hu-HU, de-DE
   String _language;
   Pages _startPage;
   // divide by 10
@@ -119,6 +119,15 @@ class SettingsProvider extends ChangeNotifier {
   bool _qTimetableLessonNum;
   bool _qTimetableSubTiles;
   bool _qSubjectsSubTiles;
+  // android live activity
+  bool _androidLiveActivityEnabled;
+  String _androidLiveNotificationType; // 'native' | 'hyper_os'
+  // countdown settings
+  bool _liveCountdownEnabled;
+  bool _liveCountdownBeforeLesson;
+  int _liveCountdownBeforeMinutes;
+  bool _liveCountdownDuringLesson;
+  bool _liveCountdownDuringBreak;
 
   SettingsProvider({
     DatabaseProvider? database,
@@ -199,6 +208,13 @@ class SettingsProvider extends ChangeNotifier {
     required bool qTimetableLessonNum,
     required bool qTimetableSubTiles,
     required bool qSubjectsSubTiles,
+    required bool androidLiveActivityEnabled,
+    required String androidLiveNotificationType,
+    required bool liveCountdownEnabled,
+    required bool liveCountdownBeforeLesson,
+    required int liveCountdownBeforeMinutes,
+    required bool liveCountdownDuringLesson,
+    required bool liveCountdownDuringBreak,
   })  : _database = database,
         _language = language,
         _startPage = startPage,
@@ -276,7 +292,14 @@ class SettingsProvider extends ChangeNotifier {
         _updatedAt = updatedAt,
         _qTimetableLessonNum = qTimetableLessonNum,
         _qTimetableSubTiles = qTimetableSubTiles,
-        _qSubjectsSubTiles = qSubjectsSubTiles;
+        _qSubjectsSubTiles = qSubjectsSubTiles,
+        _androidLiveActivityEnabled = androidLiveActivityEnabled,
+        _androidLiveNotificationType = androidLiveNotificationType,
+        _liveCountdownEnabled = liveCountdownEnabled,
+        _liveCountdownBeforeLesson = liveCountdownBeforeLesson,
+        _liveCountdownBeforeMinutes = liveCountdownBeforeMinutes,
+        _liveCountdownDuringLesson = liveCountdownDuringLesson,
+        _liveCountdownDuringBreak = liveCountdownDuringBreak;
 
   factory SettingsProvider.fromMap(Map map,
       {required DatabaseProvider database}) {
@@ -374,6 +397,13 @@ class SettingsProvider extends ChangeNotifier {
       qTimetableLessonNum: map['q_timetable_lesson_num'] == 1,
       qTimetableSubTiles: map['q_timetable_sub_tiles'] == 1,
       qSubjectsSubTiles: map['q_subjects_sub_tiles'] == 1,
+      androidLiveActivityEnabled: map['android_live_activity_enabled'] == 1,
+      androidLiveNotificationType: map['android_live_notification_type'] ?? 'native',
+      liveCountdownEnabled: map['live_countdown_enabled'] == 1,
+      liveCountdownBeforeLesson: map['live_countdown_before_lesson'] == 1,
+      liveCountdownBeforeMinutes: map['live_countdown_before_minutes'] ?? 5,
+      liveCountdownDuringLesson: (map['live_countdown_during_lesson'] ?? 1) == 1,
+      liveCountdownDuringBreak: (map['live_countdown_during_break'] ?? 1) == 1,
     );
   }
 
@@ -459,6 +489,13 @@ class SettingsProvider extends ChangeNotifier {
       "q_timetable_lesson_num": _qTimetableLessonNum ? 1 : 0,
       "q_timetable_sub_tiles": _qTimetableSubTiles ? 1 : 0,
       "q_subjects_sub_tiles": _qSubjectsSubTiles ? 1 : 0,
+      "android_live_activity_enabled": _androidLiveActivityEnabled ? 1 : 0,
+      "android_live_notification_type": _androidLiveNotificationType,
+      "live_countdown_enabled": _liveCountdownEnabled ? 1 : 0,
+      "live_countdown_before_lesson": _liveCountdownBeforeLesson ? 1 : 0,
+      "live_countdown_before_minutes": _liveCountdownBeforeMinutes,
+      "live_countdown_during_lesson": _liveCountdownDuringLesson ? 1 : 0,
+      "live_countdown_during_break": _liveCountdownDuringBreak ? 1 : 0,
     };
   }
 
@@ -469,7 +506,7 @@ class SettingsProvider extends ChangeNotifier {
       startPage: Pages.home,
       rounding: 5,
       theme: ThemeMode.system,
-      accentColor: AccentColor.filc,
+      accentColor: AccentColor.adaptive,
       gradeColors: [
         DarkMobileAppColors().gradeOne,
         DarkMobileAppColors().gradeTwo,
@@ -548,6 +585,13 @@ class SettingsProvider extends ChangeNotifier {
       qTimetableLessonNum: true,
       qTimetableSubTiles: true,
       qSubjectsSubTiles: true,
+      androidLiveActivityEnabled: false,
+      androidLiveNotificationType: 'native',
+      liveCountdownEnabled: true,
+      liveCountdownBeforeLesson: true,
+      liveCountdownBeforeMinutes: 5,
+      liveCountdownDuringLesson: true,
+      liveCountdownDuringBreak: true,
     );
   }
 
@@ -628,6 +672,13 @@ class SettingsProvider extends ChangeNotifier {
   bool get qTimetableLessonNum => _qTimetableLessonNum;
   bool get qTimetableSubTiles => _qTimetableSubTiles;
   bool get qSubjectsSubTiles => _qSubjectsSubTiles;
+  bool get androidLiveActivityEnabled => _androidLiveActivityEnabled;
+  String get androidLiveNotificationType => _androidLiveNotificationType;
+  bool get liveCountdownEnabled => _liveCountdownEnabled;
+  bool get liveCountdownBeforeLesson => _liveCountdownBeforeLesson;
+  int get liveCountdownBeforeMinutes => _liveCountdownBeforeMinutes;
+  bool get liveCountdownDuringLesson => _liveCountdownDuringLesson;
+  bool get liveCountdownDuringBreak => _liveCountdownDuringBreak;
 
   Future<void> update({
     bool store = true,
@@ -704,6 +755,13 @@ class SettingsProvider extends ChangeNotifier {
     bool? qTimetableLessonNum,
     bool? qTimetableSubTiles,
     bool? qSubjectsSubTiles,
+    bool? androidLiveActivityEnabled,
+    String? androidLiveNotificationType,
+    bool? liveCountdownEnabled,
+    bool? liveCountdownBeforeLesson,
+    int? liveCountdownBeforeMinutes,
+    bool? liveCountdownDuringLesson,
+    bool? liveCountdownDuringBreak,
   }) async {
     if (language != null && language != _language) _language = language;
     if (startPage != null && startPage != _startPage) _startPage = startPage;
@@ -928,6 +986,27 @@ class SettingsProvider extends ChangeNotifier {
     if (qSubjectsSubTiles != null && qSubjectsSubTiles != _qSubjectsSubTiles) {
       _qSubjectsSubTiles = qSubjectsSubTiles;
     }
+    if (androidLiveActivityEnabled != null && androidLiveActivityEnabled != _androidLiveActivityEnabled) {
+      _androidLiveActivityEnabled = androidLiveActivityEnabled;
+    }
+    if (androidLiveNotificationType != null && androidLiveNotificationType != _androidLiveNotificationType) {
+      _androidLiveNotificationType = androidLiveNotificationType;
+    }
+    if (liveCountdownEnabled != null && liveCountdownEnabled != _liveCountdownEnabled) {
+      _liveCountdownEnabled = liveCountdownEnabled;
+    }
+    if (liveCountdownBeforeLesson != null && liveCountdownBeforeLesson != _liveCountdownBeforeLesson) {
+      _liveCountdownBeforeLesson = liveCountdownBeforeLesson;
+    }
+    if (liveCountdownBeforeMinutes != null && liveCountdownBeforeMinutes != _liveCountdownBeforeMinutes) {
+      _liveCountdownBeforeMinutes = liveCountdownBeforeMinutes;
+    }
+    if (liveCountdownDuringLesson != null && liveCountdownDuringLesson != _liveCountdownDuringLesson) {
+      _liveCountdownDuringLesson = liveCountdownDuringLesson;
+    }
+    if (liveCountdownDuringBreak != null && liveCountdownDuringBreak != _liveCountdownDuringBreak) {
+      _liveCountdownDuringBreak = liveCountdownDuringBreak;
+    }
     // change updated at time
     _updatedAt = DateTime.now();
     // store or not
@@ -1045,3 +1124,4 @@ class SettingsProvider extends ChangeNotifier {
     Clipboard.setData(ClipboardData(text: sets));
   }
 }
+

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:provider/provider.dart';
 import 'package:refilc/models/settings.dart';
 import 'package:refilc/theme/colors/colors.dart';
@@ -191,7 +190,7 @@ class LiveActivityConsentDialog extends StatelessWidget {
                             ),
                             const SizedBox(width: 4.0),
                             Icon(
-                              FeatherIcons.chevronRight,
+                              Icons.keyboard_arrow_right_rounded,
                               size: 18.0,
                               color: colors.text.withValues(alpha: 0.8),
                             ),

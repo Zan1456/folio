@@ -6,11 +6,7 @@ import 'package:refilc/api/providers/user_provider.dart';
 import 'package:refilc/helpers/subject.dart';
 import 'package:refilc/models/settings.dart';
 import 'package:refilc/theme/colors/colors.dart';
-import 'package:refilc/ui/widgets/lesson/lesson_tile.dart';
-import 'package:refilc_mobile_ui/common/panel/panel.dart';
 import 'package:refilc_mobile_ui/common/progress_bar.dart';
-import 'package:refilc_mobile_ui/common/round_border_icon.dart';
-import 'package:refilc_mobile_ui/common/splitted_panel/splitted_panel.dart';
 import 'package:refilc_mobile_ui/pages/home/live_card/heads_up_countdown.dart';
 import 'package:refilc_mobile_ui/pages/home/live_card/segmented_countdown.dart';
 import 'package:refilc_mobile_ui/screens/summary/summary_screen.dart';
@@ -18,7 +14,6 @@ import 'package:flutter/material.dart';
 import 'package:refilc/utils/format.dart';
 import 'package:refilc/api/providers/live_card_provider.dart';
 import 'package:refilc_mobile_ui/pages/home/live_card/live_card_widget.dart';
-import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:i18n_extension/i18n_extension.dart';
 import 'package:intl/intl.dart';
 import 'package:maps_launcher/maps_launcher.dart';
@@ -56,989 +51,608 @@ class LiveCardStateA extends State<LiveCard> {
     super.dispose();
   }
 
+  // ── Helpers ────────────────────────────────────────────────────────────────
+
+  Widget _labelRow(String label, {String? trailing}) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label.toUpperCase(),
+          style: TextStyle(
+            fontSize: 10.5,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 1.1,
+            color: AppColors.of(context).text.withValues(alpha: 0.42),
+          ),
+        ),
+        if (trailing != null)
+          Text(
+            trailing,
+            style: TextStyle(
+              fontSize: 12.0,
+              fontWeight: FontWeight.w500,
+              color: AppColors.of(context).text.withValues(alpha: 0.48),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _subjectRow(
+    String name, {
+    required IconData icon,
+    required String room,
+    bool italic = false,
+  }) {
+    return Row(
+      children: [
+        Container(
+          width: 38.0,
+          height: 38.0,
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(10.0),
+          ),
+          child: Icon(
+            icon,
+            size: 19.0,
+            color: Theme.of(context).colorScheme.secondary,
+          ),
+        ),
+        const SizedBox(width: 12.0),
+        Expanded(
+          child: Text(
+            name,
+            style: TextStyle(
+              fontSize: 20.0,
+              fontWeight: FontWeight.w700,
+              fontStyle: italic ? FontStyle.italic : null,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+        if (room.isNotEmpty) ...[
+          const SizedBox(width: 8.0),
+          _roomPill(room),
+        ],
+      ],
+    );
+  }
+
+  Widget _roomPill(String room, {Color? color}) {
+    final c = color ?? Theme.of(context).colorScheme.secondary;
+    return Container(
+      constraints: const BoxConstraints(maxWidth: 88.0),
+      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+      decoration: BoxDecoration(
+        color: c.withValues(alpha: 0.14),
+        borderRadius: BorderRadius.circular(8.0),
+      ),
+      child: Text(
+        room,
+        overflow: TextOverflow.ellipsis,
+        style: TextStyle(
+          fontSize: 12.0,
+          fontWeight: FontWeight.w700,
+          color: c.withValues(alpha: 0.9),
+        ),
+      ),
+    );
+  }
+
+  Widget _progressRow({
+    required double current,
+    required double max,
+    required bool showMinutes,
+    VoidCallback? onTap,
+  }) {
+    final remaining = (max - current).clamp(0, double.infinity).round();
+    final label = showMinutes
+        ? "remaining min".plural(remaining)
+        : "remaining sec".plural(remaining);
+    return Row(
+      children: [
+        Expanded(
+          child: ProgressBar(
+            value: (current / max).clamp(0.0, 1.0),
+            height: 5.0,
+          ),
+        ),
+        const SizedBox(width: 10.0),
+        GestureDetector(
+          onTap: onTap,
+          behavior: HitTestBehavior.opaque,
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 12.0,
+              fontWeight: FontWeight.w600,
+              color: AppColors.of(context).text.withValues(alpha: 0.48),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _divider() {
+    return Divider(
+      height: 1,
+      thickness: 1,
+      color: AppColors.of(context).text.withValues(alpha: 0.08),
+    );
+  }
+
+  Widget _nextRow(
+    dynamic nextLesson, {
+    bool italic = false,
+    String Function()? subjectName,
+  }) {
+    if (nextLesson == null) {
+      return Container(
+        color: AppColors.of(context).text.withValues(alpha: 0.03),
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 11.0),
+        child: Row(
+          children: [
+            Icon(
+              Icons.home_outlined,
+              size: 15.0,
+              color: AppColors.of(context).text.withValues(alpha: 0.4),
+            ),
+            const SizedBox(width: 8.0),
+            Text(
+              'go_home'.i18n,
+              style: TextStyle(
+                fontSize: 13.0,
+                fontWeight: FontWeight.w500,
+                color: AppColors.of(context).text.withValues(alpha: 0.5),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final name = subjectName != null
+        ? subjectName()
+        : ((nextLesson.subject?.isRenamed ?? false)
+            ? nextLesson.subject.renamedTo
+            : nextLesson.subject?.name?.capital()) ?? '';
+    final room = nextLesson.room as String? ?? '';
+    final start = nextLesson.start as DateTime?;
+
+    return Container(
+      color: AppColors.of(context).text.withValues(alpha: 0.03),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 11.0),
+      child: Row(
+        children: [
+          Icon(
+            Icons.arrow_forward_rounded,
+            size: 13.0,
+            color: AppColors.of(context).text.withValues(alpha: 0.4),
+          ),
+          const SizedBox(width: 8.0),
+          Expanded(
+            child: Text(
+              name,
+              style: TextStyle(
+                fontSize: 13.5,
+                fontWeight: FontWeight.w600,
+                fontStyle: italic ? FontStyle.italic : null,
+                color: AppColors.of(context).text.withValues(alpha: 0.7),
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          if (room.isNotEmpty) ...[
+            const SizedBox(width: 6.0),
+            Container(
+              constraints: const BoxConstraints(maxWidth: 72.0),
+              padding: const EdgeInsets.symmetric(horizontal: 5.0, vertical: 2.0),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.tertiary.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(6.0),
+              ),
+              child: Text(
+                room,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 11.0,
+                  fontWeight: FontWeight.w700,
+                  color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.8),
+                ),
+              ),
+            ),
+          ],
+          if (start != null) ...[
+            const SizedBox(width: 6.0),
+            Text(
+              DateFormat('H:mm').format(start),
+              style: TextStyle(
+                fontSize: 12.0,
+                fontWeight: FontWeight.w500,
+                color: AppColors.of(context).text.withValues(alpha: 0.45),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Future<void> _showHeadsUp(double maxTime, double elapsedTime) async {
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+      DeviceOrientation.landscapeRight,
+      DeviceOrientation.landscapeLeft,
+    ]);
+    SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.dark,
+      systemNavigationBarColor: Colors.transparent,
+      systemNavigationBarIconBrightness: Brightness.dark,
+    ));
+    final result = await showDialog(
+      barrierColor: Colors.black,
+      context: context,
+      builder: (context) =>
+          HeadsUpCountdown(maxTime: maxTime, elapsedTime: elapsedTime),
+    );
+    if (result != null) {
+      SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+    }
+  }
+
+  // ── Build ──────────────────────────────────────────────────────────────────
+
   @override
   Widget build(BuildContext context) {
     liveCard = Provider.of<LiveCardProvider>(context);
-    SettingsProvider settingsProvider = Provider.of<SettingsProvider>(context);
+    final settingsProvider = Provider.of<SettingsProvider>(context);
 
-    if (!liveCard.show) return Container();
+    if (!liveCard.show) return const SizedBox.shrink();
 
+    final bellDelay = liveCard.delay;
     Widget child;
-    Duration bellDelay = liveCard.delay;
-
-    // test
-    // TODO: REMOVE IN PRODUCTION BUILD!!!
-    /*liveCard.currentState = LiveCardState.duringLesson;
-    liveCard.currentLesson = Lesson(
-      date: DateTime.now().add(const Duration(
-        minutes: 30,
-      )),
-      subject: GradeSubject(
-          category: Category(id: 'asd'), id: 'asd', name: 'Matematika'),
-      lessonIndex: '1',
-      teacher: Teacher(id: 'id', name: 'name'),
-      start: DateTime.now().subtract(const Duration(
-        minutes: 30,
-      )),
-      end: DateTime.now().add(const Duration(
-        minutes: 15,
-      )),
-      homeworkId: 'homeworkId',
-      id: 'id',
-      description: 'description',
-      room: 'ABC69',
-      groupName: 'groupName',
-      name: 'name',
-    );*/
-
-    // liveCard.nextLesson = liveCard.currentLesson;
-
-    // final dt = DateTime(2024, 3, 22, 17, 12, 1, 1, 1);
 
     switch (liveCard.currentState) {
+      // ── Year-end summary ────────────────────────────────────────────────────
       case LiveCardState.summary:
         child = LiveCardWidget(
           key: const Key('livecard.summary'),
-          title: 'Vége a tanévnek! 🥳',
-          icon: FeatherIcons.arrowRight,
-          description: Text(
-            'Irány az összefoglaláshoz',
-            style: TextStyle(
-              fontWeight: FontWeight.w500,
-              fontSize: 18.0,
-              color: Theme.of(context).textTheme.bodyMedium?.color,
+          onTap: () => SummaryScreen.show(context: context, currentPage: 'start'),
+          child: Padding(
+            padding: const EdgeInsets.all(18.0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'year_end_title'.i18n,
+                        style: const TextStyle(
+                            fontSize: 18.0, fontWeight: FontWeight.w800),
+                      ),
+                      const SizedBox(height: 4.0),
+                      Text(
+                        'year_end_action'.i18n,
+                        style: TextStyle(
+                          fontSize: 14.0,
+                          color: AppColors.of(context).text.withValues(alpha: 0.6),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(
+                  Icons.arrow_forward_rounded,
+                  color: AppColors.of(context).text.withValues(alpha: 0.4),
+                ),
+              ],
             ),
           ),
-          onTap: () {
-            // showSlidingBottomSheet(
-            //   context,
-            //   useRootNavigator: true,
-            //   builder: (context) => SlidingSheetDialog(
-            //     color: Colors.black.withValues(alpha: 0.99),
-            //     duration: const Duration(milliseconds: 400),
-            //     scrollSpec: const ScrollSpec.bouncingScroll(),
-            //     snapSpec: const SnapSpec(
-            //       snap: true,
-            //       snappings: [1.0],
-            //       initialSnap: 1.0,
-            //       positioning: SnapPositioning.relativeToAvailableSpace,
-            //     ),
-            //     minHeight: MediaQuery.of(context).size.height,
-            //     cornerRadius: 16,
-            //     cornerRadiusOnFullscreen: 0,
-            //     builder: (context, state) => const Material(
-            //       color: Colors.black,
-            //       child: SummaryScreen(
-            //         currentPage: 'start',
-            //       ),
-            //     ),
-            //   ),
-            // );
-            SummaryScreen.show(context: context, currentPage: 'start');
-          },
         );
         break;
+
+      // ── Morning — countdown to first lesson ─────────────────────────────────
       case LiveCardState.morning:
+        final greeting = 'good_morning'.i18n;
         child = LiveCardWidget(
           key: const Key('livecard.morning'),
-          // title: DateFormat("EEEE", I18n.of(context).locale.toString())
-          //     .format(DateTime.now())
-          //     .capital(),
-          // icon: FeatherIcons.sun,
           onTap: () async {
             await MapsLauncher.launchQuery(
                 '${_userProvider.student?.school.city ?? ''} ${_userProvider.student?.school.name ?? ''}');
           },
-          // description: liveCard.nextLesson != null
-          //     ? Text.rich(
-          //         TextSpan(
-          //           children: [
-          //             TextSpan(text: "first_lesson_1".i18n),
-          //             TextSpan(
-          //               text: liveCard.nextLesson!.subject.renamedTo ??
-          //                   liveCard.nextLesson!.subject.name.capital(),
-          //               style: TextStyle(
-          //                   fontWeight: FontWeight.w600,
-          //                   color: Theme.of(context)
-          //                       .colorScheme
-          //                       .secondary
-          //                       .withValues(alpha: .85),
-          //                   fontStyle: liveCard.nextLesson!.subject.isRenamed &&
-          //                           settingsProvider.renamedSubjectsItalics
-          //                       ? FontStyle.italic
-          //                       : null),
-          //             ),
-          //             TextSpan(text: "first_lesson_2".i18n),
-          //             TextSpan(
-          //               text: liveCard.nextLesson!.room.capital(),
-          //               style: TextStyle(
-          //                 fontWeight: FontWeight.w600,
-          //                 color: Theme.of(context)
-          //                     .colorScheme
-          //                     .secondary
-          //                     .withValues(alpha: .85),
-          //               ),
-          //             ),
-          //             TextSpan(text: "first_lesson_3".i18n),
-          //             TextSpan(
-          //               text: DateFormat('H:mm')
-          //                   .format(liveCard.nextLesson!.start),
-          //               style: TextStyle(
-          //                 fontWeight: FontWeight.w600,
-          //                 color: Theme.of(context)
-          //                     .colorScheme
-          //                     .secondary
-          //                     .withValues(alpha: .85),
-          //               ),
-          //             ),
-          //             TextSpan(text: "first_lesson_4".i18n),
-          //           ],
-          //         ),
-          //       )
-          //     : null,
-          children: liveCard.nextLesson != null
-              ? [
-                  SplittedPanel(
-                    hasShadow: false,
-                    padding: EdgeInsets.zero,
-                    cardPadding: EdgeInsets.zero,
-                    spacing: 8.0,
-                    children: [
-                      SplittedPanel(
-                        hasShadow: false,
-                        isTransparent: true,
-                        padding: EdgeInsets.zero,
-                        cardPadding: const EdgeInsets.symmetric(
-                          horizontal: 18.0,
-                          vertical: 16.0,
-                        ),
-                        spacing: 0.0,
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'first_lesson_soon'.i18n,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 16.0,
-                                ),
-                              ),
-                              const SizedBox(
-                                height: 5.0,
-                              ),
-                              SegmentedCountdown(
-                                  date: liveCard.nextLesson!.start),
-                            ],
-                          ),
-                        ],
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16.0, 14.0, 16.0, 14.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _labelRow(greeting),
+                    const SizedBox(height: 4.0),
+                    Text(
+                      'until_first_lesson'.i18n,
+                      style: TextStyle(
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.of(context).text.withValues(alpha: 0.55),
                       ),
-                      SplittedPanel(
-                        hasShadow: false,
-                        isTransparent: true,
-                        padding: EdgeInsets.zero,
-                        cardPadding: const EdgeInsets.symmetric(
-                          horizontal: 18.0,
-                          vertical: 14.0,
-                        ),
-                        spacing: 0.0,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Row(
-                                children: [
-                                  Icon(
-                                    SubjectIcon.resolveVariant(
-                                      context: context,
-                                      subject: liveCard.nextLesson!.subject,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12.0),
-                                  Text(
-                                    (liveCard.nextLesson!.subject.isRenamed
-                                            ? liveCard
-                                                .nextLesson!.subject.renamedTo
-                                            : liveCard
-                                                .nextLesson!.subject.name) ??
-                                        '',
-                                    style: const TextStyle(
-                                      fontSize: 16.0,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              Row(
-                                children: [
-                                  Container(
-                                    width: liveCard.nextLesson!.room.length > 20
-                                        ? 111
-                                        : null,
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 6.0, vertical: 3.5),
-                                    decoration: BoxDecoration(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .secondary
-                                          .withValues(alpha: .15),
-                                      borderRadius: BorderRadius.circular(10.0),
-                                    ),
-                                    child: Text(
-                                      liveCard.nextLesson!.room,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                        height: 1.1,
-                                        fontSize: 12.5,
-                                        fontWeight: FontWeight.w600,
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .secondary
-                                            .withValues(alpha: .9),
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(
-                                    width: 10,
-                                  ),
-                                  Text(
-                                    '${DateFormat('H:mm').format(liveCard.nextLesson!.start)} - ${DateFormat('H:mm').format(liveCard.nextLesson!.end)}',
-                                    style: const TextStyle(
-                                      fontSize: 12.5,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ]
-              : null,
+                    ),
+                    const SizedBox(height: 12.0),
+                    if (liveCard.nextLesson != null)
+                      SegmentedCountdown(date: liveCard.nextLesson!.start),
+                  ],
+                ),
+              ),
+              if (liveCard.nextLesson != null) ...[
+                _divider(),
+                _nextRow(
+                  liveCard.nextLesson,
+                  italic: liveCard.nextLesson!.subject.isRenamed &&
+                      settingsProvider.renamedSubjectsEnabled &&
+                      settingsProvider.renamedSubjectsItalics,
+                  subjectName: () =>
+                      (liveCard.nextLesson!.subject.isRenamed
+                          ? liveCard.nextLesson!.subject.renamedTo
+                          : liveCard.nextLesson!.subject.name.capital()) ??
+                      '',
+                ),
+              ],
+            ],
+          ),
         );
         break;
+
+      // ── Afternoon / Night ────────────────────────────────────────────────────
+      case LiveCardState.afternoon:
+      case LiveCardState.night:
+        final greeting = liveCard.currentState == LiveCardState.afternoon
+            ? 'good_afternoon'.i18n
+            : 'good_evening'.i18n;
+        child = LiveCardWidget(
+          key: Key('livecard.${liveCard.currentState.name}'),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16.0, 14.0, 16.0, 14.0),
+            child: Row(
+              children: [
+                Icon(
+                  liveCard.currentState == LiveCardState.afternoon
+                      ? Icons.local_cafe_rounded
+                      : Icons.nightlight_round,
+                  size: 22.0,
+                  color: AppColors.of(context).text.withValues(alpha: 0.5),
+                ),
+                const SizedBox(width: 12.0),
+                Expanded(
+                  child: Text(
+                    greeting,
+                    style: const TextStyle(
+                      fontSize: 18.0,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+        break;
+
+      // ── During lesson ────────────────────────────────────────────────────────
       case LiveCardState.duringLesson:
-        final elapsedTime = DateTime.now()
-                .difference(liveCard.currentLesson!.start)
-                .inSeconds
-                .toDouble() +
-            bellDelay.inSeconds;
+        if (liveCard.currentLesson == null) {
+          child = const SizedBox.shrink();
+          break;
+        }
+
+        final elapsedTime =
+            DateTime.now().difference(liveCard.currentLesson!.start).inSeconds.toDouble() +
+                bellDelay.inSeconds;
         final maxTime = liveCard.currentLesson!.end
             .difference(liveCard.currentLesson!.start)
             .inSeconds
             .toDouble();
-
         final showMinutes = maxTime - elapsedTime > 60;
+        final progressMax = showMinutes ? maxTime / 60 : maxTime;
+        final progressCurrent = showMinutes ? elapsedTime / 60 : elapsedTime;
 
-        // child = LiveCardWidget(
-        //   key: const Key('livecard.duringLesson'),
-        //   liveCardState: liveCard.currentState,
-        //   leading: liveCard.currentLesson!.lessonIndex +
-        //       (RegExp(r'\d').hasMatch(liveCard.currentLesson!.lessonIndex)
-        //           ? "."
-        //           : ""),
-        //   title: liveCard.currentLesson!.subject.renamedTo ??
-        //       liveCard.currentLesson!.subject.name.capital(),
-        //   titleItalic: liveCard.currentLesson!.subject.isRenamed &&
-        //       settingsProvider.renamedSubjectsEnabled &&
-        //       settingsProvider.renamedSubjectsItalics,
-        //   subtitle: liveCard.currentLesson!.room,
-        //   icon: SubjectIcon.resolveVariant(
-        //       subject: liveCard.currentLesson!.subject, context: context),
-        //   description: liveCard.currentLesson!.description != ""
-        //       ? Text(liveCard.currentLesson!.description)
-        //       : null,
-        //   nextSubject: liveCard.nextLesson?.subject.renamedTo ??
-        //       liveCard.nextLesson?.subject.name.capital(),
-        //   nextSubjectItalic: liveCard.nextLesson?.subject.isRenamed == true &&
-        //       settingsProvider.renamedSubjectsEnabled &&
-        //       settingsProvider.renamedSubjectsItalics,
-        //   nextRoom: liveCard.nextLesson?.room,
-        //   progressMax: showMinutes ? maxTime / 60 : maxTime,
-        //   progressCurrent: showMinutes ? elapsedTime / 60 : elapsedTime,
-        //   progressAccuracy:
-        //       showMinutes ? ProgressAccuracy.minutes : ProgressAccuracy.seconds,
-        //   onProgressTap: () {
-        //     showDialog(
-        //       barrierColor: Colors.black,
-        //       context: context,
-        //       builder: (context) =>
-        //           HeadsUpCountdown(maxTime: maxTime, elapsedTime: elapsedTime),
-        //     );
-        //   },
-        // );
-        // var titleItalic = liveCard.currentLesson!.subject.isRenamed &&
-        //     settingsProvider.renamedSubjectsEnabled &&
-        //     settingsProvider.renamedSubjectsItalics;
-        var nextSubject = liveCard.nextLesson?.subject.renamedTo ??
-            liveCard.nextLesson?.subject.name.capital();
-        var nextSubjectItalic =
-            liveCard.nextLesson?.subject.isRenamed == true &&
-                settingsProvider.renamedSubjectsEnabled &&
-                settingsProvider.renamedSubjectsItalics;
-        var progressMax = showMinutes ? maxTime / 60 : maxTime;
-        var progressCurrent = showMinutes ? elapsedTime / 60 : elapsedTime;
-        var progressAccuracy =
-            showMinutes ? ProgressAccuracy.minutes : ProgressAccuracy.seconds;
+        final lessonName = (liveCard.currentLesson!.subject.isRenamed &&
+                settingsProvider.renamedSubjectsEnabled
+            ? liveCard.currentLesson!.subject.renamedTo
+            : liveCard.currentLesson!.subject.name.capital()) ?? '';
+        final lessonItalic = liveCard.currentLesson!.subject.isRenamed &&
+            settingsProvider.renamedSubjectsEnabled &&
+            settingsProvider.renamedSubjectsItalics;
+
+        final nextSubjectName = (liveCard.nextLesson?.subject.isRenamed == true &&
+                settingsProvider.renamedSubjectsEnabled
+            ? liveCard.nextLesson?.subject.renamedTo
+            : liveCard.nextLesson?.subject.name.capital()) ?? '';
+        final nextItalic = liveCard.nextLesson?.subject.isRenamed == true &&
+            settingsProvider.renamedSubjectsEnabled &&
+            settingsProvider.renamedSubjectsItalics;
+
+        final indexLabel = liveCard.currentLesson!.lessonIndex.isNotEmpty
+            ? '${liveCard.currentLesson!.lessonIndex}. · '
+            : '';
+        final endLabel = '$indexLabel${DateFormat("H:mm").format(liveCard.currentLesson!.end)}-ig';
 
         child = LiveCardWidget(
           key: const Key('livecard.duringLesson'),
-          children: liveCard.currentLesson != null
-              ? [
-                  SplittedPanel(
-                    hasShadow: false,
-                    padding: EdgeInsets.zero,
-                    cardPadding: EdgeInsets.zero,
-                    spacing: 8.0,
-                    children: [
-                      SplittedPanel(
-                        hasShadow: false,
-                        isTransparent: true,
-                        padding: EdgeInsets.zero,
-                        cardPadding: const EdgeInsets.symmetric(
-                          horizontal: 12.0,
-                          vertical: 0.0,
-                        ),
-                        spacing: 0.0,
-                        children: [
-                          LessonTile(
-                            liveCard.currentLesson!,
-                            swapRoom: true,
-                            currentLessonIndicator: false,
-                            padding:
-                                const EdgeInsets.only(top: 2.0, bottom: 4.0),
-                            contentPadding: EdgeInsets.zero,
-                            showSubTiles: false,
-                          ),
-                          if (!(nextSubject == null &&
-                              progressCurrent == null &&
-                              progressMax == null))
-                            Row(
-                              children: [
-                                const SizedBox(
-                                  width: 5.0,
-                                ),
-                                if (progressCurrent != null &&
-                                    progressMax != null)
-                                  GestureDetector(
-                                    onTap: () async {
-                                      SystemChrome.setPreferredOrientations([
-                                        DeviceOrientation.portraitUp,
-                                        DeviceOrientation.portraitDown,
-                                        DeviceOrientation.landscapeRight,
-                                        DeviceOrientation.landscapeLeft,
-                                      ]);
-
-                                      SystemChrome.setSystemUIOverlayStyle(
-                                          const SystemUiOverlayStyle(
-                                        statusBarColor: Colors.transparent,
-                                        statusBarIconBrightness:
-                                            Brightness.dark,
-                                        systemNavigationBarColor:
-                                            Colors.transparent,
-                                        systemNavigationBarIconBrightness:
-                                            Brightness.dark,
-                                      ));
-
-                                      var result = await showDialog(
-                                        barrierColor: Colors.black,
-                                        context: context,
-                                        builder: (context) => HeadsUpCountdown(
-                                            maxTime: maxTime,
-                                            elapsedTime: elapsedTime),
-                                      );
-
-                                      if (result != null) {
-                                        SystemChrome.setPreferredOrientations([
-                                          DeviceOrientation.portraitUp,
-                                        ]);
-                                      }
-                                    },
-                                    child: Container(
-                                      color: Colors.transparent,
-                                      child: Text(
-                                        "remaining ${progressAccuracy == ProgressAccuracy.minutes ? 'min' : 'sec'}"
-                                            .plural(
-                                                (progressMax - progressCurrent)
-                                                    .round()),
-                                        maxLines: 1,
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.w500,
-                                          color: AppColors.of(context)
-                                              .text
-                                              .withValues(alpha: .75),
-                                          height: 1.1,
-                                        ),
-                                      ),
-                                    ),
-                                  )
-                              ],
-                            ),
-                          if (progressCurrent != null && progressMax != null)
-                            Padding(
-                              padding:
-                                  const EdgeInsets.only(top: 4.0, bottom: 12.0),
-                              child: ProgressBar(
-                                  value: progressCurrent / progressMax),
-                            )
-                        ],
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16.0, 14.0, 16.0, 14.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _labelRow(
+                      'currently'.i18n,
+                      trailing: endLabel,
+                    ),
+                    const SizedBox(height: 12.0),
+                    _subjectRow(
+                      lessonName,
+                      icon: SubjectIcon.resolveVariant(
+                        context: context,
+                        subject: liveCard.currentLesson!.subject,
                       ),
-                      SplittedPanel(
-                        hasShadow: false,
-                        isTransparent: true,
-                        padding: EdgeInsets.zero,
-                        cardPadding: const EdgeInsets.symmetric(
-                          horizontal: 18.0,
-                          vertical: 11.0,
-                        ),
-                        spacing: 0.0,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Row(
-                                children: [
-                                  Icon(
-                                    liveCard.nextLesson == null
-                                        ? Icons.home_outlined
-                                        : SubjectIcon.resolveVariant(
-                                            context: context,
-                                            subject:
-                                                liveCard.nextLesson!.subject,
-                                          ),
-                                    size: 23.0,
-                                  ),
-                                  const SizedBox(width: 12.0),
-                                  Text(
-                                    (liveCard.nextLesson?.subject
-                                                    .isRenamed ??
-                                                false
-                                            ? liveCard
-                                                .nextLesson?.subject.renamedTo
-                                            : liveCard
-                                                .nextLesson?.subject.name) ??
-                                        'go_home'.i18n,
-                                    style: TextStyle(
-                                      fontSize: 15.0,
-                                      fontWeight: FontWeight.w600,
-                                      fontStyle: nextSubjectItalic
-                                          ? FontStyle.italic
-                                          : null,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              Row(
-                                children: liveCard.nextLesson != null
-                                    ? [
-                                        Container(
-                                          width: (liveCard.nextLesson?.room
-                                                          .length ??
-                                                      0) >
-                                                  20
-                                              ? 111
-                                              : null,
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 5.5, vertical: 3.0),
-                                          decoration: BoxDecoration(
-                                            color: Theme.of(context)
-                                                .colorScheme
-                                                .tertiary
-                                                .withValues(alpha: .15),
-                                            borderRadius:
-                                                BorderRadius.circular(10.0),
-                                          ),
-                                          child: Text(
-                                            liveCard.nextLesson!.room,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: TextStyle(
-                                              height: 1.1,
-                                              fontSize: 12.0,
-                                              fontWeight: FontWeight.w600,
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .secondary
-                                                  .withValues(alpha: .9),
-                                            ),
-                                          ),
-                                        ),
-                                        const SizedBox(
-                                          width: 10,
-                                        ),
-                                        Text(
-                                          '${DateFormat('H:mm').format(liveCard.nextLesson!.start)} - ${DateFormat('H:mm').format(liveCard.nextLesson!.end)}',
-                                          style: const TextStyle(
-                                            fontSize: 12.5,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                      ]
-                                    : [],
-                              ),
-                            ],
+                      room: liveCard.currentLesson!.room,
+                      italic: lessonItalic,
+                    ),
+                    if (liveCard.currentLesson!.description.isNotEmpty) ...[
+                      const SizedBox(height: 5.0),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 50.0),
+                        child: Text(
+                          liveCard.currentLesson!.description,
+                          style: TextStyle(
+                            fontSize: 13.0,
+                            color: AppColors.of(context).text.withValues(alpha: 0.5),
                           ),
-                        ],
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
                     ],
-                  ),
-                ]
-              : null,
+                    const SizedBox(height: 12.0),
+                    _progressRow(
+                      current: progressCurrent,
+                      max: progressMax,
+                      showMinutes: showMinutes,
+                      onTap: () => _showHeadsUp(maxTime, elapsedTime),
+                    ),
+                  ],
+                ),
+              ),
+              _divider(),
+              _nextRow(
+                liveCard.nextLesson,
+                italic: nextItalic,
+                subjectName: () => nextSubjectName,
+              ),
+            ],
+          ),
         );
         break;
+
+      // ── During break ─────────────────────────────────────────────────────────
       case LiveCardState.duringBreak:
         if (liveCard.prevLesson == null || liveCard.nextLesson == null) {
-          child = Container();
+          child = const SizedBox.shrink();
           break;
         }
 
-        // final iconFloorMap = {
-        //   "to room": FeatherIcons.chevronsRight,
-        //   "up floor": FilcIcons.upstairs,
-        //   "down floor": FilcIcons.downstairs,
-        //   "ground floor": FilcIcons.downstairs,
-        // };
-
         final diff = liveCard.getFloorDifference();
-
         final maxTime = liveCard.nextLesson!.start
             .difference(liveCard.prevLesson!.end)
             .inSeconds
             .toDouble();
-        final elapsedTime = DateTime.now()
-                .difference(liveCard.prevLesson!.end)
-                .inSeconds
-                .toDouble() +
-            bellDelay.inSeconds.toDouble();
-
+        final elapsedTime =
+            DateTime.now().difference(liveCard.prevLesson!.end).inSeconds.toDouble() +
+                bellDelay.inSeconds.toDouble();
         final showMinutes = maxTime - elapsedTime > 60;
+        final progressMax = showMinutes ? maxTime / 60 : maxTime;
+        final progressCurrent = showMinutes ? elapsedTime / 60 : elapsedTime;
 
-        // child = LiveCardWidget(
-        //   key: const Key('livecard.duringBreak'),
-        //   title: "break".i18n,
-        //   icon: iconFloorMap[diff],
-        //   description: liveCard.nextLesson!.room != liveCard.prevLesson!.room
-        //       ? Text("go $diff".i18n.fill([
-        //           diff != "to room"
-        //               ? (liveCard.nextLesson!.getFloor() ?? 0)
-        //               : liveCard.nextLesson!.room
-        //         ]))
-        //       : Text("stay".i18n),
-        //   nextSubject: liveCard.nextLesson?.subject.renamedTo ??
-        //       liveCard.nextLesson?.subject.name.capital(),
-        //   nextSubjectItalic: liveCard.nextLesson?.subject.isRenamed == true &&
-        //       settingsProvider.renamedSubjectsItalics,
-        //   nextRoom: diff != "to room" ? liveCard.nextLesson?.room : null,
-        //   progressMax: showMinutes ? maxTime / 60 : maxTime,
-        //   progressCurrent: showMinutes ? elapsedTime / 60 : elapsedTime,
-        //   progressAccuracy:
-        //       showMinutes ? ProgressAccuracy.minutes : ProgressAccuracy.seconds,
-        //   onProgressTap: () {
-        //     showDialog(
-        //       barrierColor: Colors.black,
-        //       context: context,
-        //       builder: (context) => HeadsUpCountdown(
-        //         maxTime: maxTime,
-        //         elapsedTime: elapsedTime,
-        //       ),
-        //     );
-        //   },
-        // );
+        final breakDescription = liveCard.nextLesson!.room != liveCard.prevLesson!.room
+            ? localizeFill("go $diff".i18n, [
+                diff != "to room"
+                    ? (liveCard.nextLesson!.getFloor() ?? 0)
+                    : liveCard.nextLesson!.room
+              ])
+            : "stay".i18n;
 
-        var nextSubject = liveCard.nextLesson?.subject.renamedTo ??
-            liveCard.nextLesson?.subject.name.capital();
-        var nextSubjectItalic =
-            liveCard.nextLesson?.subject.isRenamed == true &&
-                settingsProvider.renamedSubjectsItalics;
-        // var nextRoom = diff != "to room" ? liveCard.nextLesson?.room : null;
-        var progressMax = showMinutes ? maxTime / 60 : maxTime;
-        var progressCurrent = showMinutes ? elapsedTime / 60 : elapsedTime;
-        var progressAccuracy =
-            showMinutes ? ProgressAccuracy.minutes : ProgressAccuracy.seconds;
+        final breakTimes =
+            '${DateFormat("H:mm").format(liveCard.prevLesson!.end)} – ${DateFormat("H:mm").format(liveCard.nextLesson!.start)}';
 
-        // Lesson breakLesson = Lesson(
-        //   date: DateTime.now(),
-        //   start: liveCard.prevLesson!.end,
-        //   end: liveCard.nextLesson!.start,
-        //   name: 'break'.i18n,
-        //   description: 'Menj a XY terembe...',
-        // );
+        final nextSubjectName = (liveCard.nextLesson!.subject.isRenamed &&
+                settingsProvider.renamedSubjectsEnabled
+            ? liveCard.nextLesson!.subject.renamedTo
+            : liveCard.nextLesson!.subject.name.capital()) ?? '';
+        final nextItalic = liveCard.nextLesson!.subject.isRenamed &&
+            settingsProvider.renamedSubjectsEnabled &&
+            settingsProvider.renamedSubjectsItalics;
 
         child = LiveCardWidget(
           key: const Key('livecard.duringBreak'),
-          children: liveCard.nextLesson != null
-              ? [
-                  SplittedPanel(
-                    hasShadow: false,
-                    padding: EdgeInsets.zero,
-                    cardPadding: EdgeInsets.zero,
-                    spacing: 8.0,
-                    children: [
-                      SplittedPanel(
-                        hasShadow: false,
-                        isTransparent: true,
-                        padding: EdgeInsets.zero,
-                        cardPadding: const EdgeInsets.symmetric(
-                          horizontal: 12.0,
-                          vertical: 0.0,
-                        ),
-                        spacing: 0.0,
-                        children: [
-                          // LessonTile(
-                          //   liveCard.currentLesson!,
-                          //   swapRoom: true,
-                          //   currentLessonIndicator: false,
-                          //   padding:
-                          //       const EdgeInsets.only(top: 8.0, bottom: 4.0),
-                          //   contentPadding: EdgeInsets.zero,
-                          // ),
-                          Padding(
-                            padding:
-                                const EdgeInsets.only(top: 8.0, bottom: 4.0),
-                            child: Material(
-                              color: Colors.transparent,
-                              borderRadius: BorderRadius.circular(12.0),
-                              child: Visibility(
-                                visible:
-                                    liveCard.nextLesson!.subject.id != '' ||
-                                        liveCard.nextLesson!.isEmpty,
-                                replacement: Padding(
-                                  padding: const EdgeInsets.only(top: 6.0),
-                                  child: PanelTitle(
-                                      title: Text(liveCard.nextLesson!.name)),
-                                ),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    ListTile(
-                                      minVerticalPadding: 0.0,
-                                      dense: true,
-                                      // onLongPress: kDebugMode ? () => log(jsonEncode(lesson.json)) : null,
-                                      visualDensity: VisualDensity.compact,
-                                      contentPadding: EdgeInsets.zero,
-                                      shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(12.0)),
-                                      title: Text(
-                                        "break".i18n,
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.w600,
-                                            fontSize: 16.5,
-                                            color: AppColors.of(context)
-                                                .text
-                                                .withValues(
-                                                    alpha: !liveCard
-                                                            .nextLesson!.isEmpty
-                                                        ? 1.0
-                                                        : 0.5),
-                                            fontStyle: liveCard.nextLesson!
-                                                        .subject.isRenamed &&
-                                                    settingsProvider
-                                                        .renamedSubjectsItalics
-                                                ? FontStyle.italic
-                                                : null),
-                                      ),
-
-                                      subtitle: DefaultTextStyle(
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodyMedium!
-                                            .copyWith(
-                                              fontWeight: FontWeight.w400,
-                                              fontSize: 15.0,
-                                              height: 1.0,
-                                              color: AppColors.of(context)
-                                                  .text
-                                                  .withValues(alpha: .75),
-                                            ),
-                                        maxLines: !(nextSubject == null &&
-                                                progressCurrent == null &&
-                                                progressMax == null)
-                                            ? 1
-                                            : 2,
-                                        softWrap: false,
-                                        overflow: TextOverflow.ellipsis,
-                                        child: liveCard.nextLesson!.room !=
-                                                liveCard.prevLesson!.room
-                                            ? Text("go $diff".i18n.fill([
-                                                diff != "to room"
-                                                    ? (liveCard.nextLesson!
-                                                            .getFloor() ??
-                                                        0)
-                                                    : liveCard.nextLesson!.room
-                                              ]))
-                                            : Text("stay".i18n),
-                                      ),
-
-                                      // subtitle: description != ""
-                                      //     ? Text(
-                                      //         description,
-                                      //         style: const TextStyle(
-                                      //           fontWeight: FontWeight.w500,
-                                      //           fontSize: 14.0,
-                                      //         ),
-                                      //         maxLines: 1,
-                                      //         softWrap: false,
-                                      //         overflow: TextOverflow.ellipsis,
-                                      //       )
-                                      //     : null,
-                                      minLeadingWidth: 34.0,
-                                      leading: AspectRatio(
-                                        aspectRatio: 1,
-                                        child: Center(
-                                          child: Stack(
-                                            children: [
-                                              RoundBorderIcon(
-                                                color:
-                                                    AppColors.of(context).text,
-                                                width: 1.0,
-                                                icon: const SizedBox(
-                                                  width: 25,
-                                                  height: 25,
-                                                  child: Center(
-                                                    child: Icon(
-                                                      Icons.local_cafe,
-                                                      size: 20.0,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                      trailing: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          const SizedBox(
-                                            width: 10,
-                                          ),
-                                          Stack(
-                                            alignment: Alignment.center,
-                                            children: [
-                                              // xix alignment hack :p
-                                              const Opacity(
-                                                  opacity: 0,
-                                                  child: Text("EE:EE")),
-                                              Text(
-                                                "${DateFormat("H:mm").format(liveCard.prevLesson!.end)}\n${DateFormat("H:mm").format(liveCard.nextLesson!.start)}",
-                                                textAlign: TextAlign.center,
-                                                style: TextStyle(
-                                                  fontWeight: FontWeight.w500,
-                                                  color: AppColors.of(context)
-                                                      .text
-                                                      .withValues(alpha: .9),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16.0, 14.0, 16.0, 14.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _labelRow(
+                      'break'.i18n,
+                      trailing: breakTimes,
+                    ),
+                    const SizedBox(height: 12.0),
+                    Row(
+                      children: [
+                        Container(
+                          width: 38.0,
+                          height: 38.0,
+                          decoration: BoxDecoration(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .tertiary
+                                .withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(10.0),
                           ),
-                          if (!(nextSubject == null &&
-                              progressCurrent == null &&
-                              progressMax == null))
-                            Row(
-                              children: [
-                                const SizedBox(
-                                  width: 5.0,
-                                ),
-                                if (progressCurrent != null &&
-                                    progressMax != null)
-                                  GestureDetector(
-                                    onTap: () async {
-                                      SystemChrome.setPreferredOrientations([
-                                        DeviceOrientation.portraitUp,
-                                        DeviceOrientation.portraitDown,
-                                        DeviceOrientation.landscapeRight,
-                                        DeviceOrientation.landscapeLeft,
-                                      ]);
-
-                                      SystemChrome.setSystemUIOverlayStyle(
-                                          const SystemUiOverlayStyle(
-                                        statusBarColor: Colors.transparent,
-                                        statusBarIconBrightness:
-                                            Brightness.dark,
-                                        systemNavigationBarColor:
-                                            Colors.transparent,
-                                        systemNavigationBarIconBrightness:
-                                            Brightness.dark,
-                                      ));
-
-                                      var result = await showDialog(
-                                        barrierColor: Colors.black,
-                                        context: context,
-                                        builder: (context) => HeadsUpCountdown(
-                                            maxTime: maxTime,
-                                            elapsedTime: elapsedTime),
-                                      );
-
-                                      if (result != null) {
-                                        SystemChrome.setPreferredOrientations([
-                                          DeviceOrientation.portraitUp,
-                                        ]);
-                                      }
-                                    },
-                                    child: Container(
-                                      color: Colors.transparent,
-                                      child: Text(
-                                        "remaining ${progressAccuracy == ProgressAccuracy.minutes ? 'min' : 'sec'}"
-                                            .plural(
-                                                (progressMax - progressCurrent)
-                                                    .round()),
-                                        maxLines: 1,
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.w500,
-                                          color: AppColors.of(context)
-                                              .text
-                                              .withValues(alpha: .75),
-                                          height: 1.1,
-                                        ),
-                                      ),
-                                    ),
-                                  )
-                              ],
-                            ),
-                          if (progressCurrent != null && progressMax != null)
-                            Padding(
-                              padding:
-                                  const EdgeInsets.only(top: 4.0, bottom: 12.0),
-                              child: ProgressBar(
-                                  value: progressCurrent / progressMax),
-                            )
-                        ],
-                      ),
-                      SplittedPanel(
-                        hasShadow: false,
-                        isTransparent: true,
-                        padding: EdgeInsets.zero,
-                        cardPadding: const EdgeInsets.symmetric(
-                          horizontal: 18.0,
-                          vertical: 11.0,
-                        ),
-                        spacing: 0.0,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Row(
-                                children: [
-                                  Icon(
-                                    liveCard.nextLesson == null
-                                        ? Icons.home_outlined
-                                        : SubjectIcon.resolveVariant(
-                                            context: context,
-                                            subject:
-                                                liveCard.nextLesson!.subject,
-                                          ),
-                                    size: 23.0,
-                                  ),
-                                  const SizedBox(width: 12.0),
-                                  Text(
-                                    (liveCard.nextLesson?.subject
-                                                    .isRenamed ??
-                                                false
-                                            ? liveCard
-                                                .nextLesson?.subject.renamedTo
-                                            : liveCard
-                                                .nextLesson?.subject.name) ??
-                                        'go_home'.i18n,
-                                    style: TextStyle(
-                                      fontSize: 15.0,
-                                      fontWeight: FontWeight.w600,
-                                      fontStyle: nextSubjectItalic
-                                          ? FontStyle.italic
-                                          : null,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              Row(
-                                children: liveCard.nextLesson != null
-                                    ? [
-                                        Container(
-                                          width: (liveCard.nextLesson?.room
-                                                          .length ??
-                                                      0) >
-                                                  20
-                                              ? 111
-                                              : null,
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 5.5, vertical: 3.0),
-                                          decoration: BoxDecoration(
-                                            color: Theme.of(context)
-                                                .colorScheme
-                                                .tertiary
-                                                .withValues(alpha: .15),
-                                            borderRadius:
-                                                BorderRadius.circular(10.0),
-                                          ),
-                                          child: Text(
-                                            liveCard.nextLesson!.room,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: TextStyle(
-                                              height: 1.1,
-                                              fontSize: 12.0,
-                                              fontWeight: FontWeight.w600,
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .secondary
-                                                  .withValues(alpha: .9),
-                                            ),
-                                          ),
-                                        ),
-                                        const SizedBox(
-                                          width: 10,
-                                        ),
-                                        Text(
-                                          '${DateFormat('H:mm').format(liveCard.nextLesson!.start)} - ${DateFormat('H:mm').format(liveCard.nextLesson!.end)}',
-                                          style: const TextStyle(
-                                            fontSize: 12.5,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                      ]
-                                    : [],
-                              ),
-                            ],
+                          child: Icon(
+                            Icons.local_cafe_outlined,
+                            size: 19.0,
+                            color: Theme.of(context).colorScheme.tertiary,
                           ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ]
-              : null,
+                        ),
+                        const SizedBox(width: 12.0),
+                        Expanded(
+                          child: Text(
+                            breakDescription,
+                            style: const TextStyle(
+                              fontSize: 16.0,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12.0),
+                    _progressRow(
+                      current: progressCurrent,
+                      max: progressMax,
+                      showMinutes: showMinutes,
+                      onTap: () => _showHeadsUp(maxTime, elapsedTime),
+                    ),
+                  ],
+                ),
+              ),
+              _divider(),
+              _nextRow(
+                liveCard.nextLesson,
+                italic: nextItalic,
+                subjectName: () => nextSubjectName,
+              ),
+            ],
+          ),
         );
         break;
-      case LiveCardState.afternoon:
-        child = LiveCardWidget(
-          key: const Key('livecard.afternoon'),
-          title: DateFormat("EEEE", I18n.of(context).locale.toString())
-              .format(DateTime.now())
-              .capital(),
-          icon: FeatherIcons.coffee,
-        );
-        break;
-      case LiveCardState.night:
-        child = LiveCardWidget(
-          key: const Key('livecard.night'),
-          title: DateFormat("EEEE", I18n.of(context).locale.toString())
-              .format(DateTime.now())
-              .capital(),
-          icon: FeatherIcons.moon,
-        );
-        break;
+
       default:
-        child = Container();
+        child = const SizedBox.shrink();
     }
 
     return PageTransitionSwitcher(

@@ -1,6 +1,5 @@
 import 'package:refilc/theme/colors/colors.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 
 class AccountTile extends StatelessWidget {
   const AccountTile(
@@ -36,7 +35,7 @@ class AccountTile extends StatelessWidget {
                 child: IconButton(
                   splashRadius: 24.0,
                   onPressed: onTapMenu,
-                  icon: Icon(FeatherIcons.moreVertical,
+                  icon: Icon(Icons.more_vert_rounded,
                       color: AppColors.of(context).text.withValues(alpha: 0.8)),
                 ),
               )

@@ -19,7 +19,6 @@ import 'package:refilc/ui/flutter_colorpicker/palette.dart';
 import 'package:refilc/ui/flutter_colorpicker/utils.dart';
 import 'package:refilc_mobile_ui/screens/settings/theme_screen.dart';
 import 'package:refilc_mobile_ui/screens/settings/theme_screen.i18n.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:refilc/theme/colors/colors.dart';
 import 'package:provider/provider.dart';
@@ -327,7 +326,7 @@ class FilcColorPickerState extends State<FilcColorPicker> {
                             child: ColorIndicator(
                                 HSVColor.fromColor(
                                     const Color.fromARGB(255, 255, 238, 177)),
-                                icon: CupertinoIcons.wand_stars,
+                                icon: Icons.auto_fix_high,
                                 currentHsvColor: currentHsvColor,
                                 width: 30,
                                 height: 30,

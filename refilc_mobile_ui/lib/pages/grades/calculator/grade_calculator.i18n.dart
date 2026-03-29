@@ -1,23 +1,23 @@
 import 'package:i18n_extension/i18n_extension.dart';
 
 extension Localization on String {
-  static final _t = Translations.byLocale("hu_hu") +
+  static final _t = Translations.byLocale("hu-HU") +
       {
-        "en_en": {
+        "en-US": {
           "Grades": "Grades",
           "Ghost Grade": "Ghost Grade",
           "Grade Calculator": "Average calculator",
           "Add Grade": "Add Grade",
           "limit_reached": "You cannot add more Ghost Grades.",
         },
-        "hu_hu": {
+        "hu-HU": {
           "Grades": "Jegyek",
           "Ghost Grade": "Szellem jegy",
           "Grade Calculator": "Átlag számoló",
           "Add Grade": "Hozzáadás",
           "limit_reached": "Nem adhatsz hozzá több jegyet.",
         },
-        "de_de": {
+        "de-DE": {
           "Grades": "Noten",
           "Ghost Grade": "Geist Noten",
           "Grade Calculator": "Mittelwert-Rechner",
@@ -31,3 +31,4 @@ extension Localization on String {
   String plural(int value) => localizePlural(value, this, _t);
   String version(Object modifier) => localizeVersion(modifier, this, _t);
 }
+

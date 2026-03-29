@@ -1,4 +1,3 @@
-import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -13,15 +12,9 @@ import 'package:refilc_kreta_api/models/exam.dart';
 import 'package:refilc_kreta_api/models/lesson.dart';
 import 'package:refilc_kreta_api/providers/exam_provider.dart';
 import 'package:refilc_mobile_ui/common/bottom_sheet_menu/rounded_bottom_sheet.dart';
-import 'package:refilc_mobile_ui/common/panel/panel_button.dart';
 import 'package:refilc_mobile_ui/common/round_border_icon.dart';
 import 'package:refilc/ui/widgets/lesson/lesson_tile.dart';
 import 'package:flutter/material.dart';
-import 'package:refilc_mobile_ui/common/viewable.dart';
-import 'package:refilc_mobile_ui/common/widgets/card_handle.dart';
-import 'package:refilc_mobile_ui/common/widgets/lesson/lesson_view.dart';
-import 'package:refilc_plus/models/premium_scopes.dart';
-import 'package:refilc_plus/providers/plus_provider.dart';
 import 'lesson_view.i18n.dart';
 
 class LessonViewable extends StatefulWidget {
@@ -61,174 +54,14 @@ class LessonViewableState extends State<LessonViewable> {
     Lesson lsn = widget.lesson;
     lsn.description = widget.customDesc;
 
-    final tile = LessonTile(
+    final isEmpty = lsn.subject.id == '' || lsn.isEmpty;
+    return LessonTile(
       lsn,
       swapDesc: widget.swapDesc,
       showSubTiles: widget.showSubTiles,
-    );
-
-    if (lsn.subject.id == '' || tile.lesson.isEmpty) return tile;
-
-    // check if new popup needed
-    if (Provider.of<SettingsProvider>(context).newPopups) {
-      return GestureDetector(
-        onTap: () => TimetableLessonPopup.show(
-          context: context,
-          lesson: lsn,
-        ),
-        child: tile,
-      );
-    }
-
-    return Viewable(
-      tile: tile,
-      view: CardHandle(child: LessonView(lsn)),
-      actions: [
-        PanelButton(
-          background: true,
-          title: Text(
-            "edit_lesson".i18n,
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-          onPressed: () {
-            Navigator.of(context, rootNavigator: true).pop();
-
-            if (!Provider.of<PlusProvider>(context, listen: false)
-                .hasScope(PremiumScopes.timetableNotes)) {
-
-              return;
-            }
-
-            showDialog(
-              context: context,
-              builder: (context) => StatefulBuilder(builder: (context, setS) {
-                return AlertDialog(
-                  shape: const RoundedRectangleBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(14.0))),
-                  title: Text("edit_lesson".i18n),
-                  content: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // description
-                      TextField(
-                        controller: _descTxt,
-                        decoration: InputDecoration(
-                          border: OutlineInputBorder(
-                            borderSide: const BorderSide(
-                                color: Colors.grey, width: 1.5),
-                            borderRadius: BorderRadius.circular(12.0),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: const BorderSide(
-                                color: Colors.grey, width: 1.5),
-                            borderRadius: BorderRadius.circular(12.0),
-                          ),
-                          contentPadding:
-                              const EdgeInsets.symmetric(horizontal: 12.0),
-                          hintText: 'l_desc'.i18n,
-                          suffixIcon: IconButton(
-                            icon: const Icon(
-                              FeatherIcons.x,
-                              color: Colors.grey,
-                              size: 18.0,
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                _descTxt.text = '';
-                              });
-                            },
-                          ),
-                        ),
-                      ),
-                      // const SizedBox(
-                      //   height: 14.0,
-                      // ),
-                      // // class
-                      // TextField(
-                      //   controller: _descTxt,
-                      //   onEditingComplete: () async {
-                      //     // SharedTheme? theme = await shareProvider.getThemeById(
-                      //     //   context,
-                      //     //   id: _paintId.text.replaceAll(' ', ''),
-                      //     // );
-
-                      //     // if (theme != null) {
-                      //     //   // set theme variable
-                      //     //   newThemeByID = theme;
-
-                      //     //   _paintId.clear();
-                      //     // } else {
-                      //     //   ScaffoldMessenger.of(context).showSnackBar(
-                      //     //     CustomSnackBar(
-                      //     //       content: Text("theme_not_found".i18n,
-                      //     //           style: const TextStyle(color: Colors.white)),
-                      //     //       backgroundColor: AppColors.of(context).red,
-                      //     //       context: context,
-                      //     //     ),
-                      //     //   );
-                      //     // }
-                      //   },
-                      //   decoration: InputDecoration(
-                      //     border: OutlineInputBorder(
-                      //       borderSide: const BorderSide(
-                      //           color: Colors.grey, width: 1.5),
-                      //       borderRadius: BorderRadius.circular(12.0),
-                      //     ),
-                      //     focusedBorder: OutlineInputBorder(
-                      //       borderSide: const BorderSide(
-                      //           color: Colors.grey, width: 1.5),
-                      //       borderRadius: BorderRadius.circular(12.0),
-                      //     ),
-                      //     contentPadding:
-                      //         const EdgeInsets.symmetric(horizontal: 12.0),
-                      //     hintText: 'l_desc'.i18n,
-                      //     suffixIcon: IconButton(
-                      //       icon: const Icon(
-                      //         FeatherIcons.x,
-                      //         color: Colors.grey,
-                      //         size: 18.0,
-                      //       ),
-                      //       onPressed: () {
-                      //         setState(() {
-                      //           _descTxt.text = '';
-                      //         });
-                      //       },
-                      //     ),
-                      //   ),
-                      // ),
-                    ],
-                  ),
-                  actions: [
-                    TextButton(
-                      child: Text(
-                        "cancel".i18n,
-                        style: const TextStyle(fontWeight: FontWeight.w500),
-                      ),
-                      onPressed: () {
-                        Navigator.of(context).maybePop();
-                      },
-                    ),
-                    TextButton(
-                      child: Text(
-                        "done".i18n,
-                        style: const TextStyle(fontWeight: FontWeight.w500),
-                      ),
-                      onPressed: () async {
-                        saveLesson();
-
-                        Navigator.of(context).pop();
-                        setState(() {});
-                      },
-                    ),
-                  ],
-                );
-              }),
-            );
-          },
-        ),
-      ],
+      onTap: isEmpty
+          ? null
+          : () => TimetableLessonPopup.show(context: context, lesson: lsn),
     );
   }
 
@@ -594,7 +427,7 @@ class TimetableLessonPopup extends StatelessWidget {
                           Row(
                             children: [
                               const Icon(
-                                FeatherIcons.file,
+                                Icons.insert_drive_file_rounded,
                                 size: 20.0,
                               ),
                               const SizedBox(

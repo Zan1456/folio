@@ -1,12 +1,13 @@
 import 'package:i18n_extension/i18n_extension.dart';
 
 extension Localization on String {
-  static final _t = Translations.byLocale("hu_hu") +
+  static final _t = Translations.byLocale("hu-HU") +
       {
-        "en_en": {
+        "en-US": {
           "goodmorning": "Good morning, %s!",
           "goodafternoon": "Good afternoon, %s!",
           "goodevening": "Good evening, %s!",
+          "goodnight": "Good night, %s!",
           "goodrest": "⛱️ Have a nice holiday, %s!",
           "happybirthday": "🎂 Happy birthday, %s!",
           "merryxmas": "🎄 Merry Christmas, %s!",
@@ -20,10 +21,11 @@ extension Localization on String {
           "missed_exams": "You missed %s exam(s) this week.",
           "missed_exam_contact": "Contact %s, to resolve it!",
         },
-        "hu_hu": {
+        "hu-HU": {
           "goodmorning": "Jó reggelt, %s!",
           "goodafternoon": "Szép napot, %s!",
           "goodevening": "Szép estét, %s!",
+          "goodnight": "Jó éjszakát, %s!",
           "goodrest": "⛱️ Jó szünetet, %s!",
           "happybirthday": "🎂 Boldog születésnapot, %s!",
           "merryxmas": "🎄 Boldog Karácsonyt, %s!",
@@ -37,10 +39,11 @@ extension Localization on String {
           "missed_exams": "Ezen a héten hiányoztál %s számonkérésről.",
           "missed_exam_contact": "Keresd %s-t, ha pótolni szeretnéd!",
         },
-        "de_de": {
+        "de-DE": {
           "goodmorning": "Guten morgen, %s!",
           "goodafternoon": "Guten Tag, %s!",
           "goodevening": "Guten Abend, %s!",
+          "goodnight": "Gute Nacht, %s!",
           "goodrest": "⛱️ Schöne Ferien, %s!",
           "happybirthday": "🎂 Alles Gute zum Geburtstag, %s!",
           "merryxmas": "🎄 Frohe Weihnachten, %s!",
@@ -61,3 +64,4 @@ extension Localization on String {
   String plural(int value) => localizePlural(value, this, _t);
   String version(Object modifier) => localizeVersion(modifier, this, _t);
 }
+

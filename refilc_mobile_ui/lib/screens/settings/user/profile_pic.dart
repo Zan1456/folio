@@ -12,7 +12,6 @@ import 'package:refilc_mobile_ui/common/bottom_sheet_menu/bottom_sheet_menu_item
 // import 'package:refilc_plus/providers/plus_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:refilc_mobile_ui/screens/settings/settings_screen.i18n.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
@@ -36,7 +35,7 @@ class UserMenuProfilePic extends StatelessWidget {
         showDialog(
             context: context, builder: (context) => UserProfilePicEditor(u));
       },
-      icon: const Icon(FeatherIcons.camera),
+      icon: const Icon(Icons.camera_alt_rounded),
       title: Text("edit_profile_picture".i18n),
     );
   }

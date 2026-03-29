@@ -1,8 +1,6 @@
 // ignore_for_file: dead_code
 import 'dart:math';
 
-import 'package:flutter/cupertino.dart';
-import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:refilc/api/providers/live_card_provider.dart';
 import 'package:refilc/theme/colors/colors.dart';
@@ -10,7 +8,6 @@ import 'package:refilc/ui/date_widget.dart';
 import 'package:refilc/utils/format.dart';
 import 'package:i18n_extension/i18n_extension.dart';
 import 'package:intl/intl.dart';
-import 'package:refilc_mobile_ui/pages/messages/messages_page.dart';
 import 'package:refilc_plus/providers/plus_provider.dart';
 import 'package:animated_list_plus/animated_list_plus.dart';
 import 'package:refilc/api/providers/update_provider.dart';
@@ -29,8 +26,8 @@ import 'package:refilc/api/providers/status_provider.dart';
 import 'package:refilc_kreta_api/providers/timetable_provider.dart';
 import 'package:refilc_mobile_ui/common/empty.dart';
 import 'package:refilc_mobile_ui/common/filter_bar.dart';
-import 'package:refilc_mobile_ui/common/profile_image/profile_button.dart';
-import 'package:refilc_mobile_ui/common/profile_image/profile_image.dart';
+import 'package:refilc_mobile_ui/common/widgets/update/update_dialog.dart';
+import 'package:refilc_mobile_ui/common/widgets/update/update_tile.dart';
 import 'package:refilc_mobile_ui/pages/home/live_card/live_card.dart';
 import 'package:refilc_mobile_ui/screens/navigation/navigation_screen.dart';
 import 'package:flutter/material.dart';
@@ -156,17 +153,17 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
       );
 
       customWelcome = true;
+    } else if (now.hour >= 21 || now.hour < 4) {
+      greeting = "goodnight";
     } else if (now.hour >= 18) {
       greeting = "goodevening";
     } else if (now.hour >= 12) {
       greeting = "goodafternoon";
-    } else if (now.hour >= 4) {
-      greeting = "goodmorning";
     } else {
-      greeting = "goodevening";
+      greeting = "goodmorning";
     }
 
-    greeting = customWelcome ? greeting : greeting.i18n.fill([firstName]);
+    greeting = customWelcome ? greeting : Localization(greeting.i18n).fill([firstName]);
   }
 
   @override
@@ -182,41 +179,6 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
     _liveCardAnimation.animateTo(_liveCard.show ? 1.0 : 0.0);
 
     setGreeting();
-    //for extra filters
-
-    // final List<String> items = [
-    //   'Item1',
-    //   'Item2',
-    //   'Item3',
-    //   'Item4',
-    //   'Item5',
-    //   'Item6',
-    //   'Item7',
-    //   'Item8',
-    // ];
-    // String? selectedValue;
-
-    // DateTime now = DateTime.now();
-    // DateTime now = DateTime(2024, 4, 22, 5, 55);
-    // LiveCardState currentState = LiveCardState.empty;
-
-    // if (now.isBefore(DateTime(now.year, DateTime.august, 31)) &&
-    //     now.isAfter(DateTime(now.year, DateTime.june, 14))) {
-    //   currentState = LiveCardState.summary;
-    // } else if (now.hour >= 12 && now.hour < 20) {
-    //   currentState = LiveCardState.afternoon;
-    // } else if (now.hour >= 20) {
-    //   currentState = LiveCardState.night;
-    // } else if (now.hour >= 5 && now.hour <= 10) {
-    //   currentState = LiveCardState.morning;
-    // } else {
-    //   currentState = LiveCardState.empty;
-    // }
-
-    // TODO: REMOVE IN PRODUCTION BUILD!!!
-    // print(_liveCard.currentState);
-    // _liveCard.currentState = LiveCardState.duringLesson;
-
     return Scaffold(
       body: Stack(
         children: [
@@ -229,10 +191,20 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       AnimatedBuilder(
                         animation: _liveCardAnimation,
                         builder: (context, child) {
+                          final colorScheme = Theme.of(context).colorScheme;
+                          final Color greetingColor =
+                              Theme.of(context).textTheme.bodyMedium?.color ??
+                                  colorScheme.onSurface;
+                          final Color dateColor = AppColors.of(context)
+                              .text
+                              .withValues(alpha: 0.55);
+
                           return SliverAppBar(
                             automaticallyImplyLeading: false,
-                            surfaceTintColor:
-                                Theme.of(context).scaffoldBackgroundColor,
+                            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                            surfaceTintColor: Colors.transparent,
+                            scrolledUnderElevation: 0.0,
+                            shape: const RoundedRectangleBorder(),
                             centerTitle: false,
                             titleSpacing: 0.0,
                             // Welcome text
@@ -257,103 +229,44 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                                         context)
                                                     .fontFamily,
                                                 textStyle: TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 18.0,
-                                                  color: Theme.of(context)
-                                                      .textTheme
-                                                      .bodyMedium
-                                                      ?.color,
+                                                  fontWeight: FontWeight.w800,
+                                                  fontSize: 30.0,
+                                                  color: greetingColor,
                                                 ),
                                               )
                                             : TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 18.0,
-                                                color: Theme.of(context)
-                                                    .textTheme
-                                                    .bodyMedium
-                                                    ?.color,
+                                                fontWeight: FontWeight.w800,
+                                                fontSize: 30.0,
+                                                color: greetingColor,
                                               ),
                                   ),
+                                  const SizedBox(height: 2.0),
                                   Text(
                                     DateFormat('EEEE, MMM d',
                                             I18n.locale.countryCode)
                                         .format(DateTime.now())
                                         .capital(),
                                     textAlign: TextAlign.start,
-                                    style: const TextStyle(
-                                      fontSize: 13.0,
+                                    style: TextStyle(
+                                      fontSize: 14.0,
                                       fontWeight: FontWeight.w500,
+                                      color: dateColor,
                                     ),
                                   ),
                                 ],
                               ),
                             ),
-                            actions: [
-                              Padding(
-                                padding: const EdgeInsets.only(
-                                    left: 8.0, right: 8.0, bottom: 0.0),
-                                child: IconButton(
-                                  splashRadius: 24.0,
-                                  onPressed: () async {
-                                    Navigator.of(context, rootNavigator: true)
-                                        .push(
-                                      CupertinoPageRoute(
-                                          builder: (context) =>
-                                              const MessagesPage()),
-                                    );
-                                    // Navigator.of(context, rootNavigator: true)
-                                    //     .push(PageRouteBuilder(
-                                    //   pageBuilder: (context, animation, secondaryAnimation) =>
-                                    //       PremiumFSTimetable(
-                                    //     controller: controller,
-                                    //   ),
-                                    // ))
-                                    //     .then((_) {
-                                    //   SystemChrome.setPreferredOrientations(
-                                    //       [DeviceOrientation.portraitUp]);
-                                    //   setSystemChrome(context);
-                                    // });
-                                    // SoonAlert.show(context: context);
-                                    // await showSendMessageSheet(context);
-                                  },
-                                  icon: Icon(
-                                    FeatherIcons.messageSquare,
-                                    color: AppColors.of(context).text,
-                                  ),
-                                ),
-                              ),
 
-                              // Profile Icon
-                              Padding(
-                                padding: const EdgeInsets.only(right: 24.0),
-                                child: ProfileButton(
-                                  child: ProfileImage(
-                                    heroTag: "profile",
-                                    name: firstName,
-                                    backgroundColor: Theme.of(context)
-                                        .colorScheme
-                                        .tertiary, //!settings.presentationMode
-                                    //? ColorUtils.stringToColor(user.displayName ?? "?")
-                                    //: Theme.of(context).colorScheme.secondary,
-                                    badge: updateProvider.available,
-                                    role: user.role,
-                                    profilePictureString: user.picture,
-                                    gradeStreak: (user.gradeStreak ?? 0) > 1,
-                                  ),
-                                ),
-                              ),
-                            ],
-
-                            // expandedHeight: _liveCardAnimation.value * 238.0,
                             expandedHeight: _liveCardAnimation.value *
                                 (_liveCard.currentState == LiveCardState.morning
-                                    ? 274.0
-                                    : ((_liveCard.currentState ==
-                                                LiveCardState.duringLesson ||
-                                            _liveCard.currentState ==
-                                                LiveCardState.duringBreak)
-                                        ? 292.0
-                                        : 238.0)),
+                                    ? 286.0
+                                    : (_liveCard.currentState == LiveCardState.duringLesson
+                                        ? (_liveCard.currentLesson?.description.isNotEmpty == true
+                                            ? 326.0
+                                            : 300.0)
+                                        : (_liveCard.currentState == LiveCardState.duringBreak
+                                            ? 300.0
+                                            : 230.0))),
 
                             // Live Card
                             flexibleSpace: FlexibleSpaceBar(
@@ -361,23 +274,16 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                 padding: EdgeInsets.only(
                                   left: 24.0,
                                   right: 24.0,
-                                  top: ((_liveCard.currentState ==
-                                                  LiveCardState.morning ||
-                                              _liveCard.currentState ==
-                                                  LiveCardState.duringLesson ||
-                                              _liveCard.currentState ==
-                                                  LiveCardState.duringBreak)
-                                          ? 0.0
-                                          : 62.0) +
+                                  top: 64.0 +
                                       MediaQuery.of(context).padding.top,
                                   bottom: (_liveCard.currentState ==
                                           LiveCardState.morning)
-                                      ? 44.0
+                                      ? 10.0
                                       : ((_liveCard.currentState ==
                                                   LiveCardState.duringLesson ||
                                               _liveCard.currentState ==
                                                   LiveCardState.duringBreak)
-                                          ? 62.0
+                                          ? 14.0
                                           : 52.0),
                                 ),
                                 child: Transform.scale(
@@ -431,7 +337,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       ),
                     ],
                 body: Padding(
-                  padding: const EdgeInsets.only(top: 12.0),
+                  padding: const EdgeInsets.only(top: 4.0),
                   child: NotificationListener<ScrollNotification>(
                     onNotification: (notification) {
                       // from flutter source
@@ -466,27 +372,44 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
                             builder: (context, dateWidgets) => dateWidgets
                                         .data !=
                                     null
-                                ? RefreshIndicator(
-                                    color:
-                                        Theme.of(context).colorScheme.secondary,
-                                    onRefresh: () => syncAll(context),
-                                    child: ImplicitlyAnimatedList<Widget>(
-                                      items: [
-                                        if (index == 0)
-                                          const SizedBox(key: Key("\$premium")),
-                                        ...sortDateWidgets(context,
-                                            dateWidgets: dateWidgets.data!,
-                                            padding: EdgeInsets.zero),
-                                      ],
-                                      itemBuilder: filterItemBuilder,
-                                      spawnIsolate: false,
-                                      areItemsTheSame: (a, b) => a.key == b.key,
-                                      physics: const BouncingScrollPhysics(
-                                          parent:
-                                              AlwaysScrollableScrollPhysics()),
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 24.0),
-                                    ))
+                                ? Column(
+                                    children: [
+                                      if (index == 0 && updateProvider.available)
+                                        Padding(
+                                          padding: const EdgeInsets.fromLTRB(24.0, 4.0, 24.0, 4.0),
+                                          child: UpdateTile(
+                                            updateProvider.releases.first,
+                                            padding: EdgeInsets.zero,
+                                            onTap: () => UpdateDialog.show(context, updateProvider.releases.first),
+                                          ),
+                                        ),
+                                      Expanded(
+                                        child: RefreshIndicator(
+                                          color: Theme.of(context).colorScheme.secondary,
+                                          onRefresh: () => syncAll(context),
+                                          child: ImplicitlyAnimatedList<Widget>(
+                                            items: [
+                                              if (index == 0)
+                                                const SizedBox(key: Key("\$premium")),
+                                              ...sortDateWidgets(context,
+                                                  dateWidgets: dateWidgets.data!,
+                                                  padding: EdgeInsets.zero),
+                                            ],
+                                            itemBuilder: filterItemBuilder,
+                                            spawnIsolate: false,
+                                            areItemsTheSame: (a, b) => a.key == b.key,
+                                            physics: const BouncingScrollPhysics(
+                                                parent: AlwaysScrollableScrollPhysics()),
+                                            padding: EdgeInsets.only(
+                                              left: 24.0,
+                                              right: 24.0,
+                                              bottom: MediaQuery.of(context).padding.bottom + 8.0,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  )
                                 : Container(),
                           );
                         },

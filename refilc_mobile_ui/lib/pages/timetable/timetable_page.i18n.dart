@@ -1,9 +1,9 @@
 import 'package:i18n_extension/i18n_extension.dart';
 
 extension Localization on String {
-  static final _t = Translations.byLocale("hu_hu") +
+  static final _t = Translations.byLocale("hu-HU") +
       {
-        "en_en": {
+        "en-US": {
           "timetable": "Timetable",
           "empty": "No school this week!",
           "week": "Week",
@@ -14,7 +14,7 @@ extension Localization on String {
           "show_breaks": "Show Breaks",
           "show_exams_homework": "Exams and Homework",
         },
-        "hu_hu": {
+        "hu-HU": {
           "timetable": "Órarend",
           "empty": "Ezen a héten nincs iskola.",
           "week": "hét",
@@ -25,7 +25,7 @@ extension Localization on String {
           "show_breaks": "Szünetek megjelenítése",
           "show_exams_homework": "Dolgozatok és házik",
         },
-        "de_de": {
+        "de-DE": {
           "timetable": "Zeitplan",
           "empty": "Keine Schule diese Woche.",
           "week": "Woche",
@@ -43,3 +43,4 @@ extension Localization on String {
   String plural(int value) => localizePlural(value, this, _t);
   String version(Object modifier) => localizeVersion(modifier, this, _t);
 }
+

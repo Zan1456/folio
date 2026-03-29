@@ -1,7 +1,6 @@
 // ignore_for_file: use_build_context_synchronously, deprecated_member_use
 
 import 'package:flutter/material.dart';
-import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:provider/provider.dart';
 // import 'package:refilc/models/settings.dart';
 import 'package:refilc/theme/colors/colors.dart';
@@ -85,7 +84,7 @@ class ShareThemeDialogState extends State<ShareThemeDialog> {
                 hintText: 'paint_title'.i18n,
                 suffixIcon: IconButton(
                   icon: const Icon(
-                    FeatherIcons.x,
+                    Icons.close_rounded,
                     color: Colors.grey,
                   ),
                   onPressed: () {

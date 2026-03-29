@@ -1,0 +1,86 @@
+import 'package:i18n_extension/i18n_extension.dart';
+
+extension ProfileLocalization on String {
+  static final _t = Translations.byLocale("hu-HU") +
+      {
+        "en-US": {
+          "profile": "Profile",
+          "personal_info": "Personal Info",
+          "birthdate": "Birth date",
+          "school": "School",
+          "class": "Class",
+          "address": "Home address",
+          "parents": "Parent(s)",
+          "grade_delay": "Grade visibility delay",
+          "hrs": "%s hour(s)",
+          "open_dkt": "Open DCS",
+          "edit": "Edit",
+          "edit_desc": "Profile picture and nickname",
+          "switch_account": "Switch Account",
+          "log_out": "Log Out",
+          "add_user": "Add User",
+          "cancel": "Cancel",
+          "done": "Done",
+          "oopsie": "Oops!",
+          "session_expired": "Your session has expired. Please log in again.",
+          "grade_streak": "Grade Streak",
+          "grade_streak_subtitle": "days of consecutive 5-grade",
+          "account": "Account",
+        },
+        "hu-HU": {
+          "profile": "Profil",
+          "personal_info": "Személyes adatok",
+          "birthdate": "Születési dátum",
+          "school": "Iskola",
+          "class": "Osztály",
+          "address": "Lakcím",
+          "parents": "Szülő(k)",
+          "grade_delay": "Jegy megjelenítési késleltetés",
+          "hrs": "%s óra",
+          "open_dkt": "DKT megnyitás",
+          "edit": "Szerkesztés",
+          "edit_desc": "Profilkép és becenév",
+          "switch_account": "Fiókváltás",
+          "log_out": "Kijelentkezés",
+          "add_user": "Felhasználó hozzáadása",
+          "cancel": "Mégsem",
+          "done": "Kész",
+          "oopsie": "Hoppá!",
+          "session_expired":
+              "A munkamenet lejárt. Kérlek, jelentkezz be újra.",
+          "grade_streak": "Jegy sorozat",
+          "grade_streak_subtitle": "egymást követő napja van ötösöd",
+          "account": "Fiók",
+        },
+        "de-DE": {
+          "profile": "Profil",
+          "personal_info": "Persönliche Daten",
+          "birthdate": "Geburtsdatum",
+          "school": "Schule",
+          "class": "Klasse",
+          "address": "Wohnanschrift",
+          "parents": "Elter(n)",
+          "grade_delay": "Notenverzögerung",
+          "hrs": "%s Stunde(n)",
+          "open_dkt": "DKT öffnen",
+          "edit": "Bearbeiten",
+          "edit_desc": "Profilbild und Spitzname",
+          "switch_account": "Konto wechseln",
+          "log_out": "Abmelden",
+          "add_user": "Benutzer hinzufügen",
+          "cancel": "Abbrechen",
+          "done": "Fertig",
+          "oopsie": "Hoppla!",
+          "session_expired":
+              "Deine Sitzung ist abgelaufen. Bitte melde dich erneut an.",
+          "grade_streak": "Notensträhne",
+          "grade_streak_subtitle": "aufeinanderfolgende Tage mit 5er-Note",
+          "account": "Konto",
+        },
+      };
+
+  String get i18n => localize(this, _t);
+  String fill(List<Object> params) => localizeFill(this, params);
+  String plural(int value) => localizePlural(value, this, _t);
+  String version(Object modifier) => localizeVersion(modifier, this, _t);
+}

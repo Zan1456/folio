@@ -1,9 +1,9 @@
 import 'package:i18n_extension/i18n_extension.dart';
 
 extension Localization on String {
-  static final _t = Translations.byLocale("hu_hu") +
+  static final _t = Translations.byLocale("hu-HU") +
       {
-        "en_en": {
+        "en-US": {
           // main
           "unknown": "???",
           "unknown_personality": "Unknown personality...",
@@ -52,7 +52,7 @@ extension Localization on String {
           // other
           "year_index": "Lesson Number",
         },
-        "hu_hu": {
+        "hu-HU": {
           // main
           "unknown": "???",
           "unknown_personality": "Ismeretlen személyiség...",
@@ -101,7 +101,7 @@ extension Localization on String {
           // other
           "year_index": "Éves óraszám",
         },
-        "de_de": {
+        "de-DE": {
           // main
           "unknown": "???",
           "unknown_personality": "Unbekannte Persönlichkeit...",
@@ -158,3 +158,4 @@ extension Localization on String {
   String plural(int value) => localizePlural(value, this, _t);
   String version(Object modifier) => localizeVersion(modifier, this, _t);
 }
+

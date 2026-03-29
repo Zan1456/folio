@@ -4,7 +4,6 @@ import 'package:refilc/utils/format.dart';
 import 'package:refilc_kreta_api/models/absence.dart';
 import 'package:refilc_mobile_ui/common/widgets/absence_group/absence_group_container.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:provider/provider.dart';
 import 'absence_tile.i18n.dart';
 
@@ -141,11 +140,11 @@ class AbsenceTile extends StatelessWidget {
   static IconData justificationIcon(Justification state) {
     switch (state) {
       case Justification.excused:
-        return FeatherIcons.check;
+        return Icons.check_rounded;
       case Justification.pending:
         return Icons.hourglass_bottom_rounded;
       case Justification.unexcused:
-        return FeatherIcons.x;
+        return Icons.close_rounded;
     }
   }
 }

@@ -9,7 +9,6 @@ import 'package:refilc/models/settings.dart';
 import 'package:flutter/foundation.dart';
 // ignore: depend_on_referenced_packages
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
-// import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
 
 const settingsDB = DatabaseStruct("settings", {
   "language": String, "start_page": int, "rounding": int, "theme": int,
@@ -66,6 +65,15 @@ const settingsDB = DatabaseStruct("settings", {
   // quick settings
   "q_timetable_lesson_num": int, "q_timetable_sub_tiles": int,
   "q_subjects_sub_tiles": int,
+  // android live activity
+  "android_live_activity_enabled": int,
+  "android_live_notification_type": String,
+  // countdown settings
+  "live_countdown_enabled": int,
+  "live_countdown_before_lesson": int,
+  "live_countdown_before_minutes": int,
+  "live_countdown_during_lesson": int,
+  "live_countdown_during_break": int,
 });
 // DON'T FORGET TO UPDATE DEFAULT VALUES IN `initDB` MIGRATION OR ELSE PARENTS WILL COMPLAIN ABOUT THEIR CHILDREN MISSING
 // YOU'VE BEEN WARNED!!!
@@ -76,6 +84,7 @@ const usersDB = DatabaseStruct("users", {
   "grade_streak": int,
   "access_token": String, "access_token_expire": String,
   "refresh_token": String,
+  "idp_application": String, "idp_remember_browser": String,
 });
 const userDataDB = DatabaseStruct("user_data", {
   "id": String, "grades": String, "timetable": String, "exams": String,
@@ -153,6 +162,8 @@ Future<Database> initDB(DatabaseProvider database) async {
         "access_token": "",
         "access_token_expire": "",
         "refresh_token": "",
+        "idp_application": "",
+        "idp_remember_browser": "",
       },
     );
     await migrateDB(db, struct: userDataDB, defaultValues: {

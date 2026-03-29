@@ -55,7 +55,7 @@ class SendMessageSheetState extends State<SendMessageSheet> {
             padding: const EdgeInsets.only(left: 8.0, right: 8.0),
             child: DropdownButton2(
               items: widget.availableRecipients
-                  .map((item) => DropdownMenuItem<String>(
+                  .map((item) => DropdownItem<String>(
                         value: item.kretaId.toString(),
                         child: Text(
                           // "${item.name ?? (item.id ?? 'Nincs név').toString()} ${item.type.code} ${item.type.code != 'TANAR' ? " (${item.type.shortName})" : ''}",
@@ -87,7 +87,6 @@ class SendMessageSheetState extends State<SendMessageSheet> {
               ),
               underline: const SizedBox(),
               menuItemStyleData: const MenuItemStyleData(
-                height: 40,
                 padding: EdgeInsets.only(left: 14, right: 14),
               ),
               buttonStyleData: ButtonStyleData(

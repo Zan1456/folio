@@ -22,7 +22,7 @@ class PanelActionButton extends StatelessWidget {
       onPressed: onPressed,
       padding: padding,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8.0),
+        borderRadius: BorderRadius.circular(16.0),
         side: BorderSide(
             color:
                 Theme.of(context).colorScheme.secondary.withValues(alpha: .6),

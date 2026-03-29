@@ -9,7 +9,6 @@ import 'package:refilc_kreta_api/models/lesson.dart';
 import 'package:refilc_mobile_ui/common/empty.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:refilc/utils/format.dart';
 import 'dart:math' as math;
 import 'package:intl/intl.dart';
@@ -104,7 +103,7 @@ class _FSTimetableState extends State<FSTimetable> {
                       padding: const EdgeInsets.only(top: 4.0),
                       child: GestureDetector(
                         onTap: () => Navigator.of(context).pop(),
-                        child: const Icon(FeatherIcons.x),
+                        child: const Icon(Icons.close_rounded),
                       ),
                     ),
                   ),
@@ -155,7 +154,7 @@ class _FSTimetableState extends State<FSTimetable> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Icon(
-                        FeatherIcons.slash,
+                        Icons.block_rounded,
                         size: 18.0,
                         color: AppColors.of(context).text.withValues(alpha: .3),
                       ),

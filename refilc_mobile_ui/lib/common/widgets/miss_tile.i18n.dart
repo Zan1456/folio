@@ -1,17 +1,17 @@
 import 'package:i18n_extension/i18n_extension.dart';
 
 extension Localization on String {
-  static final _t = Translations.byLocale("hu_hu") +
+  static final _t = Translations.byLocale("hu-HU") +
       {
-        "en_en": {
+        "en-US": {
           "Missing homework": "Missing homework",
           "Missing equipment": "Missing equipment",
         },
-        "hu_hu": {
+        "hu-HU": {
           "Missing homework": "Házi feladat hiány",
           "Missing equipment": "Felszerelés Hiány",
         },
-        "de_de": {
+        "de-DE": {
           "Missing homework": "Fehlende Hausaufgaben",
           "Missing equipment": "Fehlende Ausrüstung",
         }
@@ -22,3 +22,4 @@ extension Localization on String {
   String plural(int value) => localizePlural(value, this, _t);
   String version(Object modifier) => localizeVersion(modifier, this, _t);
 }
+

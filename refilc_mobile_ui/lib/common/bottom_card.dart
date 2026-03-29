@@ -8,30 +8,28 @@ class BottomCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(14.0),
-            color: Theme.of(context).colorScheme.surface,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 42.0,
-                height: 4.0,
-                margin: const EdgeInsets.only(top: 12.0, bottom: 4.0),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(45.0),
-                  color: AppColors.of(context).text.withValues(alpha: 0.10),
-                ),
-              ),
-              if (child != null) child!,
-            ],
-          ),
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).scaffoldBackgroundColor,
+        borderRadius: const BorderRadius.vertical(
+          top: Radius.circular(28.0),
         ),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 42.0,
+            height: 4.0,
+            margin: const EdgeInsets.only(top: 12.0, bottom: 4.0),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(45.0),
+              color: AppColors.of(context).text.withValues(alpha: 0.12),
+            ),
+          ),
+          if (child != null) child!,
+          SizedBox(height: MediaQuery.of(context).padding.bottom + 8.0),
+        ],
       ),
     );
   }
@@ -47,5 +45,6 @@ Future<void> showBottomCard({
         useRootNavigator: rootNavigator,
         elevation: 0,
         isDismissible: true,
+        isScrollControlled: true,
         context: context,
         builder: (context) => BottomCard(child: child));

@@ -1,34 +1,34 @@
 import 'package:i18n_extension/i18n_extension.dart';
 
 extension Localization on String {
-  static final _t = Translations.byLocale("hu_hu") +
+  static final _t = Translations.byLocale("hu-HU") +
       {
-        "en_en": {
+        "en-US": {
           "birthdate": "Birth date",
           "school": "School",
           "class": "Class",
           "address": "Home address",
           "parents": "Parent(s)",
           "parents_phone": "Parents' phone number: ",
-          "grade_delay": "Grade visibility delay",
+          "grade-DElay": "Grade visibility delay",
           "hrs": "%s hour(s)",
         },
-        "hu_hu": {
+        "hu-HU": {
           "birthdate": "Születési dátum",
           "school": "Iskola",
           "class": "Osztály",
           "address": "Lakcím",
           "parents": "Szülő(k)",
-          "grade_delay": "Jegy megjelenítési késleltetés",
+          "grade-DElay": "Jegy megjelenítési késleltetés",
           "hrs": "%s óra",
         },
-        "de_de": {
+        "de-DE": {
           "birthdate": "Geburtsdatum",
           "school": "Schule",
           "class": "Klasse",
           "address": "Wohnanschrift",
           "parents": "Elter(n)",
-          "grade_delay": "Notenverzögerung",
+          "grade-DElay": "Notenverzögerung",
           "hrs": "%s Stunde(n)",
         },
       };
@@ -38,3 +38,4 @@ extension Localization on String {
   String plural(int value) => localizePlural(value, this, _t);
   String version(Object modifier) => localizeVersion(modifier, this, _t);
 }
+

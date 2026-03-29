@@ -22,7 +22,6 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:refilc/api/providers/database_provider.dart';
 import 'package:refilc/api/providers/self_note_provider.dart';
@@ -34,14 +33,11 @@ import 'package:refilc_kreta_api/models/absence.dart';
 import 'package:refilc_kreta_api/models/homework.dart';
 import 'package:refilc_kreta_api/models/subject.dart';
 import 'package:refilc/api/providers/user_provider.dart';
-import 'package:refilc/theme/colors/colors.dart';
 import 'package:refilc_kreta_api/providers/homework_provider.dart';
 import 'package:refilc_mobile_ui/common/bottom_sheet_menu/bottom_sheet_menu.dart';
 import 'package:refilc_mobile_ui/common/bottom_sheet_menu/rounded_bottom_sheet.dart';
 import 'package:refilc_mobile_ui/common/empty.dart';
 import 'package:refilc_mobile_ui/common/panel/panel.dart';
-import 'package:refilc_mobile_ui/common/profile_image/profile_button.dart';
-import 'package:refilc_mobile_ui/common/profile_image/profile_image.dart';
 import 'package:refilc_mobile_ui/common/soon_alert/soon_alert.dart';
 import 'package:refilc_mobile_ui/common/widgets/tick_tile.dart';
 import 'package:flutter/material.dart';
@@ -290,139 +286,171 @@ if (selfNoteProvider.todos.isNotEmpty) {
     updateProvider = Provider.of<UpdateProvider>(context);
     selfNoteProvider = Provider.of<SelfNoteProvider>(context);
 
+    final colorScheme = Theme.of(context).colorScheme;
+    final settings = Provider.of<SettingsProvider>(context);
+
     List<String> nameParts = user.displayName?.split(" ") ?? ["?"];
     firstName = nameParts.length > 1 ? nameParts[1] : nameParts[0];
 
     generateTiles();
 
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.only(top: 12.0),
-        child: NestedScrollView(
-          physics: const BouncingScrollPhysics(
-              parent: AlwaysScrollableScrollPhysics()),
-          headerSliverBuilder: (context, _) => [
-            SliverAppBar(
-              pinned: true,
-              floating: false,
-              snap: false,
-              centerTitle: false,
-              surfaceTintColor: Theme.of(context).scaffoldBackgroundColor,
-              actions: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 16.0, vertical: 5.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      GestureDetector(
-                        onTap: () async {
-                          SoonAlert.show(context: context);
-                        },
-                        child: Icon(
-                          FeatherIcons.search,
-                          color: AppColors.of(context).text,
-                          size: 22.0,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      body: Column(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.primaryContainer,
+              borderRadius: const BorderRadius.vertical(bottom: Radius.circular(28.0)),
+            ),
+            child: SafeArea(
+              bottom: false,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20.0, 12.0, 20.0, 12.0),
+                    child: Row(
+                      children: [
+                        GestureDetector(
+                          onTap: () => Navigator.of(context).maybePop(),
+                          child: Container(
+                            padding: const EdgeInsets.all(8.0),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.onPrimaryContainer.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(12.0),
+                            ),
+                            child: Icon(
+                              Icons.arrow_back_ios_new_rounded,
+                              size: 18.0,
+                              color: Theme.of(context).colorScheme.onPrimaryContainer,
+                            ),
+                          ),
                         ),
-                      ),
-                      const SizedBox(
-                        width: 12.0,
-                      ),
-                      GestureDetector(
-                        onTap: () async {
-                          // handle tap
-                          if (!Provider.of<PlusProvider>(context, listen: false)
-                                  .hasScope(PremiumScopes.unlimitedSelfNotes) &&
-                              noteTiles.length > 10) {
-                            return;
-                          }
-
-                          showCreationModal(context);
-                        },
-                        child: Icon(
-                          FeatherIcons.plus,
-                          color: AppColors.of(context).text,
+                        const SizedBox(width: 12.0),
+                        Expanded(
+                          child: Text(
+                            "notes".i18n,
+                            style: settings.fontFamily != '' && settings.titleOnlyFont
+                                ? GoogleFonts.getFont(
+                                    settings.fontFamily,
+                                    textStyle: TextStyle(
+                                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                                      fontSize: 28.0,
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                  )
+                                : TextStyle(
+                                    color: Theme.of(context).colorScheme.onPrimaryContainer,
+                                    fontSize: 28.0,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                // Profile Icon
-                Padding(
-                  padding: const EdgeInsets.only(right: 24.0),
-                  child: ProfileButton(
-                    child: ProfileImage(
-                      heroTag: "profile",
-                      name: firstName,
-                      backgroundColor: Theme.of(context).colorScheme.tertiary,
-                      //ColorUtils.stringToColor(user.displayName ?? "?"),
-                      badge: updateProvider.available,
-                      role: user.role,
-                      profilePictureString: user.picture,
-                      gradeStreak: (user.gradeStreak ?? 0) > 1,
+                        GestureDetector(
+                          onTap: () => SoonAlert.show(context: context),
+                          child: Container(
+                            padding: const EdgeInsets.all(10.0),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.onPrimaryContainer.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(14.0),
+                            ),
+                            child: Icon(
+                              Icons.search_rounded,
+                              color: Theme.of(context).colorScheme.onPrimaryContainer,
+                              size: 20.0,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ),
-              ],
-              automaticallyImplyLeading: false,
-              shadowColor: Theme.of(context).shadowColor,
-              title: Padding(
-                padding: const EdgeInsets.only(left: 8.0),
-                child: Text(
-                  "notes".i18n,
-                  style: Provider.of<SettingsProvider>(context).fontFamily !=
-                              '' &&
-                          Provider.of<SettingsProvider>(context).titleOnlyFont
-                      ? GoogleFonts.getFont(
-                          Provider.of<SettingsProvider>(context).fontFamily,
-                          textStyle: TextStyle(
-                              color: AppColors.of(context).text,
-                              fontSize: 32.0,
-                              fontWeight: FontWeight.bold),
-                        )
-                      : TextStyle(
-                          color: AppColors.of(context).text,
-                          fontSize: 32.0,
-                          fontWeight: FontWeight.bold),
+                ],
+              ),
+            ),
+          ),
+          Expanded(
+            child: RefreshIndicator(
+              onRefresh: () {
+                var state = Provider.of<HomeworkProvider>(context, listen: false)
+                    .fetch(from: DateTime.now().subtract(const Duration(days: 30)));
+                Provider.of<SelfNoteProvider>(context, listen: false).restore();
+                Provider.of<SelfNoteProvider>(context, listen: false).restoreTodo();
+                generateTiles();
+                return state;
+              },
+              color: colorScheme.primary,
+              child: CustomScrollView(
+                physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+                slivers: [
+                  // Quick-create chips
+            SliverToBoxAdapter(
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24.0, vertical: 4.0),
+                child: Row(
+                  children: [
+                    _QuickChip(
+                      icon: Icons.sticky_note_2_rounded,
+                      label: "new_note".i18n,
+                      color: colorScheme.secondaryContainer,
+                      iconColor: colorScheme.onSecondaryContainer,
+                      onTap: () => Navigator.of(context, rootNavigator: true)
+                          .push(CupertinoPageRoute(
+                              builder: (context) => const AddNoteScreen())),
+                    ),
+                    const SizedBox(width: 8.0),
+                    _QuickChip(
+                      icon: Icons.task_rounded,
+                      label: "new_task".i18n,
+                      color: colorScheme.tertiaryContainer,
+                      iconColor: colorScheme.onTertiaryContainer,
+                      onTap: () => showTaskCreation(context),
+                    ),
+                    const SizedBox(width: 8.0),
+                    _QuickChip(
+                      icon: Icons.photo_library_rounded,
+                      label: "new_image".i18n,
+                      color: colorScheme.primaryContainer,
+                      iconColor: colorScheme.onPrimaryContainer,
+                      onTap: () => showDialog(
+                          context: context,
+                          builder: (context) => ImageNoteEditor(user.user!)),
+                    ),
+                  ],
                 ),
               ),
             ),
-          ],
-          body: RefreshIndicator(
-            onRefresh: () {
-              var state = Provider.of<HomeworkProvider>(context, listen: false)
-                  .fetch(
-                      from: DateTime.now().subtract(const Duration(days: 30)));
-              Provider.of<SelfNoteProvider>(context, listen: false).restore();
-              Provider.of<SelfNoteProvider>(context, listen: false)
-                  .restoreTodo();
 
-              generateTiles();
+            const SliverToBoxAdapter(child: SizedBox(height: 16.0)),
 
-              return state;
-            },
-            color: Theme.of(context).colorScheme.secondary,
-            child: ListView.builder(
-              padding: EdgeInsets.zero,
-              physics: const BouncingScrollPhysics(),
-              itemCount: max(noteTiles.length, 1),
-              itemBuilder: (context, index) {
-                if (noteTiles.isNotEmpty) {
-                  const EdgeInsetsGeometry panelPadding =
-                      EdgeInsets.symmetric(horizontal: 24.0);
-
-                  return Padding(
-                      padding: panelPadding, child: noteTiles[index]);
-                } else {
+            // Content tiles
+            SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (context, index) {
+                  if (noteTiles.isNotEmpty) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                      child: noteTiles[index],
+                    );
+                  }
                   return Container();
-                }
-              },
+                },
+                childCount: max(noteTiles.length, 1),
+              ),
             ),
-          ),
+
+            SliverToBoxAdapter(
+              child: SizedBox(
+                  height: MediaQuery.of(context).padding.bottom + 16.0),
+            ),
+          ],
         ),
       ),
-    );
+      ),
+    ],
+  ),
+);
   }
 
   void showCreationModal(BuildContext context) {
@@ -558,7 +586,7 @@ if (selfNoteProvider.todos.isNotEmpty) {
                   hintText: "task_name".i18n,
                   suffixIcon: IconButton(
                     icon: const Icon(
-                      FeatherIcons.x,
+                      Icons.close_rounded,
                       color: Colors.grey,
                     ),
                     onPressed: () {
@@ -589,7 +617,7 @@ if (selfNoteProvider.todos.isNotEmpty) {
                   hintText: "task_content".i18n,
                   suffixIcon: IconButton(
                     icon: const Icon(
-                      FeatherIcons.x,
+                      Icons.close_rounded,
                       color: Colors.grey,
                     ),
                     onPressed: () {
@@ -650,3 +678,55 @@ if (selfNoteProvider.todos.isNotEmpty) {
     );
   }
 }
+
+class _QuickChip extends StatelessWidget {
+  const _QuickChip({
+    required this.icon,
+    required this.label,
+    required this.color,
+    required this.iconColor,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final Color color;
+  final Color iconColor;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          padding:
+              const EdgeInsets.symmetric(horizontal: 10.0, vertical: 12.0),
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(18.0),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 24.0, color: iconColor),
+              const SizedBox(height: 6.0),
+              Text(
+                label,
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 11.0,
+                  fontWeight: FontWeight.w600,
+                  color: iconColor,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+

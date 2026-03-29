@@ -1,6 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools" package="app.firka.legacy">
-    <application android:name="${applicationName}" android:label="Firka" tools:replace="android:label" android:icon="@mipmap/ic_launcher"
+    xmlns:tools="http://schemas.android.com/tools" package="app.zan1456.folio">
+    <!-- Allow HyperIsland-ToolKit (minSdk 26) in a minSdk-24 app.
+         HyperOS devices are API 26+; the Kotlin code uses try/catch as fallback. -->
+    <uses-sdk tools:overrideLibrary="io.github.d4viddf.hyperisland_kit" />
+    <application android:name="${applicationName}" android:label="Folio" tools:replace="android:label" android:icon="@mipmap/ic_launcher"
         android:requestLegacyExternalStorage="true" android:enableOnBackInvokedCallback="false">
 
         <!-- Force OpenGL -->
@@ -8,7 +11,7 @@
             android:name="flutter.embedding.android.SurfaceView"
             android:value="true" />
 
-        <activity android:exported="true" android:name="app.firka.legacy.MainActivity"
+        <activity android:exported="true" android:name="app.zan1456.folio.MainActivity"
             android:launchMode="singleTop" android:theme="@style/LaunchTheme"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
             android:hardwareAccelerated="true" android:windowSoftInputMode="adjustResize"
@@ -56,7 +59,7 @@
         </activity>
         <meta-data android:name="flutterEmbedding" android:value="2" />
 
-        <receiver android:name="app.firka.legacy.widget_timetable.WidgetTimetable"
+        <receiver android:name="app.zan1456.folio.widget_timetable.WidgetTimetable"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
@@ -72,7 +75,7 @@
                 android:resource="@xml/home_widget_test_info" />
         </receiver>
 
-        <service android:name="app.firka.legacy.widget_timetable.WidgetTimetableService"
+        <service android:name="app.zan1456.folio.widget_timetable.WidgetTimetableService"
             android:permission="android.permission.BIND_REMOTEVIEWS" />
 
         <receiver android:name="es.antonborri.home_widget.HomeWidgetBackgroundReceiver"

@@ -2,7 +2,6 @@ import 'package:refilc/models/settings.dart';
 import 'package:refilc/theme/colors/colors.dart';
 import 'package:refilc_mobile_ui/common/panel/panel.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:provider/provider.dart';
 import 'app_icon_screen.i18n.dart';
 
@@ -27,7 +26,7 @@ class PremiumCustomAppIconMenu extends StatelessWidget {
     //     );
     //   },
     //   title: Text('custom_app_icon'.i18n),
-    //   leading: const Icon(FeatherIcons.edit),
+    //   leading: const Icon(Icons.edit_rounded),
     // );
     return const SizedBox(
       width: 0,
@@ -163,7 +162,7 @@ class AppIconItem extends StatelessWidget {
       ),
       trailing: selected
           ? Icon(
-              FeatherIcons.checkCircle,
+              Icons.check_circle_outline_rounded,
               color: Theme.of(context).colorScheme.primary,
             )
           : const SizedBox(),

@@ -1,7 +1,6 @@
 import 'package:refilc_kreta_api/models/note.dart';
 import 'package:refilc/utils/format.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'miss_tile.i18n.dart';
 
 class MissTile extends StatelessWidget {
@@ -34,11 +33,11 @@ class MissTile extends StatelessWidget {
 
   IconData _missIcon() {
     if (note.type?.name == "HaziFeladatHiany") {
-      return FeatherIcons.home;
+      return Icons.home_rounded;
     } else if (note.type?.name == "Felszereleshiany") {
-      return FeatherIcons.book;
+      return Icons.book_rounded;
     }
-    return FeatherIcons.slash;
+    return Icons.block_rounded;
   }
 
   String _missName() {

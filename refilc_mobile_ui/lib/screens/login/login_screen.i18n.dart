@@ -1,9 +1,9 @@
 import 'package:i18n_extension/i18n_extension.dart';
 
 extension Localization on String {
-  static final _t = Translations.byLocale("hu_hu") +
+  static final _t = Translations.byLocale("hu-HU") +
       {
-        "en_en": {
+        "en-US": {
           "username": "Username",
           "usernameHint": "Student ID number",
           "password": "Password",
@@ -36,7 +36,7 @@ extension Localization on String {
           "login_w_kreta_acc": "Log in with your e-KRÉTA account",
           "demo_login": "Try demo mode",
         },
-        "hu_hu": {
+        "hu-HU": {
           "username": "Felhasználónév",
           "usernameHint": "Oktatási azonosító",
           "password": "Jelszó",
@@ -69,7 +69,7 @@ extension Localization on String {
           "login_w_kreta_acc": "Bejelentkezés e-KRÉTA fiókkal",
           "demo_login": "Demo mód kipróbálása",
         },
-        "de_de": {
+        "de-DE": {
           "username": "Benutzername",
           "usernameHint": "Ausbildung ID",
           "password": "Passwort",
@@ -109,3 +109,4 @@ extension Localization on String {
   String plural(int value) => localizePlural(value, this, _t);
   String version(Object modifier) => localizeVersion(modifier, this, _t);
 }
+

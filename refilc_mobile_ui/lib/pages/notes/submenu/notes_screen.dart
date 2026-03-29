@@ -20,7 +20,6 @@ import 'package:refilc_plus/providers/plus_provider.dart';
 import 'package:refilc_plus/ui/mobile/plus/premium_inline.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:provider/provider.dart';
 
 class NotesScreen extends StatefulWidget {
@@ -185,7 +184,7 @@ class NotesScreenState extends State<NotesScreen> {
                           color: Theme.of(context).colorScheme.secondary,
                         ),
                         child: const Icon(
-                          FeatherIcons.search,
+                          Icons.search_rounded,
                           size: 20.0,
                         ),
                       ),
@@ -197,7 +196,7 @@ class NotesScreenState extends State<NotesScreen> {
                                   : Colors.white.withValues(alpha: .3),
                         ),
                         child: const Icon(
-                          FeatherIcons.search,
+                          Icons.search_rounded,
                           size: 20.0,
                         ),
                       ),
@@ -239,7 +238,7 @@ class NotesScreenState extends State<NotesScreen> {
                           color: Theme.of(context).colorScheme.secondary,
                         ),
                         child: const Icon(
-                          FeatherIcons.plus,
+                          Icons.add_rounded,
                           size: 20.0,
                         ),
                       ),
@@ -251,7 +250,7 @@ class NotesScreenState extends State<NotesScreen> {
                                   : Colors.white.withValues(alpha: .3),
                         ),
                         child: const Icon(
-                          FeatherIcons.plus,
+                          Icons.add_rounded,
                           size: 20.0,
                         ),
                       ),

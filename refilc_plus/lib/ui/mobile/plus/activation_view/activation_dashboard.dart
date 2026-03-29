@@ -1,7 +1,6 @@
 import 'package:refilc/theme/colors/colors.dart';
 import 'package:refilc_plus/providers/plus_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
@@ -76,7 +75,7 @@ class _ActivationDashboardState extends State<ActivationDashboard> {
           //       children: [
           //         Row(
           //           children: [
-          //             Icon(FeatherIcons.alertTriangle,
+          //             Icon(Icons.warning_amber_rounded,
           //                 size: 20.0, color: Colors.orange),
           //             SizedBox(width: 12.0),
           //             Text(
@@ -106,7 +105,7 @@ class _ActivationDashboardState extends State<ActivationDashboard> {
                 children: [
                   Row(
                     children: [
-                      Icon(FeatherIcons.alertTriangle,
+                      Icon(Icons.warning_amber_rounded,
                           size: 20.0, color: Colors.orange),
                       SizedBox(width: 12.0),
                       Text(
@@ -157,7 +156,7 @@ class _ActivationDashboardState extends State<ActivationDashboard> {
                               width: 16.0,
                               child: CircularProgressIndicator(),
                             )
-                          : const Icon(FeatherIcons.key, size: 20.0),
+                          : const Icon(Icons.key_rounded, size: 20.0),
                       label: const Padding(
                         padding: EdgeInsets.only(left: 8.0),
                         child: Text(
@@ -185,7 +184,7 @@ class _ActivationDashboardState extends State<ActivationDashboard> {
                   overlayColor: WidgetStatePropertyAll(
                       AppColors.of(context).text.withOpacity(.1)),
                 ),
-                icon: const Icon(FeatherIcons.arrowLeft, size: 20.0),
+                icon: const Icon(Icons.arrow_back_rounded, size: 20.0),
                 label: const Text(
                   "Vissza",
                   style: TextStyle(fontSize: 16.0),

@@ -12,7 +12,6 @@ import 'package:refilc_kreta_api/providers/homework_provider.dart';
 import 'package:refilc_mobile_ui/common/outlined_round_button.dart';
 import 'package:refilc_mobile_ui/pages/notes/submenu/notes_screen.i18n.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 
@@ -194,7 +193,7 @@ class AddNoteScreenState extends State<AddNoteScreen> {
                           color: Theme.of(context).colorScheme.secondary,
                         ),
                         child: const Icon(
-                          FeatherIcons.check,
+                          Icons.check_rounded,
                           size: 20.0,
                         ),
                       ),
@@ -206,7 +205,7 @@ class AddNoteScreenState extends State<AddNoteScreen> {
                                   : Colors.white.withValues(alpha: .3),
                         ),
                         child: const Icon(
-                          FeatherIcons.check,
+                          Icons.check_rounded,
                           size: 20.0,
                         ),
                       ),

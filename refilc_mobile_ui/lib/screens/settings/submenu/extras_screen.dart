@@ -27,7 +27,6 @@ import 'package:refilc_mobile_ui/common/splitted_panel/splitted_panel.dart';
 import 'package:refilc_mobile_ui/screens/settings/settings_helper.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:provider/provider.dart';
 import 'package:refilc_plus/ui/mobile/settings/submenu/grade_exporting.dart';
 import 'package:refilc_plus/models/premium_scopes.dart';
@@ -57,7 +56,7 @@ class MenuExtrasSettings extends StatelessWidget {
       ),
       title: Text("extras".i18n),
       leading: Icon(
-        FeatherIcons.edit,
+        Icons.edit_rounded,
         size: 22.0,
         color: AppColors.of(context).text.withValues(alpha: 0.95),
       ),
@@ -70,7 +69,7 @@ class MenuExtrasSettings extends StatelessWidget {
               .intersection({'grade_exporting'}).isNotEmpty)
             const NewChip(),
           Icon(
-            FeatherIcons.chevronRight,
+            Icons.keyboard_arrow_right_rounded,
             size: 22.0,
             color: AppColors.of(context).text.withValues(alpha: 0.95),
           )
@@ -153,7 +152,7 @@ class ExtrasSettingsScreenState extends State<ExtrasSettingsScreen> {
                       ),
                     ),
                     leading: Icon(
-                      FeatherIcons.gift,
+                      Icons.card_giftcard_rounded,
                       size: 22.0,
                       color: AppColors.of(context).text.withValues(
                           alpha: settingsProvider.gradeOpeningFun ? .95 : .25),
@@ -241,7 +240,7 @@ class ExtrasSettingsScreenState extends State<ExtrasSettingsScreen> {
                       ),
                     ),
                     leading: Icon(
-                      FeatherIcons.userCheck,
+                      Icons.how_to_reg_rounded,
                       size: 22.0,
                       color: AppColors.of(context).text.withValues(
                           alpha: settingsProvider.goodStudent ? .95 : .25),
@@ -312,7 +311,7 @@ class ExtrasSettingsScreenState extends State<ExtrasSettingsScreen> {
                       ),
                     ),
                     leading: Icon(
-                      FeatherIcons.tv,
+                      Icons.tv_rounded,
                       size: 22.0,
                       color: AppColors.of(context).text.withValues(
                           alpha: settingsProvider.presentationMode ? .95 : .25),

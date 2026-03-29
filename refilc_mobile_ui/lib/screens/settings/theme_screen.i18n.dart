@@ -1,9 +1,9 @@
 import 'package:i18n_extension/i18n_extension.dart';
 
 extension SettingsLocalization on String {
-  static final _t = Translations.byLocale("hu_hu") +
+  static final _t = Translations.byLocale("hu-HU") +
       {
-        "en_en": {
+        "en-US": {
           "theme_prev": "Preview",
           "colorpicker_presets": "Presets",
           "colorpicker_background": "Background",
@@ -22,7 +22,7 @@ extension SettingsLocalization on String {
           "understand": "I understand",
           "share_subj_theme": "Share Theme",
         },
-        "hu_hu": {
+        "hu-HU": {
           "theme_prev": "Előnézet",
           "colorpicker_presets": "Téma",
           "colorpicker_background": "Háttér",
@@ -41,7 +41,7 @@ extension SettingsLocalization on String {
           "understand": "Értem",
           "share_subj_theme": "Téma Megosztás",
         },
-        "de_de": {
+        "de-DE": {
           "theme_prev": "Vorschau",
           "colorpicker_presets": "Farben",
           "colorpicker_background": "Hintergrund",
@@ -68,3 +68,4 @@ extension SettingsLocalization on String {
   String plural(int value) => localizePlural(value, this, _t);
   String version(Object modifier) => localizeVersion(modifier, this, _t);
 }
+

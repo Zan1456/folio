@@ -1,31 +1,40 @@
 import 'package:i18n_extension/i18n_extension.dart';
 
 extension ScreensLocalization on String {
-  static final _t = Translations.byLocale("hu_hu") +
+  static final _t = Translations.byLocale("hu-HU") +
       {
-        "en_en": {
+        "en-US": {
           "home": "Home",
           "grades": "Grades",
           "timetable": "Timetable",
           "messages": "Messages",
           "absences": "Absences",
           "notes": "Notes",
+          "more": "More",
+          "profile": "Profile",
+          "settings": "Settings",
         },
-        "hu_hu": {
+        "hu-HU": {
           "home": "Kezdőlap",
           "grades": "Jegyek",
           "timetable": "Órarend",
           "messages": "Üzenetek",
-          "absences": "Hiányok",
-          "notes": "Füzet",
+          "absences": "Hiányzások",
+          "notes": "Jegyzetek",
+          "more": "Több",
+          "profile": "Profil",
+          "settings": "Beállítások",
         },
-        "de_de": {
+        "de-DE": {
           "home": "Zuhause",
           "grades": "Noten",
           "timetable": "Zeitplan",
           "messages": "Mitteilungen",
           "absences": "Fehlen",
           "notes": "Anmerkungen",
+          "more": "Mehr",
+          "profile": "Profil",
+          "settings": "Einstellungen",
         },
       };
 
@@ -34,3 +43,4 @@ extension ScreensLocalization on String {
   String plural(int value) => localizePlural(value, this, _t);
   String version(Object modifier) => localizeVersion(modifier, this, _t);
 }
+

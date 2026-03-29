@@ -23,42 +23,51 @@ class NavbarItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Widget icon = active ? item.activeIcon : item.icon;
+    final colorScheme = Theme.of(context).colorScheme;
+    final activeColor = colorScheme.onSecondaryContainer;
+    final inactiveColor = colorScheme.onSurfaceVariant;
 
-    return SafeArea(
-      child: GestureDetector(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 6.0),
-          child: Container(
-            padding: const EdgeInsets.all(12.0),
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeOutCubic,
+            padding: active
+                ? const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0)
+                : const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
             decoration: BoxDecoration(
-              color: active
-                  ? Theme.of(context).colorScheme.tertiary.withValues(alpha: .2)
-                  : null,
-              borderRadius: BorderRadius.circular(14.0),
+              color: active ? colorScheme.secondaryContainer : Colors.transparent,
+              borderRadius: BorderRadius.circular(50.0),
             ),
-            child: icon,
-            // child: Stack(
-            //   children: [
-            //     IconTheme(
-            //       data: IconThemeData(
-            //         color: Theme.of(context).colorScheme.secondary,
-            //       ),
-            //       child: icon,
-            //     ),
-            //     IconTheme(
-            //       data: IconThemeData(
-            //         color: Theme.of(context).brightness == Brightness.light
-            //             ? Colors.black.withValues(alpha: .5)
-            //             : Colors.white.withValues(alpha: .3),
-            //       ),
-            //       child: icon,
-            //     ),
-            //   ],
-            // ),
+            child: IconTheme(
+              data: IconThemeData(
+                color: active ? activeColor : inactiveColor,
+                size: 24.0,
+              ),
+              child: active ? item.activeIcon : item.icon,
+            ),
           ),
-        ),
+          const SizedBox(height: 4.0),
+          AnimatedDefaultTextStyle(
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeOutCubic,
+            style: TextStyle(
+              fontSize: 11.0,
+              fontWeight: active ? FontWeight.w700 : FontWeight.w500,
+              color: active ? activeColor : inactiveColor,
+            ),
+            child: Text(
+              item.title,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
       ),
     );
   }

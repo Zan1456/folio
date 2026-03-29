@@ -6,7 +6,6 @@ import 'package:refilc/utils/format.dart';
 import 'package:refilc_mobile_ui/pages/grades/calculator/grade_calculator_provider.dart';
 import 'package:refilc_mobile_ui/pages/grades/subject_grades_container.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:provider/provider.dart';
 
 class GradeTile extends StatelessWidget {
@@ -180,7 +179,7 @@ class GradeTile extends StatelessWidget {
                       style: const TextStyle(fontWeight: FontWeight.w500))
                   : IconButton(
                       splashRadius: 24.0,
-                      icon: Icon(FeatherIcons.trash2,
+                      icon: Icon(Icons.delete_rounded,
                           color: AppColors.of(context).red),
                       onPressed: () {
                         calculatorProvider.removeGrade(grade);

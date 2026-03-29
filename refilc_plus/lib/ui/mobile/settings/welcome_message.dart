@@ -6,7 +6,6 @@ import 'package:refilc_plus/models/premium_scopes.dart';
 import 'package:refilc_plus/providers/plus_provider.dart';
 import 'package:refilc_plus/ui/mobile/plus/upsell.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:refilc_mobile_ui/screens/settings/settings_screen.i18n.dart';
 import 'package:provider/provider.dart';
 import 'package:i18n_extension/i18n_extension.dart';
@@ -40,7 +39,7 @@ class WelcomeMessagePanelButton extends StatelessWidget {
         ),
       ),
       leading: Icon(
-        FeatherIcons.smile,
+        Icons.sentiment_satisfied_alt_rounded,
         size: 22.0,
         color: AppColors.of(context).text.withOpacity(.95),
       ),
@@ -94,7 +93,7 @@ class _WelcomeMessageEditorState extends State<WelcomeMessageEditor> {
           border: const OutlineInputBorder(),
           label: Text('welcome_msg'.i18n),
           suffixIcon: IconButton(
-            icon: const Icon(FeatherIcons.x),
+            icon: const Icon(Icons.close_rounded),
             onPressed: () {
               setState(() {
                 _welcomeMsg.text = "";

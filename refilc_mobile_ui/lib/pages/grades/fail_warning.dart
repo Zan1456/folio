@@ -1,7 +1,6 @@
 import 'package:refilc_kreta_api/models/subject.dart';
 import 'package:refilc_mobile_ui/common/panel/panel.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'grades_page.i18n.dart';
 
 class FailWarning extends StatelessWidget {
@@ -26,7 +25,7 @@ class FailWarning extends StatelessWidget {
         child: Row(
           children: [
             Icon(
-              FeatherIcons.alertTriangle,
+              Icons.warning_amber_rounded,
               color: Colors.orange.withValues(alpha: .5),
               size: 20.0,
             ),

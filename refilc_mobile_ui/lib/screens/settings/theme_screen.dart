@@ -40,7 +40,6 @@ import 'package:refilc/ui/flutter_colorpicker/colorpicker.dart';
 // import 'package:refilc_plus/ui/mobile/plus/upsell.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:provider/provider.dart';
 import 'package:refilc_mobile_ui/screens/settings/submenu/share_theme_popup.dart';
 import 'theme_screen.i18n.dart';
@@ -370,7 +369,7 @@ class _PremiumCustomAccentColorSettingState
                           }
                         },
                         icon: const Icon(
-                          FeatherIcons.share2,
+                          Icons.share_rounded,
                           size: 22.0,
                         ),
                       ),

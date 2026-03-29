@@ -2,7 +2,6 @@ import 'package:refilc/models/ad.dart';
 import 'package:refilc/theme/colors/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:refilc_mobile_ui/common/panel/panel_button.dart';
-import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 
 class AdTile extends StatelessWidget {
   const AdTile(this.ad,
@@ -53,7 +52,7 @@ class AdTile extends StatelessWidget {
             : null,
         trailing: showExternalIcon
             ? const Icon(
-                FeatherIcons.externalLink,
+                Icons.open_in_new_rounded,
                 size: 20.0,
               )
             : null,

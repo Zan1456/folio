@@ -2,12 +2,7 @@
 
 import 'dart:math';
 
-import 'package:animations/animations.dart';
-import 'package:collection/collection.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:refilc/api/providers/update_provider.dart';
-import 'package:refilc/models/settings.dart';
-import 'package:refilc/theme/colors/utils.dart';
 import 'package:refilc/ui/date_widget.dart';
 import 'package:refilc_kreta_api/models/absence.dart';
 import 'package:refilc_kreta_api/models/lesson.dart';
@@ -20,18 +15,12 @@ import 'package:refilc/theme/colors/colors.dart';
 import 'package:refilc_kreta_api/providers/timetable_provider.dart';
 import 'package:refilc_mobile_ui/common/action_button.dart';
 import 'package:refilc_mobile_ui/common/empty.dart';
-import 'package:refilc_mobile_ui/common/filter_bar.dart';
-import 'package:refilc_mobile_ui/common/panel/panel.dart';
-import 'package:refilc_mobile_ui/common/profile_image/profile_button.dart';
-import 'package:refilc_mobile_ui/common/profile_image/profile_image.dart';
-import 'package:refilc_mobile_ui/common/splitted_panel/splitted_panel.dart';
 import 'package:refilc_mobile_ui/common/widgets/absence/absence_subject_tile.dart';
 import 'package:refilc_mobile_ui/common/widgets/absence/absence_viewable.dart';
 import 'package:refilc_mobile_ui/common/widgets/miss_tile.dart';
 import 'package:refilc_mobile_ui/pages/absences/absence_subject_view.dart';
 import 'package:refilc/ui/filter/sort.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:provider/provider.dart';
 import 'absences_page.i18n.dart';
 
@@ -94,6 +83,12 @@ class AbsencesPageState extends State<AbsencesPage>
     });
   }
 
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
   void buildSubjectAbsences() {
     Map<GradeSubject, SubjectAbsence> _absences = {};
 
@@ -145,78 +140,134 @@ class AbsencesPageState extends State<AbsencesPage>
     buildSubjectAbsences();
 
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.only(top: 12.0),
-        child: NestedScrollView(
-          physics: const BouncingScrollPhysics(
-              parent: AlwaysScrollableScrollPhysics()),
-          headerSliverBuilder: (context, _) => [
-            SliverAppBar(
-              pinned: true,
-              floating: false,
-              snap: false,
-              centerTitle: false,
-              surfaceTintColor: Theme.of(context).scaffoldBackgroundColor,
-              actions: [
-                // Profile Icon
-                Padding(
-                  padding: const EdgeInsets.only(right: 24.0),
-                  child: ProfileButton(
-                    child: ProfileImage(
-                      heroTag: "profile",
-                      name: firstName,
-                      backgroundColor: Theme.of(context)
-                          .colorScheme
-                          .tertiary, //ColorUtils.stringToColor(user.displayName ?? "?"),
-                      badge: updateProvider.available,
-                      role: user.role,
-                      profilePictureString: user.picture,
-                      gradeStreak: (user.gradeStreak ?? 0) > 1,
+      body: Column(
+        children: [
+          // ─── Accent Header ────────────────────────────────────────────
+          Container(
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.primaryContainer,
+              borderRadius:
+                  const BorderRadius.vertical(bottom: Radius.circular(28.0)),
+            ),
+            child: SafeArea(
+              bottom: false,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20.0, 12.0, 8.0, 0.0),
+                    child: Row(
+                      children: [
+                        GestureDetector(
+                          onTap: () => Navigator.of(context).maybePop(),
+                          child: Container(
+                            padding: const EdgeInsets.all(8.0),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onPrimaryContainer
+                                  .withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(12.0),
+                            ),
+                            child: Icon(
+                              Icons.arrow_back_ios_new_rounded,
+                              size: 18.0,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onPrimaryContainer,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12.0),
+                        Expanded(
+                          child: Text(
+                            "Absences".i18n,
+                            style: TextStyle(
+                              fontSize: 28.0,
+                              fontWeight: FontWeight.w800,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onPrimaryContainer,
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            showDialog(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12.0)),
+                                title: Text("attention".i18n),
+                                content: Text("attention_body".i18n),
+                                actions: [
+                                  ActionButton(
+                                    label: "Ok",
+                                    onTap: () => Navigator.of(context).pop(),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                          icon: Icon(
+                            Icons.info_outline_rounded,
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onPrimaryContainer,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ),
-              ],
-              automaticallyImplyLeading: false,
-              shadowColor: Theme.of(context).shadowColor,
-              title: Padding(
-                padding: const EdgeInsets.only(left: 8.0),
-                child: Text(
-                  "Absences".i18n,
-                  style: Provider.of<SettingsProvider>(context).fontFamily !=
-                              '' &&
-                          Provider.of<SettingsProvider>(context).titleOnlyFont
-                      ? GoogleFonts.getFont(
-                          Provider.of<SettingsProvider>(context).fontFamily,
-                          textStyle: TextStyle(
-                            color: AppColors.of(context).text,
-                            fontSize: 32.0,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        )
-                      : TextStyle(
-                          color: AppColors.of(context).text,
-                          fontSize: 32.0,
-                          fontWeight: FontWeight.bold,
-                        ),
-                ),
-              ),
-              bottom: FilterBar(
-                items: [
-                  Tab(text: "Absences".i18n),
-                  Tab(text: "Delays".i18n),
-                  Tab(text: "Misses".i18n),
+                  // Tab bar
+                  AnimatedBuilder(
+                    animation: _tabController,
+                    builder: (context, _) => TabBar(
+                      controller: _tabController,
+                      dividerColor: Colors.transparent,
+                      labelColor: Theme.of(context).colorScheme.secondary,
+                      unselectedLabelColor: Theme.of(context)
+                          .colorScheme
+                          .onPrimaryContainer
+                          .withValues(alpha: 0.65),
+                      indicatorSize: TabBarIndicatorSize.tab,
+                      indicatorPadding: const EdgeInsets.symmetric(
+                          horizontal: 8.0, vertical: 6.0),
+                      indicator: BoxDecoration(
+                        color: Theme.of(context)
+                            .colorScheme
+                            .onPrimaryContainer
+                            .withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(14.0),
+                      ),
+                      overlayColor: WidgetStateProperty.all(
+                        Theme.of(context)
+                            .colorScheme
+                            .onPrimaryContainer
+                            .withValues(alpha: 0.08),
+                      ),
+                      padding: const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 14.0),
+                      tabs: [
+                        Tab(text: "Absences".i18n),
+                        Tab(text: "Delays".i18n),
+                        Tab(text: "Misses".i18n),
+                      ],
+                    ),
+                  ),
                 ],
-                controller: _tabController,
-                disableFading: true,
               ),
             ),
-          ],
-          body: TabBarView(
+          ),
+          // ─── Content ─────────────────────────────────────────────────
+          Expanded(
+            child: TabBarView(
               physics: const BouncingScrollPhysics(),
               controller: _tabController,
               children: List.generate(
-                  3, (index) => filterViewBuilder(context, index))),
-        ),
+                  3, (index) => filterViewBuilder(context, index)),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -271,432 +322,198 @@ class AbsencesPageState extends State<AbsencesPage>
     return items;
   }
 
-  Widget filterViewBuilder(context, int activeData) {
-    List<Widget> filterWidgets = [];
+  Widget filterViewBuilder(BuildContext context, int activeData) {
+    final colorScheme = Theme.of(context).colorScheme;
 
-    var absWidgets = getFilterWidgets(AbsenceFilter.values[activeData])
-        .map((e) => e.widget)
-        .cast<Widget>()
-        .toList();
+    // Collect counts for stats header
+    List<Absence> excused = [];
+    List<Absence> unexcused = [];
+    List<Absence> pending = [];
+    String suffix = "";
+    String excusedLabel = "";
+    String unexcusedLabel = "";
+    String pendingLabel = "";
 
-    if (activeData > 0) {
-      filterWidgets = sortDateWidgets(
+    if (activeData == AbsenceFilter.absences.index) {
+      excused = absenceProvider.absences
+          .where((e) => e.delay == 0 && e.state == Justification.excused)
+          .toList();
+      unexcused = absenceProvider.absences
+          .where((e) => e.delay == 0 && e.state == Justification.unexcused)
+          .toList();
+      pending = absenceProvider.absences
+          .where((e) => e.delay == 0 && e.state == Justification.pending)
+          .toList();
+      suffix = " ${"hr".i18n}";
+      excusedLabel = "stat_1".i18n;
+      unexcusedLabel = "stat_2".i18n;
+      pendingLabel = "pending".i18n;
+    } else if (activeData == AbsenceFilter.delays.index) {
+      excused = absenceProvider.absences
+          .where((e) => e.delay != 0 && e.state == Justification.excused)
+          .toList();
+      unexcused = absenceProvider.absences
+          .where((e) => e.delay != 0 && e.state == Justification.unexcused)
+          .toList();
+      pending = absenceProvider.absences
+          .where((e) => e.delay != 0 && e.state == Justification.pending)
+          .toList();
+      suffix = " ${"min".i18n}";
+      excusedLabel = "stat_3".i18n;
+      unexcusedLabel = "stat_4".i18n;
+      pendingLabel = "pending".i18n;
+    }
+
+    final int excusedVal = activeData == AbsenceFilter.delays.index
+        ? excused.map((e) => e.delay).fold(0, (a, b) => a + b)
+        : excused.length;
+    final int unexcusedVal = activeData == AbsenceFilter.delays.index
+        ? unexcused.map((e) => e.delay).fold(0, (a, b) => a + b)
+        : unexcused.length;
+    final int pendingVal = activeData == AbsenceFilter.delays.index
+        ? pending.map((e) => e.delay).fold(0, (a, b) => a + b)
+        : pending.length;
+
+    final filterDateWidgets =
+        getFilterWidgets(AbsenceFilter.values[activeData]);
+
+    List<Widget> listItems;
+    if (activeData == AbsenceFilter.absences.index) {
+      listItems =
+          filterDateWidgets.map((e) => e.widget).cast<Widget>().toList();
+    } else {
+      listItems = sortDateWidgets(
         context,
-        dateWidgets: getFilterWidgets(AbsenceFilter.values[activeData]),
+        dateWidgets: filterDateWidgets,
         padding: EdgeInsets.zero,
         hasShadow: true,
       );
-    } else if (absWidgets.isNotEmpty) {
-      filterWidgets = [
-        Padding(
-          padding: const EdgeInsets.only(bottom: 24.0),
-          child: Panel(
-            padding: EdgeInsets.zero,
-            isTransparent: true,
-            hasShadow: false,
-            title: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text("Subjects".i18n),
-                Padding(
-                  padding: const EdgeInsets.only(right: 4.0),
-                  child: IconButton(
-                    onPressed: () {
-                      showDialog(
-                        context: context,
-                        builder: (context) => AlertDialog(
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12.0)),
-                          title: Text("attention".i18n),
-                          content: Text("attention_body".i18n),
-                          actions: [
-                            ActionButton(
-                              label: "Ok",
-                              onTap: () => Navigator.of(context).pop(),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                    padding: EdgeInsets.zero,
-                    splashRadius: 24.0,
-                    visualDensity: VisualDensity.compact,
-                    constraints: BoxConstraints.tight(const Size(42.0, 42.0)),
-                    icon: const Icon(FeatherIcons.info),
-                  ),
-                ),
-              ],
-            ),
-            child: PageTransitionSwitcher(
-              transitionBuilder: (
-                Widget child,
-                Animation<double> primaryAnimation,
-                Animation<double> secondaryAnimation,
-              ) {
-                return FadeThroughTransition(
-                  animation: primaryAnimation,
-                  secondaryAnimation: secondaryAnimation,
-                  fillColor: Colors.transparent,
-                  child: child,
-                );
-              },
-              child: SplittedPanel(
-                padding: EdgeInsets.zero,
-                isSeparated: true,
-                isTransparent: true,
-                children: absWidgets,
-              ),
-            ),
-          ),
-        )
-      ];
     }
 
-    return Padding(
-      padding: const EdgeInsets.only(top: 12.0),
-      child: RefreshIndicator(
-        color: Theme.of(context).colorScheme.secondary,
-        onRefresh: () async {
-          await absenceProvider.fetch();
-          await noteProvider.fetch();
+    return RefreshIndicator(
+      color: colorScheme.secondary,
+      onRefresh: () async {
+        await absenceProvider.fetch();
+        await noteProvider.fetch();
+      },
+      child: ListView.builder(
+        padding: EdgeInsets.fromLTRB(
+            16.0, 12.0, 16.0, MediaQuery.of(context).padding.bottom + 8.0),
+        physics: const BouncingScrollPhysics(
+            parent: AlwaysScrollableScrollPhysics()),
+        itemCount: max(
+            listItems.length +
+                (activeData < AbsenceFilter.misses.index ? 1 : 0),
+            1),
+        itemBuilder: (context, index) {
+          // Stats card at the top for absences and delays tabs
+          if (index == 0 && activeData < AbsenceFilter.misses.index) {
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 12.0),
+              child: Row(
+                children: [
+                  _StatCard(
+                    value: excusedVal,
+                    suffix: suffix,
+                    label: excusedLabel,
+                    color: AppColors.of(context).green,
+                    cardColor: colorScheme.surfaceContainerHigh,
+                    onCardColor: colorScheme.onSurface,
+                  ),
+                  const SizedBox(width: 8.0),
+                  _StatCard(
+                    value: unexcusedVal,
+                    suffix: suffix,
+                    label: unexcusedLabel,
+                    color: AppColors.of(context).red,
+                    cardColor: colorScheme.surfaceContainerHigh,
+                    onCardColor: colorScheme.onSurface,
+                  ),
+                  const SizedBox(width: 8.0),
+                  _StatCard(
+                    value: pendingVal,
+                    suffix: suffix,
+                    label: pendingLabel,
+                    color: AppColors.of(context).orange,
+                    cardColor: colorScheme.surfaceContainerHigh,
+                    onCardColor: colorScheme.onSurface,
+                  ),
+                ],
+              ),
+            );
+          }
+
+          final itemIndex =
+              index - (activeData < AbsenceFilter.misses.index ? 1 : 0);
+
+          if (listItems.isEmpty) {
+            return activeData == AbsenceFilter.delays.index
+                ? Empty(subtitle: "emptyDelays".i18n)
+                : activeData == AbsenceFilter.misses.index
+                    ? Empty(subtitle: "emptyMisses".i18n)
+                    : Empty(subtitle: "empty".i18n);
+          }
+
+          return listItems[itemIndex];
         },
-        child: ListView.builder(
-          padding: EdgeInsets.zero,
-          physics: const BouncingScrollPhysics(),
-          itemCount: max(filterWidgets.length + (activeData <= 1 ? 1 : 0), 1),
-          itemBuilder: (context, index) {
-            if (filterWidgets.isNotEmpty) {
-              if ((index == 0 && activeData == 1) ||
-                  (index == 0 && activeData == 0)) {
-                int value1 = 0;
-                int value2 = 0;
-                int value3 = 0;
-                String title1 = "";
-                String title2 = "";
-                String suffix = "";
+      ),
+    );
+  }
+}
 
-                List<Absence> unexcused = [];
-                List<Absence> excused = [];
-                List<Absence> pending = [];
+class _StatCard extends StatelessWidget {
+  const _StatCard({
+    required this.value,
+    required this.suffix,
+    required this.label,
+    required this.color,
+    required this.cardColor,
+    required this.onCardColor,
+  });
 
-                List<double> absencePositions = [];
-                List<Color> finalChartColors = [];
+  final int value;
+  final String suffix;
+  final String label;
+  final Color color;
+  final Color cardColor;
+  final Color onCardColor;
 
-                if (activeData == AbsenceFilter.absences.index) {
-                  unexcused = absenceProvider.absences
-                      .where((e) =>
-                          e.delay == 0 && e.state == Justification.unexcused)
-                      .toList();
-                  excused = absenceProvider.absences
-                      .where((e) =>
-                          e.delay == 0 && e.state == Justification.excused)
-                      .toList();
-                  pending = absenceProvider.absences
-                      .where((e) =>
-                          e.delay == 0 && e.state == Justification.pending)
-                      .toList();
-
-                  value1 = excused.length;
-                  value2 = unexcused.length;
-                  value3 = pending.length;
-                  title1 = "stat_1".i18n;
-                  title2 = "stat_2".i18n;
-                  suffix = " ${"hr".i18n}";
-                } else if (activeData == AbsenceFilter.delays.index) {
-                  unexcused = absenceProvider.absences
-                      .where((e) =>
-                          e.delay != 0 && e.state == Justification.unexcused)
-                      .toList();
-                  excused = absenceProvider.absences
-                      .where((e) =>
-                          e.delay != 0 && e.state == Justification.excused)
-                      .toList();
-                  pending = absenceProvider.absences
-                      .where((e) =>
-                          e.delay != 0 && e.state == Justification.pending)
-                      .toList();
-
-                  value1 = excused.map((e) => e.delay).fold(0, (a, b) => a + b);
-                  value2 =
-                      unexcused.map((e) => e.delay).fold(0, (a, b) => a + b);
-                  value3 = pending.map((e) => e.delay).fold(0, (a, b) => a + b);
-                  title1 = "stat_3".i18n;
-                  title2 = "stat_4".i18n;
-                  suffix = " ${"min".i18n}";
-                }
-
-                // bar chart magic
-                List<AbsenceChartData> absenceChartData = [];
-
-                int yr = DateTime.now().month < 9
-                    ? DateTime.now().year - 1
-                    : DateTime.now().year;
-                int barTotal =
-                    DateTime.now().difference(DateTime(yr, 09, 01)).inDays;
-
-                [...unexcused, ...excused, ...pending].forEachIndexed((i, a) {
-                  int abs = DateTime.now().difference(a.date).inDays;
-
-                  double startPos = (barTotal - abs) / barTotal;
-                  double endPos = startPos + (barTotal / 100 / barTotal);
-
-                  if (absenceChartData.isEmpty) {
-                    absenceChartData.add(AbsenceChartData(
-                      start: 0.0,
-                      end: startPos,
-                      color: Theme.of(context).scaffoldBackgroundColor,
-                    ));
-                  }
-                  absenceChartData.add(AbsenceChartData(
-                    start: startPos,
-                    end: endPos,
-                    color: a.state == Justification.excused
-                        ? Colors.green
-                        : a.state == Justification.unexcused
-                            ? Colors.red
-                            : Colors.orange,
-                  ));
-                  if ([...unexcused, ...excused, ...pending].length > i + 1) {
-                    int nextAbs = DateTime.now()
-                        .difference(
-                            [...unexcused, ...excused, ...pending][i + 1].date)
-                        .inDays;
-
-                    double nextStartPos = (barTotal - nextAbs) / barTotal;
-                    // double nextEndPos = startPos + (barTotal / 100 / barTotal);
-
-                    absenceChartData.add(AbsenceChartData(
-                      start: endPos,
-                      end: nextStartPos < 0.999 ? nextStartPos : 1.0,
-                      color: Theme.of(context).scaffoldBackgroundColor,
-                    ));
-                  }
-
-                  // print(value2.toString() + '-total');
-                  // print(absenceChartData.length.toString() + '-chartdata');
-                  if ((i + 1 ==
-                          [...unexcused, ...excused, ...pending].length) &&
-                      endPos < 0.999) {
-                    absenceChartData.add(AbsenceChartData(
-                      start: endPos,
-                      end: 1.0,
-                      color: Theme.of(context).scaffoldBackgroundColor,
-                    ));
-                  }
-                });
-
-                for (var aP in absenceChartData) {
-                  absencePositions.addAll([aP.start, aP.end]);
-                }
-
-                for (var aC in absenceChartData) {
-                  finalChartColors.addAll([aC.color, aC.color]);
-                }
-
-                return Padding(
-                  padding: const EdgeInsets.only(
-                      bottom: 20.0, left: 24.0, right: 24.0),
-                  child: Row(children: [
-                    Expanded(
-                      child: SplittedPanel(
-                        padding: EdgeInsets.zero,
-                        cardPadding: const EdgeInsets.symmetric(
-                          vertical: 16.0,
-                          horizontal: 18.0,
-                        ),
-                        spacing: 8.0,
-                        children: [
-                          Column(
-                            children: [
-                              Row(
-                                children: [
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        value1.toString() + suffix,
-                                        style: TextStyle(
-                                          fontSize: 18.0,
-                                          fontWeight: FontWeight.w700,
-                                          color: value1 > 0
-                                              ? AppColors.of(context).green
-                                              : AppColors.of(context).text,
-                                        ),
-                                      ),
-                                      Text(
-                                        title1,
-                                        style: TextStyle(
-                                          fontSize: 16.0,
-                                          fontWeight: FontWeight.w500,
-                                          height: 1.1,
-                                          color: value1 > 0
-                                              ? ColorsUtils().fade(
-                                                  context,
-                                                  AppColors.of(context).green,
-                                                  darkenAmount: 0.5,
-                                                  lightenAmount: 0.4,
-                                                )
-                                              : AppColors.of(context).text,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(
-                                    width: 18.0,
-                                  ),
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        value2.toString() + suffix,
-                                        style: TextStyle(
-                                          fontSize: 18.0,
-                                          fontWeight: FontWeight.w700,
-                                          color: value2 > 0
-                                              ? AppColors.of(context).red
-                                              : AppColors.of(context).text,
-                                        ),
-                                      ),
-                                      Text(
-                                        title2,
-                                        style: TextStyle(
-                                          fontSize: 16.0,
-                                          fontWeight: FontWeight.w500,
-                                          height: 1.1,
-                                          color: value2 > 0
-                                              ? ColorsUtils().fade(
-                                                  context,
-                                                  AppColors.of(context).red,
-                                                  darkenAmount: 0.4,
-                                                  lightenAmount: 0.2,
-                                                )
-                                              : AppColors.of(context).text,
-                                        ),
-                                      ),
-                                    ],
-                                  )
-                                ],
-                              ),
-                              const SizedBox(
-                                height: 18.0,
-                              ),
-                              Column(
-                                children: [
-                                  Container(
-                                    height: 9.11,
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(20.0),
-                                      color: Theme.of(context)
-                                          .scaffoldBackgroundColor,
-                                      gradient: LinearGradient(
-                                        colors: finalChartColors,
-                                        stops: absencePositions,
-                                        begin: Alignment.centerLeft,
-                                        end: Alignment.centerRight,
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(
-                                    height: 3.0,
-                                  ),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        "sept".i18n,
-                                      ),
-                                      Text("now".i18n),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Row(
-                                children: [
-                                  Icon(
-                                    Icons.av_timer_rounded,
-                                    color: value3 > 0 ? Colors.orange : null,
-                                  ),
-                                  const SizedBox(
-                                    width: 10.0,
-                                  ),
-                                  Text(
-                                    "pending".i18n,
-                                    style: const TextStyle(
-                                      fontSize: 16.0,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              Text(
-                                value3.toString() + suffix,
-                                style: TextStyle(
-                                  fontSize: 16.0,
-                                  fontWeight: FontWeight.w500,
-                                  color: AppColors.of(context)
-                                      .text
-                                      .withValues(alpha: 0.8),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                    // Expanded(
-                    //   child: StatisticsTile(
-                    //     title: AutoSizeText(
-                    //       title1,
-                    //       textAlign: TextAlign.center,
-                    //       maxLines: 2,
-                    //       overflow: TextOverflow.ellipsis,
-                    //     ),
-                    //     valueSuffix: suffix,
-                    //     value: value1.toDouble(),
-                    //     decimal: false,
-                    //     showZero: true,
-                    //     color: AppColors.of(context).green,
-                    //   ),
-                    // ),
-                    // const SizedBox(width: 24.0),
-                    // Expanded(
-                    //   child: StatisticsTile(
-                    //     title: AutoSizeText(
-                    //       title2,
-                    //       textAlign: TextAlign.center,
-                    //       maxLines: 2,
-                    //       overflow: TextOverflow.ellipsis,
-                    //     ),
-                    //     valueSuffix: suffix,
-                    //     value: value2.toDouble(),
-                    //     decimal: false,
-                    //     showZero: true,
-                    //     color: AppColors.of(context).red,
-                    //   ),
-                    // ),
-                  ]),
-                );
-              }
-
-              return Padding(
-                padding: const EdgeInsets.only(
-                    left: 24.0, right: 24.0, bottom: 12.0),
-                child: filterWidgets[index - (activeData <= 1 ? 1 : 0)],
-              );
-            } else {
-              return activeData == 1
-                  ? Empty(subtitle: "emptyDelays".i18n)
-                  : Empty(subtitle: "emptyMisses".i18n);
-            }
-          },
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 12.0),
+        decoration: BoxDecoration(
+          color: value > 0 ? color.withValues(alpha: 0.14) : cardColor,
+          borderRadius: BorderRadius.circular(16.0),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "$value$suffix",
+              style: TextStyle(
+                fontSize: 20.0,
+                fontWeight: FontWeight.w800,
+                color: value > 0 ? color : onCardColor,
+                height: 1.1,
+              ),
+            ),
+            const SizedBox(height: 2.0),
+            Text(
+              label,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 12.0,
+                fontWeight: FontWeight.w500,
+                height: 1.2,
+                color: value > 0
+                    ? color.withValues(alpha: 0.8)
+                    : onCardColor.withValues(alpha: 0.6),
+              ),
+            ),
+          ],
         ),
       ),
     );

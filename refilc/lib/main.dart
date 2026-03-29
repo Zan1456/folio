@@ -23,7 +23,6 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:refilc/api/providers/user_provider.dart';
 import 'package:refilc/api/providers/database_provider.dart';
 import 'package:refilc/database/init.dart';
-// import 'package:refilc/helpers/notification_helper.dart';
 import 'package:refilc/models/settings.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -41,71 +40,92 @@ import 'helpers/live_activity_helper.dart';
 // days without touching grass: 5,843 (16 yrs)
 
 void main() async {
-  // Initalize
-  WidgetsBinding binding = WidgetsFlutterBinding.ensureInitialized();
-  // ignore: deprecated_member_use
-  binding.renderView.automaticSystemUiAdjustment = false;
-  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-  // navigation
-  setupLocator();
+  try {
+    // Initalize
+    WidgetsBinding binding = WidgetsFlutterBinding.ensureInitialized();
+    // ignore: deprecated_member_use
+    binding.renderView.automaticSystemUiAdjustment = false;
+    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+    // navigation
+    setupLocator();
 
-  // Startup
-  Startup startup = Startup();
-  await startup.start();
+    // Startup
+    Startup startup = Startup();
+    await startup.start();
 
-  // Custom error page
-  ErrorWidget.builder = errorBuilder;
+    // Custom error page
+    ErrorWidget.builder = errorBuilder;
 
-  BackgroundFetch.registerHeadlessTask(backgroundHeadlessTask);
+    BackgroundFetch.registerHeadlessTask(backgroundHeadlessTask);
 
-  // setting up things for shakebugs
-  // List<ShakePickerItem> pickerItems = [
-  //   ShakePickerItem('Bug', 'Hiba', tag: 'bug'),
-  //   ShakePickerItem('Suggestion', 'Fejlesztési javaslat', tag: 'suggestion'),
-  //   ShakePickerItem('Question', 'Kérdés', tag: 'question')
-  // ];
-  // ShakePicker picker =
-  //     ShakePicker('Feedback type', 'Visszajelzés típusa', pickerItems);
-  // ShakeTitle title = ShakeTitle('Title', 'Leírás', required: true);
+    // setting up things for shakebugs
+    // List<ShakePickerItem> pickerItems = [
+    //   ShakePickerItem('Bug', 'Hiba', tag: 'bug'),
+    //   ShakePickerItem('Suggestion', 'Fejlesztési javaslat', tag: 'suggestion'),
+    //   ShakePickerItem('Question', 'Kérdés', tag: 'question')
+    // ];
+    // ShakePicker picker =
+    //     ShakePicker('Feedback type', 'Visszajelzés típusa', pickerItems);
+    // ShakeTitle title = ShakeTitle('Title', 'Leírás', required: true);
 
-  // ShakeInspectButton inspect = ShakeInspectButton();
-  // ShakeAttachments attachments = ShakeAttachments();
+    // ShakeInspectButton inspect = ShakeInspectButton();
+    // ShakeAttachments attachments = ShakeAttachments();
 
-  // List<ShakeFormComponent> components = [picker, title, inspect, attachments];
-  // ShakeForm form = ShakeForm(components);
+    // List<ShakeFormComponent> components = [picker, title, inspect, attachments];
+    // ShakeForm form = ShakeForm(components);
 
-  // Shake.setShakeForm(form);
+    // Shake.setShakeForm(form);
 
-  // shakebugs initialization
-  // Shake.setInvokeShakeOnScreenshot(true);
-  Shake.start('Y44AwzfY6091xO2Nr0w59RHSpNxJhhiSFGs4enmoJwelN82ZRzTLE5X');
+    // shakebugs initialization
+    // Shake.setInvokeShakeOnScreenshot(true);
+    Shake.start('Y44AwzfY6091xO2Nr0w59RHSpNxJhhiSFGs4enmoJwelN82ZRzTLE5X');
 
-  // pre-cache required icons
-  const todaySvg = SvgAssetLoader('assets/svg/menu_icons/today_selected.svg');
-  const gradesSvg = SvgAssetLoader('assets/svg/menu_icons/grades_selected.svg');
-  const timetableSvg =
-      SvgAssetLoader('assets/svg/menu_icons/timetable_selected.svg');
-  const notesSvg = SvgAssetLoader('assets/svg/menu_icons/notes_selected.svg');
-  const absencesSvg =
-      SvgAssetLoader('assets/svg/menu_icons/absences_selected.svg');
+    // pre-cache required icons
+    const todaySvg = SvgAssetLoader('assets/svg/menu_icons/today_selected.svg');
+    const gradesSvg =
+        SvgAssetLoader('assets/svg/menu_icons/grades_selected.svg');
+    const timetableSvg =
+        SvgAssetLoader('assets/svg/menu_icons/timetable_selected.svg');
+    const notesSvg = SvgAssetLoader('assets/svg/menu_icons/notes_selected.svg');
+    const absencesSvg =
+        SvgAssetLoader('assets/svg/menu_icons/absences_selected.svg');
 
-  svg.cache
-      .putIfAbsent(todaySvg.cacheKey(null), () => todaySvg.loadBytes(null));
-  svg.cache
-      .putIfAbsent(gradesSvg.cacheKey(null), () => gradesSvg.loadBytes(null));
-  svg.cache.putIfAbsent(
-      timetableSvg.cacheKey(null), () => timetableSvg.loadBytes(null));
-  svg.cache
-      .putIfAbsent(notesSvg.cacheKey(null), () => notesSvg.loadBytes(null));
-  svg.cache.putIfAbsent(
-      absencesSvg.cacheKey(null), () => absencesSvg.loadBytes(null));
+    svg.cache
+        .putIfAbsent(todaySvg.cacheKey(null), () => todaySvg.loadBytes(null));
+    svg.cache
+        .putIfAbsent(gradesSvg.cacheKey(null), () => gradesSvg.loadBytes(null));
+    svg.cache.putIfAbsent(
+        timetableSvg.cacheKey(null), () => timetableSvg.loadBytes(null));
+    svg.cache
+        .putIfAbsent(notesSvg.cacheKey(null), () => notesSvg.loadBytes(null));
+    svg.cache.putIfAbsent(
+        absencesSvg.cacheKey(null), () => absencesSvg.loadBytes(null));
 
-  // Run App
-  runApp(App(
-    database: startup.database,
-    settings: startup.settings,
-    user: startup.user,
-  ));
+    // Run App
+    runApp(App(
+      database: startup.database,
+      settings: startup.settings,
+      user: startup.user,
+    ));
+  } catch (error, stackTrace) {
+    runApp(MaterialApp(
+      home: Scaffold(
+        backgroundColor: Colors.black,
+        body: SafeArea(
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Text(
+                'Initialization Error:\n\n$error\n\n$stackTrace',
+                style: const TextStyle(color: Colors.red, fontSize: 14),
+                textDirection: TextDirection.ltr,
+              ),
+            ),
+          ),
+        ),
+      ),
+    ));
+  }
 }
 
 class Startup {
@@ -206,17 +226,6 @@ Widget errorBuilder(FlutterErrorDetails details) {
         Navigator.of(context, rootNavigator: true)
             .push(MaterialPageRoute(builder: (context) {
           if (kReleaseMode) {
-            // silent report to shakebugs
-            ShakeReportConfiguration configuration = ShakeReportConfiguration();
-            configuration.blackBoxData = true;
-            configuration.activityHistoryData = true;
-            configuration.screenshot = true;
-            configuration.video = false;
-            Shake.silentReport(
-              configuration: configuration,
-              description:
-                  'Silent Report #${DateTime.now().year}${DateTime.now().month}${DateTime.now().day}',
-            );
             // show error report screen
             return ErrorReportScreen(details);
           } else {
@@ -226,7 +235,19 @@ Widget errorBuilder(FlutterErrorDetails details) {
       }
     });
 
-    return  Container();
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Text(
+            details.exceptionAsString() +
+                '\n\n' +
+                (details.stack?.toString() ?? ''),
+            style: const TextStyle(color: Colors.red, fontSize: 12),
+          ),
+        ),
+      ),
+    );
   });
 }
 
@@ -247,7 +268,7 @@ Future<void> initPlatformState() async {
     if (kDebugMode) {
       print("[BackgroundFetch] Event received $taskId");
     }
-    if (taskId == "com.transistorsoft.firkaliveactivity") {
+    if (taskId == "com.transistorsoft.folioliveactivity") {
       if (!Platform.isIOS) return;
       LiveActivityHelper().backgroundJob();
     } else {
@@ -265,7 +286,7 @@ Future<void> initPlatformState() async {
     print('[BackgroundFetch] configure success: $status');
   }
   BackgroundFetch.scheduleTask(TaskConfig(
-      taskId: "com.transistorsoft.firkanotification",
+      taskId: "com.transistorsoft.folionotification",
       delay: 900000, // 15 minutes
       periodic: true,
       forceAlarmManager: true,
@@ -287,7 +308,7 @@ void backgroundHeadlessTask(HeadlessTask task) {
   if (kDebugMode) {
     print('[BackgroundFetch] Headless event received.');
   }
-  if (taskId == "com.transistorsoft.firkaliveactivity") {
+  if (taskId == "com.transistorsoft.folioliveactivity") {
     if (!Platform.isIOS) return;
     LiveActivityHelper().backgroundJob();
   } else {
@@ -328,7 +349,7 @@ Future<void> initAdditionalBackgroundFetch() async {
     print('[BackgroundFetch] configure success: $status');
   }
   BackgroundFetch.scheduleTask(TaskConfig(
-      taskId: "com.transistorsoft.firkaliveactivity",
+      taskId: "com.transistorsoft.folioliveactivity",
       delay: 300000, // 5 minute
       periodic: true,
       forceAlarmManager: true,

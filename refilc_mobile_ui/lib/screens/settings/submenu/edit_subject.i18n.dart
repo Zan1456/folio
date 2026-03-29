@@ -1,9 +1,9 @@
 import 'package:i18n_extension/i18n_extension.dart';
 
 extension SettingsLocalization on String {
-  static final _t = Translations.byLocale("hu_hu") +
+  static final _t = Translations.byLocale("hu-HU") +
       {
-        "en_en": {
+        "en-US": {
           "rename_it": "Rename Subject",
           "rename_te": "Rename Teacher",
           "rounding": "Rounding",
@@ -13,7 +13,7 @@ extension SettingsLocalization on String {
           "cancel": "Cancel",
           "done": "Done",
         },
-        "hu_hu": {
+        "hu-HU": {
           "rename_it": "Tantárgy átnevezése",
           "rename_te": "Tanár átnevezése",
           "rounding": "Kerekítés",
@@ -23,7 +23,7 @@ extension SettingsLocalization on String {
           "cancel": "Mégse",
           "done": "Kész",
         },
-        "de_de": {
+        "de-DE": {
           "rename_it": "Betreff umbenennen",
           "rename_te": "Lehrer umbenennen",
           "rounding": "Rundung",
@@ -40,3 +40,4 @@ extension SettingsLocalization on String {
   String plural(int value) => localizePlural(value, this, _t);
   String version(Object modifier) => localizeVersion(modifier, this, _t);
 }
+

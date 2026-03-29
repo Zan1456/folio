@@ -4,7 +4,6 @@ import 'package:refilc_kreta_api/models/grade.dart';
 import 'package:refilc_mobile_ui/common/widgets/cretification/certification_view.dart';
 import 'package:refilc/ui/widgets/grade/grade_tile.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'certification_card.i18n.dart';
 
 class CertificationCard extends StatelessWidget {
@@ -78,7 +77,7 @@ class CertificationCard extends StatelessWidget {
                 fontSize: 18.0,
               ),
             ),
-            trailing: Icon(FeatherIcons.arrowRight, color: textColor),
+            trailing: Icon(Icons.arrow_forward_rounded, color: textColor),
             onTap: () => CertificationView.show(grades,
                 context: context, gradeType: gradeType),
           ),

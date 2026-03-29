@@ -1,6 +1,5 @@
 import 'package:refilc/theme/colors/colors.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 
 class AbsenceDisplay extends StatelessWidget {
   const AbsenceDisplay(this.excused, this.unexcused, this.pending, {super.key});
@@ -21,7 +20,7 @@ class AbsenceDisplay extends StatelessWidget {
       child: Row(children: [
         if (excused > 0)
           Icon(
-            FeatherIcons.check,
+            Icons.check_rounded,
             size: 16.0,
             color: AppColors.of(context).green,
           ),
@@ -43,7 +42,7 @@ class AbsenceDisplay extends StatelessWidget {
         if (unexcused > 0 && pending > 0) const SizedBox(width: 3.0),
         if (unexcused > 0)
           Icon(
-            FeatherIcons.x,
+            Icons.close_rounded,
             size: 18.0,
             color: AppColors.of(context).red,
           ),

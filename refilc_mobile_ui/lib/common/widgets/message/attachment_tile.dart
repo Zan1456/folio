@@ -4,7 +4,6 @@ import 'package:refilc_kreta_api/models/attachment.dart';
 import 'package:refilc/helpers/attachment_helper.dart';
 import 'package:refilc_mobile_ui/common/widgets/message/image_view.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 
 class AttachmentTile extends StatelessWidget {
   const AttachmentTile(this.attachment, {super.key});
@@ -69,7 +68,7 @@ class AttachmentTile extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Row(children: [
-            const Icon(FeatherIcons.paperclip),
+            const Icon(Icons.attach_file_rounded),
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 12.0),

@@ -1,9 +1,9 @@
 import 'package:i18n_extension/i18n_extension.dart';
 
 extension Localization on String {
-  static final _t = Translations.byLocale("hu_hu") +
+  static final _t = Translations.byLocale("hu-HU") +
       {
-        "en_en": {
+        "en-US": {
           "recipients": "Recipients",
           "send_message": "Send Message",
           "send": "Send",
@@ -13,7 +13,7 @@ extension Localization on String {
           "select_recipient": "Add Recipient",
           "cant_send": "You can't send a message to one of the recipients!",
         },
-        "hu_hu": {
+        "hu-HU": {
           "recipients": "Címzettek",
           "send_message": "Üzenetküldés",
           "send": "Küldés",
@@ -23,7 +23,7 @@ extension Localization on String {
           "select_recipient": "Címzett hozzáadása",
           "cant_send": "Az egyik címzettnek nem küldhetsz üzenetet!",
         },
-        "de_de": {
+        "de-DE": {
           "recipients": "Empfänger",
           "send_message": "Nachricht senden",
           "send": "Versenden",
@@ -40,3 +40,4 @@ extension Localization on String {
   String plural(int value) => localizePlural(value, this, _t);
   String version(Object modifier) => localizeVersion(modifier, this, _t);
 }
+

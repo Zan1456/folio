@@ -23,6 +23,8 @@ class User {
   String accessToken;
   DateTime accessTokenExpire;
   String refreshToken;
+  String idpApplication;
+  String idpRememberBrowser;
   // cloud sync
   // String qwidAccessToken;
   // DateTime? qwidAccessTokenExpire;
@@ -45,6 +47,8 @@ class User {
     required this.accessToken,
     required this.accessTokenExpire,
     required this.refreshToken,
+    this.idpApplication = "",
+    this.idpRememberBrowser = "",
     // this.qwidAccessToken = "",
     // this.qwidAccessTokenExpire,
     // this.qwidRefreshToken = "",
@@ -83,6 +87,8 @@ class User {
           ? map["access_token_expire"]
           : DateTime.now().toIso8601String()),
       refreshToken: map["refresh_token"] ?? "",
+      idpApplication: map["idp_application"] ?? "",
+      idpRememberBrowser: map["idp_remember_browser"] ?? "",
       // qwidAccessToken: map["qwid_access_token"] ?? "",
       // qwidAccessTokenExpire: map["qwid_access_token_expire"] != ""
       //     ? DateTime.parse(map["qwid_access_token_expire"])
@@ -106,6 +112,8 @@ class User {
       "access_token": accessToken,
       "access_token_expire": accessTokenExpire.toIso8601String(),
       "refresh_token": refreshToken,
+      "idp_application": idpApplication,
+      "idp_remember_browser": idpRememberBrowser,
       // "qwid_access_token": qwidAccessToken,
       // "qwid_access_token_expire": qwidAccessTokenExpire != null
       //     ? qwidAccessTokenExpire!.toIso8601String()

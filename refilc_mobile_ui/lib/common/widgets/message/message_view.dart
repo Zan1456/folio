@@ -30,7 +30,7 @@ class MessageViewState extends State<MessageView> {
           //   padding: EdgeInsets.only(right: 8.0),
           //   child: IconButton(
           //     onPressed: () {},
-          //     icon: Icon(FeatherIcons.archive, color: AppColors.of(context).text),
+          //     icon: Icon(Icons.archive_rounded, color: AppColors.of(context).text),
           //     splashRadius: 32.0,
           //   ),
           // ),

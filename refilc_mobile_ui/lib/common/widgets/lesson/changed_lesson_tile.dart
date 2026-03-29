@@ -3,7 +3,6 @@ import 'package:refilc/theme/colors/colors.dart';
 import 'package:refilc_kreta_api/models/lesson.dart';
 import 'package:flutter/material.dart';
 import 'package:refilc/utils/format.dart';
-import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:provider/provider.dart';
 import 'changed_lesson_tile.i18n.dart';
 
@@ -79,7 +78,7 @@ class ChangedLessonTile extends StatelessWidget {
                     ? FontStyle.italic
                     : null),
           ),
-          trailing: const Icon(FeatherIcons.arrowRight),
+          trailing: const Icon(Icons.arrow_forward_rounded),
           minLeadingWidth: 0,
         ),
       ),

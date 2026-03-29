@@ -15,7 +15,6 @@ import 'package:refilc_mobile_ui/common/panel/panel_button.dart';
 import 'package:refilc_mobile_ui/common/splitted_panel/splitted_panel.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:provider/provider.dart';
 import 'package:refilc_mobile_ui/screens/settings/settings_screen.i18n.dart';
 import 'package:refilc_plus/models/premium_scopes.dart';
@@ -114,7 +113,7 @@ class MenuGradeExporting extends StatelessWidget {
               .contains('grade_exporting'))
             const NewChip(),
           Icon(
-            FeatherIcons.chevronRight,
+            Icons.keyboard_arrow_right_rounded,
             size: 22.0,
             color: AppColors.of(context).text.withOpacity(0.95),
           )
@@ -338,7 +337,7 @@ class CalendarSyncScreenState extends State<GradeExportingScreen>
             ),
           ),
           // leading: Icon(
-          //   FeatherIcons.plus,
+          //   Icons.add_rounded,
           //   size: 20.0,
           //   color: AppColors.of(context).text.withOpacity(0.75),
           // ),

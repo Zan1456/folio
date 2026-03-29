@@ -10,7 +10,6 @@ import 'package:refilc_mobile_ui/common/widgets/custom_segmented_control.dart';
 import 'package:refilc_mobile_ui/screens/settings/settings_helper.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:provider/provider.dart';
 import 'package:refilc_mobile_ui/screens/settings/settings_screen.i18n.dart';
 import 'package:refilc_mobile_ui/screens/settings/live_activity_consent_dialog.dart';
@@ -32,12 +31,12 @@ class MenuGeneralSettings extends StatelessWidget {
       ),
       title: Text("general".i18n),
       leading: Icon(
-        FeatherIcons.settings,
+        Icons.settings_rounded,
         size: 22.0,
         color: AppColors.of(context).text.withValues(alpha: 0.95),
       ),
       trailing: Icon(
-        FeatherIcons.chevronRight,
+        Icons.keyboard_arrow_right_rounded,
         size: 22.0,
         color: AppColors.of(context).text.withValues(alpha: 0.95),
       ),
@@ -107,8 +106,8 @@ class GeneralSettingsScreenState extends State<GeneralSettingsScreen> {
                     ),
                     leading: Icon(
                       settingsProvider.bellDelayEnabled
-                          ? FeatherIcons.bell
-                          : FeatherIcons.bellOff,
+                          ? Icons.notifications_outlined
+                          : Icons.notifications_off_rounded,
                       size: 22.0,
                       color: AppColors.of(context).text.withValues(
                           alpha: settingsProvider.bellDelayEnabled ? .95 : .25),
@@ -159,7 +158,7 @@ class GeneralSettingsScreenState extends State<GeneralSettingsScreen> {
                         ),
                       ),
                       leading: Icon(
-                        FeatherIcons.activity,
+                        Icons.show_chart_rounded,
                         size: 22.0,
                         color: AppColors.of(context).text.withValues(
                             alpha: settingsProvider.liveActivityEnabled
@@ -208,7 +207,7 @@ class GeneralSettingsScreenState extends State<GeneralSettingsScreen> {
                       ),
                     ),
                     leading: Icon(
-                      FeatherIcons.gitCommit,
+                      Icons.commit_rounded,
                       size: 22.0,
                       color: AppColors.of(context).text.withValues(alpha: .95),
                     ),
@@ -243,7 +242,7 @@ class GeneralSettingsScreenState extends State<GeneralSettingsScreen> {
                       ),
                     ),
                     leading: Icon(
-                      FeatherIcons.barChart,
+                      Icons.bar_chart_rounded,
                       size: 22.0,
                       color: AppColors.of(context).text.withValues(
                           alpha: settingsProvider.graphClassAvg ? .95 : .25),
@@ -279,7 +278,7 @@ class GeneralSettingsScreenState extends State<GeneralSettingsScreen> {
                       ),
                     ),
                     leading: Icon(
-                      FeatherIcons.play,
+                      Icons.play_arrow_rounded,
                       size: 22.0,
                       color: AppColors.of(context).text.withValues(alpha: .95),
                     ),
@@ -312,7 +311,7 @@ class GeneralSettingsScreenState extends State<GeneralSettingsScreen> {
                       ),
                     ),
                     leading: Icon(
-                      FeatherIcons.globe,
+                      Icons.language_rounded,
                       size: 22.0,
                       color: AppColors.of(context).text.withValues(alpha: .95),
                     ),
@@ -344,7 +343,7 @@ class GeneralSettingsScreenState extends State<GeneralSettingsScreen> {
               //         ),
               //       ),
               //       leading: Icon(
-              //         FeatherIcons.radio,
+              //         Icons.radio_rounded,
               //         size: 22.0,
               //         color: AppColors.of(context).text.withValues(alpha: .95),
               //       ),
@@ -380,8 +379,8 @@ class GeneralSettingsScreenState extends State<GeneralSettingsScreen> {
                     ),
                     leading: Icon(
                       settingsProvider.showBreaks
-                          ? FeatherIcons.eye
-                          : FeatherIcons.eyeOff,
+                          ? Icons.visibility_rounded
+                          : Icons.visibility_off_rounded,
                       size: 22.0,
                       color: AppColors.of(context).text.withValues(
                           alpha: settingsProvider.showBreaks ? .95 : .25),

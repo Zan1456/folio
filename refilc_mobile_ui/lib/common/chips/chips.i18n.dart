@@ -1,17 +1,17 @@
 import 'package:i18n_extension/i18n_extension.dart';
 
 extension ScreensLocalization on String {
-  static final _t = Translations.byLocale("hu_hu") +
+  static final _t = Translations.byLocale("hu-HU") +
       {
-        "en_en": {
+        "en-US": {
           "new": "NEW",
           "beta": "BETA",
         },
-        "hu_hu": {
+        "hu-HU": {
           "new": "ÚJ",
           "beta": "BÉTA",
         },
-        "de_de": {
+        "de-DE": {
           "new": "NEU",
           "beta": "BETA",
         },
@@ -22,3 +22,4 @@ extension ScreensLocalization on String {
   String plural(int value) => localizePlural(value, this, _t);
   String version(Object modifier) => localizeVersion(modifier, this, _t);
 }
+

@@ -5,7 +5,6 @@ import 'package:refilc_kreta_api/models/lesson.dart';
 import 'package:refilc_mobile_ui/common/bottom_sheet_menu/rounded_bottom_sheet.dart';
 import 'package:refilc_mobile_ui/pages/timetable/timetable_page.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:refilc/utils/format.dart';
 import 'package:provider/provider.dart';
 import 'missed_exam_tile.i18n.dart';
@@ -66,7 +65,7 @@ class MissedExamViewTile extends StatelessWidget {
             "missed_exam_contact".i18n.fill([teacherName ?? '']),
             style: const TextStyle(fontWeight: FontWeight.w500),
           ),
-          trailing: const Icon(FeatherIcons.arrowRight),
+          trailing: const Icon(Icons.arrow_forward_rounded),
           onTap: () {
             Navigator.of(context, rootNavigator: true).pop();
             TimetablePage.jump(context, lesson: lesson);

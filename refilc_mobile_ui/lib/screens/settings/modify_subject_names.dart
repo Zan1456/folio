@@ -18,7 +18,6 @@ import 'package:refilc_mobile_ui/common/panel/panel_button.dart';
 // import 'package:refilc_plus/ui/mobile/plus/upsell.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:provider/provider.dart';
 
 import 'modify_names.i18n.dart';
@@ -52,8 +51,8 @@ class MenuRenamedSubjects extends StatelessWidget {
                 .withValues(alpha: settings.renamedSubjectsEnabled ? 1.0 : .5)),
       ),
       leading: settings.renamedSubjectsEnabled
-          ? const Icon(FeatherIcons.penTool)
-          : Icon(FeatherIcons.penTool,
+          ? const Icon(Icons.draw_rounded)
+          : Icon(Icons.draw_rounded,
               color: AppColors.of(context).text.withValues(alpha: .25)),
       trailingDivider: true,
       trailing: Switch(
@@ -127,7 +126,7 @@ class _ModifySubjectNamesState extends State<ModifySubjectNames> {
             children: [
               DropdownButton2(
                 items: subjects
-                    .map((item) => DropdownMenuItem<String>(
+                    .map((item) => DropdownItem<String>(
                           value: item.id,
                           child: Text(
                             item.name,
@@ -160,7 +159,6 @@ class _ModifySubjectNamesState extends State<ModifySubjectNames> {
                 ),
                 underline: const SizedBox(),
                 menuItemStyleData: const MenuItemStyleData(
-                  height: 40,
                   padding: EdgeInsets.only(left: 14, right: 14),
                 ),
                 buttonStyleData: ButtonStyleData(
@@ -210,7 +208,7 @@ class _ModifySubjectNamesState extends State<ModifySubjectNames> {
               ),
               const Padding(
                 padding: EdgeInsets.symmetric(vertical: 8.0),
-                child: Icon(FeatherIcons.arrowDown, size: 32),
+                child: Icon(Icons.arrow_downward_rounded, size: 32),
               ),
               TextField(
                 controller: _subjectName,
@@ -229,7 +227,7 @@ class _ModifySubjectNamesState extends State<ModifySubjectNames> {
                   hintText: "modified_name".i18n,
                   suffixIcon: IconButton(
                     icon: const Icon(
-                      FeatherIcons.x,
+                      Icons.close_rounded,
                       color: Colors.grey,
                     ),
                     onPressed: () {
@@ -442,7 +440,7 @@ class RenamedSubjectItem extends StatelessWidget {
       ),
       trailing: InkWell(
         onTap: removeCallback,
-        child: Icon(FeatherIcons.trash,
+        child: Icon(Icons.delete_outline_rounded,
             color: AppColors.of(context).red.withValues(alpha: .75)),
       ),
     );

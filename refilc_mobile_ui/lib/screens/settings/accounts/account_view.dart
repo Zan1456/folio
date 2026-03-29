@@ -58,7 +58,7 @@ class AccountView extends StatelessWidget {
                 description: user.student.parents.join(", ")),
           if (user.student.gradeDelay > 0)
             Detail(
-              title: "grade_delay".i18n,
+              title: "grade-DElay".i18n,
               description: "hrs".i18n.fill([user.student.gradeDelay]),
             ),
           // if ((user.student.bankAccount ?? "").isNotEmpty)
@@ -74,3 +74,4 @@ class AccountView extends StatelessWidget {
     );
   }
 }
+

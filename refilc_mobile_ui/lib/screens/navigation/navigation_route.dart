@@ -6,10 +6,6 @@ class NavigationRoute {
     "home",
     "grades",
     "timetable",
-    "notes",
-    "absences",
-    // "messages",
-    // "absences",
   ];
 
   String get name => _name;

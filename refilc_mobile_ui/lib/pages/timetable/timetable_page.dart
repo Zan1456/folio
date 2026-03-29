@@ -1,9 +1,7 @@
-import 'dart:math';
+﻿import 'dart:math';
 import 'package:animations/animations.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:i18n_extension/i18n_extension.dart';
 import 'package:refilc/api/providers/database_provider.dart';
-import 'package:refilc/api/providers/update_provider.dart';
 import 'package:refilc/models/settings.dart';
 import 'package:refilc/utils/format.dart';
 import 'package:refilc_kreta_api/client/client.dart';
@@ -16,20 +14,16 @@ import 'package:refilc_mobile_ui/common/bottom_sheet_menu/bottom_sheet_menu.dart
 import 'package:refilc_mobile_ui/common/bottom_sheet_menu/rounded_bottom_sheet.dart';
 import 'package:refilc_mobile_ui/common/dot.dart';
 import 'package:refilc_mobile_ui/common/empty.dart';
-import 'package:refilc_mobile_ui/common/profile_image/profile_button.dart';
-import 'package:refilc_mobile_ui/common/profile_image/profile_image.dart';
 import 'package:refilc_mobile_ui/common/system_chrome.dart';
 // import 'package:refilc_mobile_ui/common/widgets/lesson/lesson_view.dart';
 import 'package:refilc_kreta_api/controllers/timetable_controller.dart';
 import 'package:refilc_mobile_ui/common/widgets/lesson/lesson_viewable.dart';
-import 'package:refilc_mobile_ui/pages/timetable/day_title.dart';
 import 'package:refilc_mobile_ui/pages/timetable/fs_timetable.dart';
 import 'package:refilc_mobile_ui/screens/navigation/navigation_route_handler.dart';
 import 'package:refilc_mobile_ui/screens/navigation/navigation_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:refilc_plus/models/premium_scopes.dart';
@@ -77,7 +71,6 @@ class TimetablePageState extends State<TimetablePage>
 
   late UserProvider user;
   late TimetableProvider timetableProvider;
-  late UpdateProvider updateProvider;
   late SettingsProvider settingsProvider;
   late DatabaseProvider db;
 
@@ -209,147 +202,33 @@ class TimetablePageState extends State<TimetablePage>
   Widget build(BuildContext context) {
     user = Provider.of<UserProvider>(context);
     timetableProvider = Provider.of<TimetableProvider>(context);
-    updateProvider = Provider.of<UpdateProvider>(context);
     settingsProvider = Provider.of<SettingsProvider>(context);
 
     getCustom();
 
-    // First name
-    List<String> nameParts = user.displayName?.split(" ") ?? ["?"];
-    firstName = nameParts.length > 1 ? nameParts[1] : nameParts[0];
-
     return Scaffold(
       key: _scaffoldKey,
-      body: Padding(
-        padding: const EdgeInsets.only(top: 9.0),
-        child: RefreshIndicator(
-          onRefresh: () => mounted
-              ? _controller.jump(_controller.currentWeek,
-                  context: context, loader: false)
-              : Future.value(null),
-          color: Theme.of(context).colorScheme.secondary,
-          edgeOffset: 132.0,
-          child: NestedScrollView(
-            physics: const BouncingScrollPhysics(
-                parent: AlwaysScrollableScrollPhysics()),
-            headerSliverBuilder: (context, _) => [
-              SliverAppBar(
-                centerTitle: false,
-                pinned: true,
-                floating: false,
-                snap: false,
-                surfaceTintColor: Theme.of(context).scaffoldBackgroundColor,
-                actions: [
-                  // Padding(
-                  //   padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
-                  //   child: IconButton(
-                  //     splashRadius: 24.0,
-                  //     // tested timetable sync
-                  //     // onPressed: () async {
-                  //     //   ThirdPartyProvider tpp =
-                  //     //       Provider.of<ThirdPartyProvider>(context,
-                  //     //           listen: false);
-
-                  //     //   await tpp.pushTimetable(context, _controller);
-                  //     // },
-                  //     onPressed: () {
-                  //       // If timetable empty, show empty
-                  //       if (_tabController.length == 0) {
-                  //         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                  //           content: Text("empty_timetable".i18n),
-                  //           duration: const Duration(seconds: 2),
-                  //         ));
-                  //         return;
-                  //       }
-
-                  //       Navigator.of(context, rootNavigator: true)
-                  //           .push(PageRouteBuilder(
-                  //         pageBuilder:
-                  //             (context, animation, secondaryAnimation) =>
-                  //                 FSTimetable(
-                  //           controller: _controller,
-                  //         ),
-                  //       ))
-                  //           .then((_) {
-                  //         SystemChrome.setPreferredOrientations(
-                  //             [DeviceOrientation.portraitUp]);
-                  //         setSystemChrome(context);
-                  //       });
-                  //     },
-                  //     icon: Icon(FeatherIcons.trello,
-                  //         color: AppColors.of(context).text),
-                  //   ),
-                  // ),
-
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      body: Column(
+        children: [
+          // ─── Accent Header ─────────────────────────────────────────────
+          Container(
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.primaryContainer,
+              borderRadius: const BorderRadius.vertical(
+                  bottom: Radius.circular(28.0)),
+            ),
+            child: SafeArea(
+              bottom: false,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Title row: spinner + "Órarend" + inline week selector + more
                   Padding(
-                    padding: const EdgeInsets.only(
-                      right: 5.0,
-                      bottom: 8.0,
-                      top: 8.0,
-                    ),
-                    child: IconButton(
-                      splashRadius: 24.0,
-                      // tested timetable sync
-                      // onPressed: () async {
-                      //   ThirdPartyProvider tpp =
-                      //       Provider.of<ThirdPartyProvider>(context,
-                      //           listen: false);
-
-                      //   await tpp.pushTimetable(context, _controller);
-                      // },
-                      onPressed: () {
-                        showQuickSettings(context);
-                      },
-                      icon: Icon(FeatherIcons.moreHorizontal,
-                          color: AppColors.of(context).text),
-                    ),
-                  ),
-
-                  // Profile Icon
-                  Padding(
-                    padding: const EdgeInsets.only(right: 24.0),
-                    child: ProfileButton(
-                      child: ProfileImage(
-                        heroTag: "profile",
-                        name: firstName,
-                        backgroundColor: Theme.of(context)
-                            .colorScheme
-                            .tertiary, //ColorUtils.stringToColor(user.displayName ?? "?"),
-                        badge: updateProvider.available,
-                        role: user.role,
-                        profilePictureString: user.picture,
-                        gradeStreak: (user.gradeStreak ?? 0) > 1,
-                      ),
-                    ),
-                  ),
-                ],
-                automaticallyImplyLeading: false,
-                // Current day text
-                title: PageTransitionSwitcher(
-                  reverse:
-                      _controller.currentWeekId < _controller.previousWeekId,
-                  transitionBuilder: (
-                    Widget child,
-                    Animation<double> primaryAnimation,
-                    Animation<double> secondaryAnimation,
-                  ) {
-                    return SharedAxisTransition(
-                      animation: primaryAnimation,
-                      secondaryAnimation: secondaryAnimation,
-                      transitionType: SharedAxisTransitionType.horizontal,
-                      fillColor: Theme.of(context).scaffoldBackgroundColor,
-                      child: child,
-                    );
-                  },
-                  layoutBuilder: (List<Widget> entries) {
-                    return Stack(
-                      children: entries,
-                    );
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 8.0),
+                    padding: const EdgeInsets.fromLTRB(20.0, 12.0, 8.0, 0.0),
                     child: Row(
                       children: [
+                        // Loading spinner
                         () {
                           final show = _controller.days == null ||
                               (_controller.loadType != LoadType.offline &&
@@ -358,115 +237,219 @@ class TimetablePageState extends State<TimetablePage>
                           return AnimatedOpacity(
                             opacity: show ? 1.0 : 0.0,
                             duration: duration,
-                            curve: Curves.easeInOut,
                             child: AnimatedContainer(
                               duration: duration,
-                              width: show ? 24.0 : 0.0,
-                              curve: Curves.easeInOut,
-                              child: const Padding(
-                                padding: EdgeInsets.only(right: 12.0),
-                                child: CupertinoActivityIndicator(),
+                              width: show ? 26.0 : 0.0,
+                              child: Padding(
+                                padding: const EdgeInsets.only(right: 8.0),
+                                child: CupertinoActivityIndicator(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onPrimaryContainer),
                               ),
                             ),
                           );
                         }(),
-                        () {
-                          if ((_controller.days?.length ?? 0) > 0) {
-                            return DayTitle(
-                                controller: _tabController, dayTitle: dayTitle);
-                          } else {
-                            return Text(
-                              "timetable".i18n,
-                              style: Provider.of<SettingsProvider>(context)
-                                              .fontFamily !=
-                                          '' &&
-                                      Provider.of<SettingsProvider>(context)
-                                          .titleOnlyFont
-                                  ? GoogleFonts.getFont(
-                                      Provider.of<SettingsProvider>(context)
-                                          .fontFamily,
-                                      textStyle: TextStyle(
-                                        fontSize: 32.0,
-                                        fontWeight: FontWeight.bold,
-                                        color: AppColors.of(context).text,
-                                      ),
-                                    )
-                                  : TextStyle(
-                                      fontSize: 32.0,
-                                      fontWeight: FontWeight.bold,
-                                      color: AppColors.of(context).text,
-                                    ),
-                            );
-                          }
-                        }(),
-                      ],
-                    ),
-                  ),
-                ),
-                shadowColor: Theme.of(context).shadowColor,
-                bottom: PreferredSize(
-                  preferredSize: const Size.fromHeight(50.0),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        // Previous week
-                        IconButton(
-                            onPressed: _controller.currentWeekId == 0
-                                ? null
-                                : () => setState(() {
-                                      _controller.previous(context);
-                                    }),
-                            splashRadius: 24.0,
-                            icon: const Icon(FeatherIcons.chevronLeft),
-                            color: Theme.of(context).colorScheme.secondary),
-
-                        // Week selector
-                        InkWell(
-                          borderRadius: BorderRadius.circular(6.0),
-                          onTap: () => setState(() {
-                            _controller.current();
-                            if (mounted) {
-                              _controller.jump(
-                                _controller.currentWeek,
-                                context: context,
-                                loader: _controller.currentWeekId !=
-                                    _controller.previousWeekId,
-                              );
-                            }
-                            _tabController
-                                .animateTo(_getDayIndex(DateTime.now()));
-                          }),
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text(
-                              "${DateFormat("${_controller.currentWeek.start.year != DateTime.now().year ? "yyyy. " : ""}MMM d", I18n.of(context).locale.languageCode).format(_controller.currentWeek.start)}${DateFormat("${_controller.currentWeek.start.year != DateTime.now().year ? " - yyyy. MMM " : (_controller.currentWeek.start.month == _controller.currentWeek.end.month ? '-' : ' - MMM ')}d", I18n.of(context).locale.languageCode).format(_controller.currentWeek.end)}  •  ${_controller.currentWeekId + 1}. ${"week".i18n}",
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w500,
-                                fontSize: 14.0,
-                              ),
+                        // "Órarend" title
+                        Expanded(
+                          child: Text(
+                            "timetable".i18n,
+                            style: TextStyle(
+                              fontSize: 28.0,
+                              fontWeight: FontWeight.w800,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onPrimaryContainer,
                             ),
                           ),
                         ),
-
-                        // Next week
+                        // Compact inline week selector
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onPrimaryContainer
+                                .withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(24.0),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              GestureDetector(
+                                onTap: _controller.currentWeekId == 0
+                                    ? null
+                                    : () => setState(
+                                        () => _controller.previous(context)),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 12.0, vertical: 11.0),
+                                  child: Icon(
+                                    Icons.keyboard_arrow_left_rounded,
+                                    size: 20.0,
+                                    color: _controller.currentWeekId == 0
+                                        ? Theme.of(context)
+                                            .colorScheme
+                                            .onPrimaryContainer
+                                            .withValues(alpha: 0.3)
+                                        : Theme.of(context)
+                                            .colorScheme
+                                            .onPrimaryContainer,
+                                  ),
+                                ),
+                              ),
+                              GestureDetector(
+                                onTap: () => setState(() {
+                                  _controller.current();
+                                  if (mounted) {
+                                    _controller.jump(
+                                      _controller.currentWeek,
+                                      context: context,
+                                      loader: _controller.currentWeekId !=
+                                          _controller.previousWeekId,
+                                    );
+                                  }
+                                  _tabController
+                                      .animateTo(_getDayIndex(DateTime.now()));
+                                }),
+                                child: AnimatedSwitcher(
+                                  duration: const Duration(milliseconds: 250),
+                                  transitionBuilder: (Widget child, Animation<double> animation) {
+                                    return FadeTransition(opacity: animation, child: child);
+                                  },
+                                  child: Text(
+                                    "${_controller.currentWeekId + 1}. ${"week".i18n}",
+                                    key: ValueKey<int>(_controller.currentWeekId),
+                                    style: TextStyle(
+                                      fontSize: 15.0,
+                                      fontWeight: FontWeight.w600,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onPrimaryContainer,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              GestureDetector(
+                                onTap: _controller.currentWeekId == 51
+                                    ? null
+                                    : () => setState(
+                                        () => _controller.next(context)),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 12.0, vertical: 11.0),
+                                  child: Icon(
+                                    Icons.keyboard_arrow_right_rounded,
+                                    size: 20.0,
+                                    color: _controller.currentWeekId == 51
+                                        ? Theme.of(context)
+                                            .colorScheme
+                                            .onPrimaryContainer
+                                            .withValues(alpha: 0.3)
+                                        : Theme.of(context)
+                                            .colorScheme
+                                            .onPrimaryContainer,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        // More / settings button
                         IconButton(
-                            onPressed: _controller.currentWeekId == 51
-                                ? null
-                                : () => setState(() {
-                                      _controller.next(context);
-                                    }),
-                            splashRadius: 24.0,
-                            icon: const Icon(FeatherIcons.chevronRight),
-                            color: Theme.of(context).colorScheme.secondary),
+                          splashRadius: 24.0,
+                          onPressed: () => showQuickSettings(context),
+                          icon: Icon(Icons.more_horiz_rounded,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onPrimaryContainer),
+                        ),
                       ],
                     ),
                   ),
-                ),
+                  // Day tab bar
+                  if (_tabController.length > 0)
+                    AnimatedBuilder(
+                      animation: _tabController,
+                      builder: (context, _) => TabBar(
+                        controller: _tabController,
+                        dividerColor: Colors.transparent,
+                        labelPadding: EdgeInsets.zero,
+                        labelColor: Theme.of(context).colorScheme.secondary,
+                        unselectedLabelColor: Theme.of(context)
+                            .colorScheme
+                            .onPrimaryContainer
+                            .withValues(alpha: 0.65),
+                        indicatorSize: TabBarIndicatorSize.tab,
+                        indicatorPadding: const EdgeInsets.symmetric(
+                            horizontal: 8.0, vertical: 6.0),
+                        indicator: BoxDecoration(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onPrimaryContainer
+                              .withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(14.0),
+                        ),
+                        overlayColor: WidgetStateProperty.all(Theme.of(context)
+                            .colorScheme
+                            .onPrimaryContainer
+                            .withValues(alpha: 0.08)),
+                        padding:
+                            const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 14.0),
+                        tabs: List.generate(_tabController.length, (index) {
+                          final isToday = _sameDate(
+                              _controller.days![index].first.date,
+                              DateTime.now());
+                          final isSelected = _tabController.index == index;
+                          final dotColor = isSelected
+                              ? Theme.of(context)
+                                  .colorScheme
+                                  .secondary
+                                  .withValues(alpha: 0.6)
+                              : Theme.of(context)
+                                  .colorScheme
+                                  .onPrimaryContainer
+                                  .withValues(alpha: 0.45);
+                          String label = DateFormat(
+                                  "EEEE", I18n.of(context).locale.languageCode)
+                              .format(_controller.days![index].first.date)
+                              .capital();
+                          return Tab(
+                            height: 50.0,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                if (isToday) Dot(size: 4.0, color: dotColor),
+                                Text(
+                                  label.substring(0, 1),
+                                  style: const TextStyle(
+                                    fontSize: 20.0,
+                                    fontWeight: FontWeight.w700,
+                                    height: 1.1,
+                                  ),
+                                ),
+                                SizedBox(height: isToday ? 0.0 : 2.0),
+                                Text(
+                                  _controller.days![index].first.date.day
+                                      .toString(),
+                                  style: const TextStyle(
+                                    height: 1.0,
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 14.0,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }),
+                      ),
+                    ),
+                ],
               ),
-            ],
-            body: PageTransitionSwitcher(
+            ),
+          ),
+          // ─── Timetable content ─────────────────────────────────────────
+          Expanded(
+            child: PageTransitionSwitcher(
               transitionBuilder: (
                 Widget child,
                 Animation<double> primaryAnimation,
@@ -483,13 +466,11 @@ class TimetablePageState extends State<TimetablePage>
                   ? Column(
                       key: Key(_controller.currentWeek.toString()),
                       children: [
-                        // Week view
                         _tabController.length > 0
                             ? Expanded(
                                 child: TabBarView(
                                   physics: const BouncingScrollPhysics(),
                                   controller: _tabController,
-                                  // days
                                   children: List.generate(
                                     _controller.days!.length,
                                     (tab) => RefreshIndicator(
@@ -503,7 +484,9 @@ class TimetablePageState extends State<TimetablePage>
                                           .colorScheme
                                           .secondary,
                                       child: ListView.builder(
-                                        padding: EdgeInsets.zero,
+                                        padding: EdgeInsets.fromLTRB(
+                                            10.0, 8.0, 10.0,
+                                            MediaQuery.of(context).padding.bottom + 8.0),
                                         physics: const BouncingScrollPhysics(),
                                         itemCount:
                                             _controller.days![tab].length,
@@ -512,38 +495,8 @@ class TimetablePageState extends State<TimetablePage>
                                             return Container();
                                           }
 
-                                          // Header
-                                          // if (index == 0) {
-                                          //   return const Padding(
-                                          //     padding: EdgeInsets.only(
-                                          //         top: 8.0,
-                                          //         left: 24.0,
-                                          //         right: 24.0),
-                                          //     child: PanelHeader(
-                                          //         padding: EdgeInsets.only(
-                                          //             top: 12.0)),
-                                          //   );
-                                          // }
-
-                                          // Footer
-                                          // if (index ==
-                                          //     _controller.days![tab].length +
-                                          //         1) {
-                                          //   return const Padding(
-                                          //     padding: EdgeInsets.only(
-                                          //         bottom: 8.0,
-                                          //         left: 24.0,
-                                          //         right: 24.0),
-                                          //     child: PanelFooter(
-                                          //         padding: EdgeInsets.only(
-                                          //             top: 12.0)),
-                                          //   );
-                                          // }
-
-                                          // Body
                                           int len =
                                               _controller.days![tab].length;
-
                                           final Lesson lesson =
                                               _controller.days![tab][index];
                                           final Lesson? before =
@@ -551,7 +504,6 @@ class TimetablePageState extends State<TimetablePage>
                                                   ? _controller.days![tab]
                                                       [index - 1]
                                                   : null;
-
                                           final bool swapDescDay = _controller
                                                   .days![tab]
                                                   .map(
@@ -570,9 +522,9 @@ class TimetablePageState extends State<TimetablePage>
                                                   padding: EdgeInsets.only(
                                                       top: index == 0
                                                           ? 0.0
-                                                          : 12.0,
-                                                      left: 24,
-                                                      right: 24),
+                                                          : 8.0,
+                                                      bottom: 6.0,
+                                                      left: 50.0),
                                                   child: Container(
                                                     padding:
                                                         const EdgeInsets.all(
@@ -634,11 +586,9 @@ class TimetablePageState extends State<TimetablePage>
                                                               ),
                                                             ),
                                                             const SizedBox(
-                                                              width: 10.0,
-                                                            ),
+                                                                width: 10.0),
                                                             Text(
                                                               '${DateFormat("H:mm", I18n.of(context).locale.languageCode).format(before.end)} - ${DateFormat("H:mm", I18n.of(context).locale.languageCode).format(lesson.start)}',
-                                                              // '${before.end.hour}:${before.end.minute} - ${lesson.start.hour}:${lesson.start.minute}',
                                                               style:
                                                                   const TextStyle(
                                                                 fontSize: 12.5,
@@ -668,203 +618,34 @@ class TimetablePageState extends State<TimetablePage>
                                                     ),
                                                   ),
                                                 ),
-                                              Padding(
-                                                padding: EdgeInsets.only(
-                                                    top:
-                                                        index == 0 ? 5.0 : 12.0,
-                                                    left: 24,
-                                                    right: 24,
-                                                    bottom: index + 1 == len
-                                                        ? 20.0
-                                                        : 0),
-                                                child: Container(
-                                                  padding: const EdgeInsets
-                                                      .symmetric(
-                                                      horizontal: 6.0),
-                                                  decoration: BoxDecoration(
-                                                    boxShadow: [
-                                                      if (Provider.of<
-                                                                  SettingsProvider>(
-                                                              context,
-                                                              listen: false)
-                                                          .shadowEffect)
-                                                        BoxShadow(
-                                                          offset: const Offset(
-                                                              0, 21),
-                                                          blurRadius: 23.0,
-                                                          color:
-                                                              Theme.of(context)
-                                                                  .shadowColor,
-                                                        )
-                                                    ],
-                                                    color: Theme.of(context)
-                                                        .colorScheme
-                                                        .surface,
-                                                    borderRadius:
-                                                        BorderRadius.only(
-                                                      topLeft: index == 0
-                                                          ? const Radius
-                                                              .circular(16.0)
-                                                          : const Radius
-                                                              .circular(16.0),
-                                                      topRight: index == 0
-                                                          ? const Radius
-                                                              .circular(16.0)
-                                                          : const Radius
-                                                              .circular(16.0),
-                                                      bottomLeft: index + 1 ==
-                                                              len
-                                                          ? const Radius
-                                                              .circular(16.0)
-                                                          : const Radius
-                                                              .circular(16.0),
-                                                      bottomRight: index + 1 ==
-                                                              len
-                                                          ? const Radius
-                                                              .circular(16.0)
-                                                          : const Radius
-                                                              .circular(16.0),
-                                                    ),
-                                                  ),
-                                                  child: LessonViewable(
-                                                    lesson,
-                                                    swapDesc: swapDescDay,
-                                                    customDesc:
-                                                        customLessonDesc[
-                                                                lesson.id] ??
-                                                            lesson.description,
-                                                    showSubTiles:
-                                                        settingsProvider
-                                                            .qTimetableSubTiles,
-                                                  ),
-                                                ),
+                                              LessonViewable(
+                                                lesson,
+                                                swapDesc: swapDescDay,
+                                                customDesc:
+                                                    customLessonDesc[
+                                                            lesson.id] ??
+                                                        lesson.description,
+                                                showSubTiles:
+                                                    settingsProvider
+                                                        .qTimetableSubTiles,
                                               ),
                                             ],
                                           );
-
-                                          // return Padding(
-                                          //   padding: const EdgeInsets.symmetric(
-                                          //       horizontal: 24.0),
-                                          //   child: PanelBody(
-                                          //     padding:
-                                          //         const EdgeInsets.symmetric(
-                                          //             horizontal: 10.0),
-                                          //     child: LessonViewable(
-                                          //       lesson,
-                                          //       swapDesc: swapDescDay,
-                                          //     ),
-                                          //   ),
-                                          // );
                                         },
                                       ),
                                     ),
                                   ),
                                 ),
                               )
-
-                            // Empty week
                             : Expanded(
                                 child: Center(child: empty),
                               ),
-
-                        // Day selector
-                        TabBar(
-                          dividerColor: Colors.transparent,
-                          controller: _tabController,
-                          // Label
-                          labelPadding: EdgeInsets.zero,
-                          labelColor:
-                              AppColors.of(context).text.withValues(alpha: 0.9),
-                          unselectedLabelColor: Theme.of(context)
-                              .colorScheme
-                              .secondary
-                              .withValues(alpha: 0.25)
-                              .withAlpha(100),
-                          // Indicator
-                          indicatorSize: TabBarIndicatorSize.tab,
-                          indicatorPadding:
-                              const EdgeInsets.symmetric(horizontal: 10.0),
-                          indicator: BoxDecoration(
-                            color: Theme.of(context).colorScheme.surface,
-                            // color: Colors.transparent,
-                            // border: Border.all(
-                            //     color: AppColors.of(context)
-                            //         .text
-                            //         .withValues(alpha: 0.90)),
-                            // color: Theme.of(context)
-                            //     .colorScheme
-                            //     .secondary
-                            //     .withValues(alpha: 0.25),
-                            borderRadius: BorderRadius.circular(16.0),
-                          ),
-                          overlayColor:
-                              WidgetStateProperty.all(const Color(0x00000000)),
-                          // Tabs
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 6.0, horizontal: 24.0),
-                          tabs: List.generate(_tabController.length, (index) {
-                            String label = DateFormat("EEEE",
-                                    I18n.of(context).locale.languageCode)
-                                .format(_controller.days![index].first.date)
-                                .capital();
-                            return Tab(
-                              height: 56.0,
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  if (_sameDate(
-                                      _controller.days![index].first.date,
-                                      DateTime.now()))
-                                    Padding(
-                                      padding: const EdgeInsets.only(top: 0.0),
-                                      child: Dot(
-                                          size: 4.0,
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .secondary
-                                              .withValues(alpha: 0.25)
-                                              .withAlpha(100)),
-                                    ),
-                                  Text(
-                                    label.substring(0, min(2, label.length)),
-                                    style: const TextStyle(
-                                      fontSize: 22.0,
-                                      fontWeight: FontWeight.w600,
-                                      height: 1.1,
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    height: _sameDate(
-                                            _controller.days![index].first.date,
-                                            DateTime.now())
-                                        ? 0.0
-                                        : 3.0,
-                                  ),
-                                  Text(
-                                    _controller.days![index].first.date.day
-                                        .toString(),
-                                    style: TextStyle(
-                                      height: 1.0,
-                                      fontWeight: FontWeight.w500,
-                                      fontSize: 17.0,
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .secondary
-                                          .withValues(alpha: 0.25)
-                                          .withAlpha(100),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            );
-                          }),
-                        ),
                       ],
                     )
                   : const SizedBox(),
             ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -903,7 +684,7 @@ class TimetablePageState extends State<TimetablePage>
             contentPadding: const EdgeInsets.only(left: 16.0, right: 10.0),
             title: Row(
               children: [
-                const Icon(FeatherIcons.trello),
+                const Icon(Icons.dashboard_rounded),
                 const SizedBox(
                   width: 10.0,
                 ),
@@ -967,7 +748,7 @@ class TimetablePageState extends State<TimetablePage>
         // SwitchListTile(
         //   title: Row(
         //     children: [
-        //       const Icon(FeatherIcons.clock),
+        //       const Icon(Icons.access_time_rounded),
         //       const SizedBox(
         //         width: 10.0,
         //       ),

@@ -1,12 +1,5 @@
-import 'package:refilc/theme/colors/colors.dart';
-// import 'package:refilc_plus/models/premium_scopes.dart';
-// import 'package:refilc_plus/providers/plus_provider.dart';
-// import 'package:refilc_plus/ui/mobile/plus/upsell.dart';
 import 'package:flutter/material.dart';
-import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:refilc_mobile_ui/pages/grades/grades_page.i18n.dart';
-import 'package:flutter_feather_icons/flutter_feather_icons.dart';
-// import 'package:provider/provider.dart';
 
 final Map<int, String> avgDropItems = {
   0: "annual_average",
@@ -16,98 +9,207 @@ final Map<int, String> avgDropItems = {
   7: "7_days_average",
 };
 
-class AverageSelector extends StatefulWidget {
+class AverageSelector extends StatelessWidget {
   const AverageSelector({super.key, this.onChanged, required this.value});
 
   final Function(int?)? onChanged;
   final int value;
 
-  @override
-  AverageSelectorState createState() => AverageSelectorState();
-}
+  void _showModal(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (ctx) => _AverageSelectorModal(
+        value: value,
+        onChanged: (v) {
+          Navigator.of(ctx).pop();
+          onChanged?.call(v);
+        },
+      ),
+    );
+  }
 
-class AverageSelectorState extends State<AverageSelector> {
   @override
   Widget build(BuildContext context) {
-    List<DropdownMenuItem<int>> dropdownItems = avgDropItems.keys.map((item) {
-      return DropdownMenuItem<int>(
-        value: item,
-        child: Text(
-          avgDropItems[item]!.i18n,
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-            color: AppColors.of(context).text,
-          ),
-          overflow: TextOverflow.ellipsis,
-        ),
-      );
-    }).toList();
-
-    return DropdownButton2<int>(
-      items: dropdownItems,
-      onChanged: (int? value) {
-        // if (Provider.of<PlusProvider>(context, listen: false)
-        //     .hasScope(PremiumScopes.gradeStats)) {
-        if (widget.onChanged != null) {
-          setState(() {
-            widget.onChanged!(value);
-          });
-        }
-        // } else {
-        //   PlusLockedFeaturePopup.show(
-        //       context: context, feature: PremiumFeature.gradestats);
-        // }
-      },
-      value: widget.value,
-      iconStyleData: IconStyleData(
-        iconSize: 14,
-        iconEnabledColor: AppColors.of(context).text,
-        iconDisabledColor: AppColors.of(context).text,
-      ),
-      underline: const SizedBox(),
-      menuItemStyleData: const MenuItemStyleData(
-        height: 40,
-        padding: EdgeInsets.only(left: 14, right: 14),
-      ),
-      buttonStyleData: ButtonStyleData(
+    return GestureDetector(
+      onTap: () => _showModal(context),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 7.0),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
+          color: Theme.of(context)
+              .colorScheme
+              .onPrimaryContainer
+              .withValues(alpha: 0.12),
+          borderRadius: BorderRadius.circular(20.0),
         ),
-      ),
-      dropdownStyleData: DropdownStyleData(
-        width: 200,
-        padding: null,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(14),
-        ),
-        elevation: 8,
-        scrollbarTheme: ScrollbarThemeData(
-          radius: const Radius.circular(40),
-          thickness: WidgetStateProperty.all<double>(6.0),
-          trackVisibility: WidgetStateProperty.all<bool>(true),
-          thumbVisibility: WidgetStateProperty.all<bool>(true),
-        ),
-        offset: const Offset(-10, -10),
-      ),
-      customButton: SizedBox(
-        height: 30,
         child: Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              avgDropItems[widget.value]!.i18n,
-              style: Theme.of(context).textTheme.titleSmall!.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.of(context).text.withValues(alpha: 0.65)),
-            ),
-            const SizedBox(
-              width: 4,
-            ),
             Icon(
-              FeatherIcons.chevronDown,
-              size: 16,
-              color: AppColors.of(context).text,
+              Icons.access_time_rounded,
+              size: 13.0,
+              color: Theme.of(context)
+                  .colorScheme
+                  .onPrimaryContainer
+                  .withValues(alpha: 0.75),
             ),
+            const SizedBox(width: 6.0),
+            Text(
+              avgDropItems[value]!.i18n,
+              style: TextStyle(
+                fontSize: 13.0,
+                fontWeight: FontWeight.w600,
+                color: Theme.of(context)
+                    .colorScheme
+                    .onPrimaryContainer
+                    .withValues(alpha: 0.85),
+              ),
+            ),
+            const SizedBox(width: 4.0),
+            Icon(
+              Icons.keyboard_arrow_down_rounded,
+              size: 16.0,
+              color: Theme.of(context)
+                  .colorScheme
+                  .onPrimaryContainer
+                  .withValues(alpha: 0.7),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _AverageSelectorModal extends StatelessWidget {
+  const _AverageSelectorModal({required this.value, this.onChanged});
+
+  final int value;
+  final Function(int?)? onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).scaffoldBackgroundColor,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24.0)),
+      ),
+      child: SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Handle
+            Padding(
+              padding: const EdgeInsets.only(top: 12.0, bottom: 4.0),
+              child: Container(
+                width: 36.0,
+                height: 4.0,
+                decoration: BoxDecoration(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .onSurface
+                      .withValues(alpha: 0.18),
+                  borderRadius: BorderRadius.circular(2.0),
+                ),
+              ),
+            ),
+            // Title
+            Padding(
+              padding:
+                  const EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 6.0),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(9.0),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .secondaryContainer,
+                      borderRadius: BorderRadius.circular(12.0),
+                    ),
+                    child: Icon(
+                      Icons.access_time_rounded,
+                      size: 17.0,
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onSecondaryContainer,
+                    ),
+                  ),
+                  const SizedBox(width: 12.0),
+                  Text(
+                    "avg_period".i18n,
+                    style: TextStyle(
+                      fontSize: 18.0,
+                      fontWeight: FontWeight.w700,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 8.0),
+            // Options
+            ...avgDropItems.entries.map((entry) {
+              final isSelected = entry.key == value;
+              return Padding(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 12.0, vertical: 3.0),
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(14.0),
+                    onTap: () => onChanged?.call(entry.key),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 150),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16.0, vertical: 13.0),
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? Theme.of(context)
+                                .colorScheme
+                                .secondaryContainer
+                            : Theme.of(context)
+                                .colorScheme
+                                .surfaceContainerHighest
+                                .withValues(alpha: 0.5),
+                        borderRadius: BorderRadius.circular(14.0),
+                      ),
+                      child: Row(
+                        children: [
+                          Text(
+                            entry.value.i18n,
+                            style: TextStyle(
+                              fontSize: 15.0,
+                              fontWeight: isSelected
+                                  ? FontWeight.w700
+                                  : FontWeight.w500,
+                              color: isSelected
+                                  ? Theme.of(context)
+                                      .colorScheme
+                                      .onSecondaryContainer
+                                  : Theme.of(context)
+                                      .colorScheme
+                                      .onSurface,
+                            ),
+                          ),
+                          const Spacer(),
+                          if (isSelected)
+                            Icon(
+                              Icons.check_rounded,
+                              size: 18.0,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSecondaryContainer,
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            }),
+            const SizedBox(height: 16.0),
           ],
         ),
       ),

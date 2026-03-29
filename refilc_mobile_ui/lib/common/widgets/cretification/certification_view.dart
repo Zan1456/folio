@@ -5,7 +5,6 @@ import 'package:refilc_mobile_ui/common/widgets/cretification/certification_tile
 import 'package:refilc_mobile_ui/common/hero_scrollview.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 
 class CertificationView extends StatelessWidget {
   const CertificationView(this.grades, {super.key, required this.gradeType});
@@ -31,7 +30,7 @@ class CertificationView extends StatelessWidget {
     return Scaffold(
       body: HeroScrollView(
         title: getGradeTypeTitle(gradeType),
-        icon: FeatherIcons.award,
+        icon: Icons.emoji_events_rounded,
         iconSize: 50,
         child: ListView(
           shrinkWrap: true,

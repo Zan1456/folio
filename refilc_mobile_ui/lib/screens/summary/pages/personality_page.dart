@@ -5,7 +5,6 @@ import 'package:refilc_mobile_ui/common/personality_card/empty_card.dart';
 import 'package:refilc_mobile_ui/common/personality_card/personality_card.dart';
 import 'package:refilc_mobile_ui/screens/summary/summary_screen.i18n.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:provider/provider.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:share_plus/share_plus.dart';
@@ -92,7 +91,7 @@ class PersonalityBodyState extends State<PersonalityBody> {
                       await sharePersonality();
                     },
                     icon: const Icon(
-                      FeatherIcons.share,
+                      Icons.share_rounded,
                       color: Colors.white,
                       size: 30,
                     ),
@@ -109,7 +108,7 @@ class PersonalityBodyState extends State<PersonalityBody> {
                       await savePersonality();
                     },
                     icon: const Icon(
-                      FeatherIcons.bookmark,
+                      Icons.bookmark_rounded,
                       color: Colors.white,
                       size: 30,
                     ),

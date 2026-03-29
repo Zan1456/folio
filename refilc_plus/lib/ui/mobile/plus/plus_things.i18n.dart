@@ -1,9 +1,9 @@
 import 'package:i18n_extension/i18n_extension.dart';
 
 extension Localization on String {
-  static final _t = Translations.byLocale("hu_hu") +
+  static final _t = Translations.byLocale("hu-HU") +
       {
-        "en_en": {
+        "en-US": {
           // upsell titles
           "u_title_1": "Use more accounts?",
           "u_title_2": "Want to try the updates in advance?",
@@ -44,7 +44,7 @@ extension Localization on String {
           "copy_code_asap":
               "Copy your reFilc+ ID, in case you loose your device!",
         },
-        "hu_hu": {
+        "hu-HU": {
           // upsell titles
           "u_title_1": "Több fiókot használnál?",
           "u_title_2": "Előre kipróbálnád a frissítéseket?",
@@ -84,7 +84,7 @@ extension Localization on String {
           "copy_code_asap":
               "Másold ki a reFilc+ ID-t, mielőtt elveszítenéd a telefonod!",
         },
-        "de_de": {
+        "de-DE": {
           // upsell titles
           "u_title_1": "Mehr Accounts nutzen?",
           "u_title_2": "Willst du die Updates im vorraus testen?",
@@ -136,3 +136,4 @@ extension Localization on String {
   String plural(int value) => localizePlural(value, this, _t);
   String version(Object modifier) => localizeVersion(modifier, this, _t);
 }
+

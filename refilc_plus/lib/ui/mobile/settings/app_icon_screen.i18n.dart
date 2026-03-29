@@ -1,9 +1,9 @@
 import 'package:i18n_extension/i18n_extension.dart';
 
 extension Localization on String {
-  static final _t = Translations.byLocale("hu_hu") +
+  static final _t = Translations.byLocale("hu-HU") +
       {
-        "en_en": {
+        "en-US": {
           "custom_app_icon": "Custom App Icon",
           "app_icons": "App Icons",
           "basic": "Basic",
@@ -11,7 +11,7 @@ extension Localization on String {
           "special": "Special",
           "other": "Other",
         },
-        "hu_hu": {
+        "hu-HU": {
           "custom_app_icon": "Alkalmazásikon",
           "app_icons": "Alkalmazásikonok",
           "basic": "Egyszerű",
@@ -19,7 +19,7 @@ extension Localization on String {
           "special": "Különleges",
           "other": "Egyéb",
         },
-        "de_de": {
+        "de-DE": {
           "custom_app_icon": "App-Symbol",
           "app_icons": "App-Symbole",
           "basic": "Basic",
@@ -34,3 +34,4 @@ extension Localization on String {
   String plural(int value) => localizePlural(value, this, _t);
   String version(Object modifier) => localizeVersion(modifier, this, _t);
 }
+

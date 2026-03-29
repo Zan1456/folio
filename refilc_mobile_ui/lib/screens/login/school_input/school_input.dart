@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:refilc_mobile_ui/screens/login/login_input.dart';
 import 'package:refilc_mobile_ui/screens/login/school_input/school_input_overlay.dart';
 import 'package:refilc_mobile_ui/screens/login/school_input/school_input_tile.dart';
@@ -20,6 +21,7 @@ class SchoolInputState extends State<SchoolInput> {
   final _focusNode = FocusNode();
   final _layerLink = LayerLink();
   late SchoolInputOverlay overlay;
+  Timer? _searchTimer;
 
   @override
   void initState() {
@@ -53,21 +55,50 @@ class SchoolInputState extends State<SchoolInput> {
       String text = widget.controller.textController.text;
       if (text.isEmpty) {
         overlay.children = null;
+        if (mounted) Overlay.of(context).setState(() {});
         return;
       }
 
-      List<School> results =
-          searchSchools(widget.controller.schools ?? [], text);
-      setState(() {
-        overlay.children = results
-            .map((School e) => SchoolInputTile(
-                  school: e,
-                  onTap: () => _selectSchool(e),
-                ))
-            .toList();
-      });
-      Overlay.of(context).setState(() {});
+      if (widget.controller.onSearch != null) {
+        if (text.length >= 3) {
+          _searchTimer?.cancel();
+          _searchTimer = Timer(const Duration(milliseconds: 350), () async {
+            if (!mounted) return;
+            final results = await widget.controller.onSearch!(text);
+            if (!mounted) return;
+            setState(() {
+              overlay.children = results == null
+                  ? []
+                  : results
+                      .map((School e) => SchoolInputTile(
+                            school: e,
+                            onTap: () => _selectSchool(e),
+                          ))
+                      .toList();
+            });
+            if (mounted) Overlay.of(context).setState(() {});
+          });
+        }
+      } else {
+        List<School> results =
+            searchSchools(widget.controller.schools ?? [], text);
+        setState(() {
+          overlay.children = results
+              .map((School e) => SchoolInputTile(
+                    school: e,
+                    onTap: () => _selectSchool(e),
+                  ))
+              .toList();
+        });
+        if (mounted) Overlay.of(context).setState(() {});
+      }
     });
+  }
+
+  @override
+  void dispose() {
+    _searchTimer?.cancel();
+    super.dispose();
   }
 
   void _selectSchool(School school) {
@@ -119,4 +150,6 @@ class SchoolInputController {
   School? selectedSchool;
   List<School>? schools;
   late void Function(void Function()) update;
+  Future<List<School>?> Function(String query)? onSearch;
+  bool isSearching = false;
 }

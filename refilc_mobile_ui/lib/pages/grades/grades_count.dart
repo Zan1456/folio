@@ -1,7 +1,6 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:refilc_kreta_api/models/grade.dart';
 import 'package:refilc_mobile_ui/pages/grades/grades_count_item.dart';
 import 'package:collection/collection.dart';
@@ -26,7 +25,7 @@ class GradesCount extends StatelessWidget {
         contentPadding: EdgeInsets.zero,
         visualDensity: const VisualDensity(vertical: -4),
         duration: const Duration(milliseconds: 250),
-        trailing: const Icon(FeatherIcons.chevronDown),
+        trailing: const Icon(Icons.keyboard_arrow_down_rounded),
         title: Text(
           'grades_cnt'.i18n.fill([
             gradesCount.reduce((a, b) => a + b).toString(),

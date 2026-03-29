@@ -7,8 +7,6 @@ import 'package:refilc_mobile_ui/common/widgets/message/attachment_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:refilc/utils/format.dart';
 import 'package:flutter_custom_tabs/flutter_custom_tabs.dart';
-import 'package:flutter_feather_icons/flutter_feather_icons.dart';
-// import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:i18n_extension/i18n_extension.dart';
 import 'package:intl/intl.dart';
@@ -135,7 +133,7 @@ class MessageViewTile extends StatelessWidget {
                 children: [
                   // IconButton(
                   //   onPressed: () {},
-                  //   icon: Icon(FeatherIcons.cornerUpLeft,
+                  //   icon: Icon(Icons.undo_rounded,
                   //       color: AppColors.of(context).text),
                   //   splashRadius: 24.0,
                   //   highlightColor: Colors.transparent,
@@ -150,7 +148,7 @@ class MessageViewTile extends StatelessWidget {
                       );
                     },
                     icon: Icon(
-                      FeatherIcons.share2,
+                      Icons.share_rounded,
                       color: AppColors.of(context).text,
                       size: 20,
                     ),

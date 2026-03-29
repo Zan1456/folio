@@ -2,7 +2,6 @@ import 'package:refilc/api/client.dart';
 import 'package:refilc/api/providers/user_provider.dart';
 import 'package:refilc/models/settings.dart';
 import 'package:refilc/models/shared_theme.dart';
-// import 'package:refilc/models/shared_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';

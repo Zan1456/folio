@@ -7,29 +7,31 @@ import 'package:refilc/models/settings.dart';
 import 'package:refilc/theme/observer.dart';
 import 'package:refilc/utils/navigation_service.dart';
 import 'package:refilc/utils/service_locator.dart';
+import 'package:refilc/api/providers/user_provider.dart';
 import 'package:refilc_kreta_api/client/client.dart';
 import 'package:refilc_kreta_api/providers/grade_provider.dart';
+import 'package:refilc_mobile_ui/common/profile_image/profile_image.dart';
 import 'package:refilc_mobile_ui/common/system_chrome.dart';
+import 'package:refilc_mobile_ui/screens/navigation/more_menu.dart';
 import 'package:refilc_mobile_ui/screens/navigation/nabar.dart';
 import 'package:refilc_mobile_ui/screens/navigation/navbar_item.dart';
 import 'package:refilc_mobile_ui/screens/navigation/navigation_route.dart';
 import 'package:refilc_mobile_ui/screens/navigation/navigation_route_handler.dart';
-// import 'package:refilc/icons/filc_icons.dart';
 import 'package:refilc_mobile_ui/screens/navigation/status_bar.dart';
 import 'package:refilc_mobile_ui/screens/news/news_view.dart';
 import 'package:refilc_mobile_ui/screens/settings/settings_screen.dart';
 import 'package:refilc_mobile_ui/screens/settings/live_activity_consent_dialog.dart';
+import 'package:refilc_mobile_ui/common/widgets/update/update_dialog.dart';
 import 'package:refilc_plus/ui/mobile/goal_planner/goal_complete_modal.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-// import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:provider/provider.dart';
 import 'package:refilc_mobile_ui/common/screens.i18n.dart';
 import 'package:refilc/api/providers/news_provider.dart';
 import 'package:refilc/api/providers/sync.dart';
 import 'package:home_widget/home_widget.dart';
-import 'package:wtf_sliding_sheet/wtf_sliding_sheet.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:background_fetch/background_fetch.dart';
 import 'package:refilc_plus/providers/goal_provider.dart';
 import 'package:refilc/api/providers/ad_provider.dart';
@@ -86,26 +88,8 @@ class NavigationScreenState extends State<NavigationScreen>
     } else if (uri.scheme == "settings" && uri.authority == "premium") {
       Navigator.of(context).popUntil((route) => route.isFirst);
 
-      showSlidingBottomSheet(
-        context,
-        useRootNavigator: true,
-        builder: (context) => SlidingSheetDialog(
-          color: Theme.of(context).scaffoldBackgroundColor,
-          duration: const Duration(milliseconds: 400),
-          scrollSpec: const ScrollSpec.bouncingScroll(),
-          snapSpec: const SnapSpec(
-            snap: true,
-            snappings: [1.0],
-            initialSnap: 1.0,
-            positioning: SnapPositioning.relativeToSheetHeight,
-          ),
-          cornerRadius: 16,
-          cornerRadiusOnFullscreen: 0,
-          builder: (context, state) => Material(
-            color: Theme.of(context).scaffoldBackgroundColor,
-            child: const SettingsScreen(),
-          ),
-        ),
+      Navigator.of(context, rootNavigator: true).push(
+        CupertinoPageRoute(builder: (context) => const SettingsScreen()),
       );
     }
   }
@@ -154,14 +138,16 @@ class NavigationScreenState extends State<NavigationScreen>
   void initState() {
     super.initState();
 
-    HomeWidget.setAppGroupId('app.firka.legacy.group');
+    HomeWidget.setAppGroupId('app.zan1456.folio.group');
 
     _checkForWidgetLaunch();
     HomeWidget.widgetClicked.listen(_launchedFromWidget);
 
     settings = Provider.of<SettingsProvider>(context, listen: false);
     selected = NavigationRoute();
-    selected.index = settings.startPage.index; // set page index to start page
+    // Clamp to valid page indices (0-2, index 3 is the "Több" popup)
+    final startIndex = settings.startPage.index.clamp(0, 2);
+    selected.index = startIndex;
 
     // add brightness observer
     WidgetsBinding.instance.addObserver(this);
@@ -183,7 +169,13 @@ class NavigationScreenState extends State<NavigationScreen>
 
     // get releases
     updateProvider = Provider.of<UpdateProvider>(context, listen: false);
-    updateProvider.fetch();
+    updateProvider.fetch().then((_) {
+      if (updateProvider.available && mounted) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          UpdateDialog.show(context, updateProvider.releases.first);
+        });
+      }
+    });
 
     // get advertisements
     adProvider = Provider.of<AdProvider>(context, listen: false);
@@ -227,6 +219,12 @@ class NavigationScreenState extends State<NavigationScreen>
     settings = Provider.of<SettingsProvider>(context);
     newsProvider = Provider.of<NewsProvider>(context);
     goalProvider = Provider.of<GoalProvider>(context);
+    final user = Provider.of<UserProvider>(context);
+    final navUpdateProvider = Provider.of<UpdateProvider>(context);
+    final navNameParts = user.displayName?.split(" ") ?? ["?"];
+    final navFirstName = settings.presentationMode
+        ? "János"
+        : (navNameParts.length > 1 ? navNameParts[1] : navNameParts[0]);
 
     // show news and complete goals
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -268,61 +266,26 @@ class NavigationScreenState extends State<NavigationScreen>
         return false;
       },
       child: Scaffold(
-        body: Column(
+        extendBody: true,
+        body: Stack(
+          alignment: Alignment.bottomCenter,
           children: [
-            // actual page
-            Expanded(
-              child: Stack(
-                alignment: Alignment.bottomCenter,
-                children: [
-                  Navigator(
-                    key: _navigatorState,
-                    initialRoute: selected.name,
-                    onGenerateRoute: (settings) =>
-                        navigationRouteHandler(settings),
-                  ),
-                ],
-              ),
+            Navigator(
+              key: _navigatorState,
+              initialRoute: selected.name,
+              onGenerateRoute: (settings) =>
+                  navigationRouteHandler(settings),
             ),
+          ],
+        ),
+        bottomNavigationBar: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+                // Status bar
+                const StatusBar(),
 
-            // navbar
-            Container(
-              decoration: settings.navShadow && selected.name != "timetable"
-                  ? BoxDecoration(
-                      boxShadow: [
-                        BoxShadow(
-                          color: Theme.of(context).scaffoldBackgroundColor,
-                          offset: const Offset(0, -4),
-                          blurRadius: 14,
-                          spreadRadius: 18,
-                        ),
-                      ],
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        stops: const [0.0, 0.175],
-                        colors: [
-                          Theme.of(context).scaffoldBackgroundColor,
-                          Theme.of(context).scaffoldBackgroundColor,
-                        ],
-                      ),
-                    )
-                  : null,
-              child: Column(
-                children: [
-                  // Status bar
-                  Material(
-                    color: Theme.of(context).colorScheme.surface,
-                    child: const StatusBar(),
-                  ),
-
-                  // Bottom Navigaton Bar
-                  Material(
-                    color: Theme.of(context).scaffoldBackgroundColor,
-                    child: MediaQuery.removePadding(
-                      context: context,
-                      removeTop: true,
-                      child: Navbar(
+                // Floating Bottom Navigation Bar
+                Navbar(
                         selectedIndex: selected.index,
                         onSelected: onPageSelected,
                         items: [
@@ -406,38 +369,30 @@ class NavigationScreenState extends State<NavigationScreen>
                             ),
                           ),
                           NavItem(
-                            title: "notes".i18n,
-                            icon: SvgPicture.asset(
-                              'assets/svg/menu_icons/notes.svg',
-                              color: Theme.of(context).colorScheme.secondary,
-                              height: 22,
+                            title: "more".i18n,
+                            icon: ProfileImage(
+                              name: navFirstName,
+                              backgroundColor:
+                                  Theme.of(context).colorScheme.tertiary,
+                              badge: navUpdateProvider.available,
+                              role: user.role,
+                              profilePictureString: user.picture,
+                              gradeStreak: (user.gradeStreak ?? 0) > 1,
+                              radius: 14.0,
                             ),
-                            activeIcon: SvgPicture.asset(
-                              'assets/svg/menu_icons/notes_selected.svg',
-                              color: Theme.of(context).colorScheme.secondary,
-                              height: 22,
-                            ),
-                          ),
-                          NavItem(
-                            title: "absences".i18n,
-                            icon: SvgPicture.asset(
-                              'assets/svg/menu_icons/absences.svg',
-                              color: Theme.of(context).colorScheme.secondary,
-                              height: 24,
-                            ),
-                            activeIcon: SvgPicture.asset(
-                              'assets/svg/menu_icons/absences_selected.svg',
-                              color: Theme.of(context).colorScheme.secondary,
-                              height: 24,
+                            activeIcon: ProfileImage(
+                              name: navFirstName,
+                              backgroundColor:
+                                  Theme.of(context).colorScheme.tertiary,
+                              badge: navUpdateProvider.available,
+                              role: user.role,
+                              profilePictureString: user.picture,
+                              gradeStreak: (user.gradeStreak ?? 0) > 1,
+                              radius: 14.0,
                             ),
                           ),
                         ],
                       ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
           ],
         ),
       ),
@@ -445,6 +400,24 @@ class NavigationScreenState extends State<NavigationScreen>
   }
 
   void onPageSelected(int index) {
+    // "Több" button (index 3) opens popup, does not navigate
+    if (index == 3) {
+      switch (settings.vibrate) {
+        case VibrationStrength.light:
+          HapticFeedback.lightImpact();
+          break;
+        case VibrationStrength.medium:
+          HapticFeedback.mediumImpact();
+          break;
+        case VibrationStrength.strong:
+          HapticFeedback.heavyImpact();
+          break;
+        default:
+      }
+      MoreMenu.show(context);
+      return;
+    }
+
     // Vibrate, then set the active screen
     if (selected.index != index) {
       switch (settings.vibrate) {

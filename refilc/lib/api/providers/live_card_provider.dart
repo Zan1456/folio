@@ -1,9 +1,11 @@
 // ignore_for_file: no_leading_underscores_for_local_identifiers
 
 import 'dart:async';
+import 'dart:io';
 
 import 'package:refilc/api/providers/liveactivity/platform_channel.dart';
 import 'package:refilc/api/providers/liveactivity/server_sync_provider.dart';
+import 'package:refilc/helpers/android_live_activity_helper.dart';
 import 'package:refilc/helpers/subject.dart';
 import 'package:refilc/models/settings.dart';
 import 'package:refilc/ui/flutter_colorpicker/utils.dart';
@@ -430,6 +432,28 @@ class LiveCardProvider extends ChangeNotifier {
       }
     } // end of liveActivityEnabled else block
 
+    // ── Android Live Activity ─────────────────────────────────
+    if (Platform.isAndroid && _settings.androidLiveActivityEnabled) {
+      final shouldShow = currentState == LiveCardState.duringLesson ||
+          currentState == LiveCardState.duringBreak ||
+          ((currentState == LiveCardState.morning ||
+                  currentState == LiveCardState.afternoon ||
+                  currentState == LiveCardState.night) &&
+              nextLesson != null);
+
+      if (shouldShow) {
+        AndroidLiveActivityHelper.showOrUpdate(
+          state: currentState,
+          data: toMap(),
+          type: _settings.androidLiveNotificationType,
+        );
+      } else {
+        AndroidLiveActivityHelper.cancel();
+      }
+    } else if (Platform.isAndroid && AndroidLiveActivityHelper.isActive) {
+      AndroidLiveActivityHelper.cancel();
+    }
+
     LAData = toMap();
     notifyListeners();
   }
@@ -444,7 +468,14 @@ class LiveCardProvider extends ChangeNotifier {
     }
   }
 
-  bool get show => currentState != LiveCardState.empty;
+  bool get show {
+    if (currentState == LiveCardState.empty) return false;
+    // Greeting-only states without an upcoming lesson have nothing useful to show
+    if ((currentState == LiveCardState.afternoon ||
+            currentState == LiveCardState.night) &&
+        nextLesson == null) return false;
+    return true;
+  }
   Duration get delay => _delay;
 
   bool _sameDate(DateTime a, DateTime b) =>

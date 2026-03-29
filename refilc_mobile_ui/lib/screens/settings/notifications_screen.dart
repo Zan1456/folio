@@ -9,7 +9,6 @@
 // import 'package:refilc_mobile_ui/common/panel/panel_button.dart';
 // import 'package:flutter/cupertino.dart';
 // import 'package:flutter/material.dart';
-// import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 // import 'package:provider/provider.dart';
 // import 'package:refilc_mobile_ui/common/splitted_panel/splitted_panel.dart';
 // import 'notifications_screen.i18n.dart';
@@ -41,12 +40,12 @@
 //         ],
 //       ),
 //       leading: Icon(
-//         FeatherIcons.messageCircle,
+//         Icons.chat_rounded,
 //         size: 22.0,
 //         color: AppColors.of(context).text.withValues(alpha: 0.95),
 //       ),
 //       trailing: Icon(
-//         FeatherIcons.chevronRight,
+//         Icons.keyboard_arrow_right_rounded,
 //         size: 22.0,
 //         color: AppColors.of(context).text.withValues(alpha: 0.95),
 //       ),
@@ -110,7 +109,7 @@
 //                       ),
 //                     ),
 //                     leading: Icon(
-//                       FeatherIcons.bookmark,
+//                       Icons.bookmark_rounded,
 //                       size: 22.0,
 //                       color: AppColors.of(context).text.withValues(alpha: 
 //                           settings.notificationsGradesEnabled ? .95 : .25),
@@ -149,7 +148,7 @@
 //                       ),
 //                     ),
 //                     leading: Icon(
-//                       FeatherIcons.clock,
+//                       Icons.access_time_rounded,
 //                       size: 22.0,
 //                       color: AppColors.of(context).text.withValues(alpha: 
 //                           settings.notificationsAbsencesEnabled ? .95 : .25),
@@ -188,7 +187,7 @@
 //                       ),
 //                     ),
 //                     leading: Icon(
-//                       FeatherIcons.messageSquare,
+//                       Icons.chat_bubble_outline_rounded,
 //                       size: 22.0,
 //                       color: AppColors.of(context).text.withValues(alpha: 
 //                           settings.notificationsMessagesEnabled ? .95 : .25),
@@ -227,7 +226,7 @@
 //                       ),
 //                     ),
 //                     leading: Icon(
-//                       FeatherIcons.bookmark,
+//                       Icons.bookmark_rounded,
 //                       size: 22.0,
 //                       color: AppColors.of(context).text.withValues(alpha: 
 //                           settings.notificationsLessonsEnabled ? .95 : .25),
@@ -257,7 +256,7 @@
 //                               context, DateTime(1970, 1, 1, 0, 0, 0, 0, 0)),
 //                           title: Text("set_all_as_unseen".i18n),
 //                           leading: Icon(
-//                             FeatherIcons.mail,
+//                             Icons.mail_outline_rounded,
 //                             size: 22.0,
 //                             color: AppColors.of(context).text.withValues(alpha: 0.95),
 //                           ),

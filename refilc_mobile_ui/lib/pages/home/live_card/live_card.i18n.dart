@@ -1,10 +1,17 @@
 import 'package:i18n_extension/i18n_extension.dart';
 
 extension Localization on String {
-  static final _t = Translations.byLocale("hu_hu") +
+  static final _t = Translations.byLocale("hu-HU") +
       {
-        "en_en": {
+        "en-US": {
           "next": "Next",
+          "currently": "Now",
+          "until_first_lesson": "Until your first lesson:",
+          "good_morning": "Good morning!",
+          "good_afternoon": "Good afternoon!",
+          "good_evening": "Good evening!",
+          "year_end_title": "The school year is over! 🥳",
+          "year_end_action": "Go to your summary",
           "remaining min": "%d min(s)",
           "remaining sec": "%d sec(s)",
           "break": "Break",
@@ -25,8 +32,15 @@ extension Localization on String {
           "first_lesson_soon": "Your first lesson starts soon!",
           "go_home": "You've no more lessons today",
         },
-        "hu_hu": {
+        "hu-HU": {
           "next": "Következő",
+          "currently": "Jelenleg",
+          "until_first_lesson": "Az első órádig:",
+          "good_morning": "Jó reggelt!",
+          "good_afternoon": "Jó napot!",
+          "good_evening": "Jó estét!",
+          "year_end_title": "Vége a tanévnek! 🥳",
+          "year_end_action": "Irány az összefoglaláshoz",
           "remaining min": "%d perc",
           "remaining sec": "%d másodperc",
           "break": "Szünet",
@@ -47,8 +61,15 @@ extension Localization on String {
           "first_lesson_soon": "Hamarosan kezdődik az első órád!",
           "go_home": "Ma már nincs több órád",
         },
-        "de_de": {
+        "de-DE": {
           "next": "Nächste",
+          "currently": "Gerade",
+          "until_first_lesson": "Bis zur ersten Stunde:",
+          "good_morning": "Guten Morgen!",
+          "good_afternoon": "Guten Tag!",
+          "good_evening": "Guten Abend!",
+          "year_end_title": "Das Schuljahr ist vorbei! 🥳",
+          "year_end_action": "Zur Zusammenfassung",
           "remaining min": "%d Minute(n)",
           "remaining sec": "%d Sekunde(n)",
           "break": "Pause",
@@ -76,3 +97,4 @@ extension Localization on String {
   String plural(int value) => localizePlural(value, this, _t);
   String version(Object modifier) => localizeVersion(modifier, this, _t);
 }
+

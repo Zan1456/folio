@@ -1,9 +1,9 @@
 import 'package:i18n_extension/i18n_extension.dart';
 
 extension SettingsLocalization on String {
-  static final _t = Translations.byLocale("hu_hu") +
+  static final _t = Translations.byLocale("hu-HU") +
       {
-        "en_en": {
+        "en-US": {
           // main thingies
           "no_grades": "No grades found",
           "no_lesson": "No lessons found",
@@ -38,7 +38,7 @@ extension SettingsLocalization on String {
           // personality page
           "click_reveal": "Click to reveal...",
         },
-        "hu_hu": {
+        "hu-HU": {
           // main thingies
           "no_grades": "Nincsenek jegyek",
           "no_lesson": "Nincsenek tanórák",
@@ -73,7 +73,7 @@ extension SettingsLocalization on String {
           // personality page
           "click_reveal": "Kattints a felfedéshez...",
         },
-        "de_de": {
+        "de-DE": {
           // main thingies
           "no_grades": "Keine Grade gefunden",
           "no_lesson": "Keine Lektionen gefunden",
@@ -115,3 +115,4 @@ extension SettingsLocalization on String {
   String plural(int value) => localizePlural(value, this, _t);
   String version(Object modifier) => localizeVersion(modifier, this, _t);
 }
+

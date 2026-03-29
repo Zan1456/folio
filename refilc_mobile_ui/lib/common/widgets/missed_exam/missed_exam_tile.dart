@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:refilc/theme/colors/colors.dart';
 import 'package:refilc_kreta_api/models/lesson.dart';
 import 'package:refilc_mobile_ui/common/panel/panel_button.dart';
-import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'missed_exam_tile.i18n.dart';
 
 class MissedExamTile extends StatelessWidget {
@@ -22,14 +21,14 @@ class MissedExamTile extends StatelessWidget {
             width: 36,
             height: 36,
             child: Icon(
-              FeatherIcons.slash,
+              Icons.block_rounded,
               color: AppColors.of(context).red.withValues(alpha: .75),
               size: 28.0,
             )),
         title: Text("missed_exams"
             .plural(missedExams.length)
             .fill([missedExams.length])),
-        trailing: const Icon(FeatherIcons.arrowRight),
+        trailing: const Icon(Icons.arrow_forward_rounded),
         onPressed: onTap,
       ),
     );

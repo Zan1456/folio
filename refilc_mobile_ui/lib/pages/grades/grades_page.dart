@@ -4,34 +4,26 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
-import 'package:auto_size_text/auto_size_text.dart';
 import 'package:collection/collection.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:refilc/api/providers/update_provider.dart';
 import 'package:refilc/models/settings.dart';
+import 'package:refilc/theme/colors/utils.dart';
 import 'package:refilc/ui/widgets/grade/grade_tile.dart';
 import 'package:refilc_kreta_api/models/exam.dart';
 import 'package:refilc_kreta_api/providers/exam_provider.dart';
-// import 'package:refilc_kreta_api/client/api.dart';
-// import 'package:refilc_kreta_api/client/client.dart';
 import 'package:refilc_kreta_api/providers/grade_provider.dart';
 import 'package:refilc/api/providers/user_provider.dart';
-import 'package:refilc/theme/colors/colors.dart';
 import 'package:refilc_kreta_api/models/grade.dart';
 import 'package:refilc_kreta_api/models/subject.dart';
 import 'package:refilc_kreta_api/models/group_average.dart';
 import 'package:refilc_kreta_api/providers/homework_provider.dart';
-import 'package:refilc_mobile_ui/common/average_display.dart';
 import 'package:refilc_mobile_ui/common/bottom_sheet_menu/bottom_sheet_menu.dart';
 import 'package:refilc_mobile_ui/common/bottom_sheet_menu/rounded_bottom_sheet.dart';
 import 'package:refilc_mobile_ui/common/empty.dart';
 import 'package:refilc_mobile_ui/common/panel/panel.dart';
-import 'package:refilc_mobile_ui/common/profile_image/profile_button.dart';
-import 'package:refilc_mobile_ui/common/profile_image/profile_image.dart';
 import 'package:refilc_mobile_ui/common/widgets/exam/exam_viewable.dart';
-import 'package:refilc_mobile_ui/common/widgets/statistics_tile.dart';
 import 'package:refilc_mobile_ui/common/widgets/grade/grade_subject_tile.dart';
 import 'package:refilc_mobile_ui/common/trend_display.dart';
 import 'package:refilc_mobile_ui/pages/grades/fail_warning.dart';
@@ -43,11 +35,10 @@ import 'package:refilc_mobile_ui/screens/navigation/navigation_screen.dart';
 import 'package:refilc_plus/models/premium_scopes.dart';
 import 'package:refilc_plus/providers/plus_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:provider/provider.dart';
 import 'package:refilc/helpers/average_helper.dart';
-import 'average_selector.dart';
 import 'package:refilc_plus/ui/mobile/plus/premium_inline.dart';
+import 'average_selector.dart';
 import 'calculator/grade_calculator.dart';
 import 'calculator/grade_calculator_provider.dart';
 import 'grades_page.i18n.dart';
@@ -273,7 +264,7 @@ class GradesPageState extends State<GradesPage> {
                               fontSize: 15.0, fontWeight: FontWeight.w500),
                         ),
                         // const Icon(
-                        //   FeatherIcons.chevronRight,
+                        //   Icons.keyboard_arrow_right_rounded,
                         //   grade: 0.5,
                         //   size: 20.0,
                         // )
@@ -401,29 +392,74 @@ class GradesPageState extends State<GradesPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
-            child: StatisticsTile(
-              fill: true,
-              title: AutoSizeText(
-                "subjectavg".i18n,
-                textAlign: TextAlign.center,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+            child: Container(
+              padding: const EdgeInsets.all(16.0),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surface,
+                borderRadius: BorderRadius.circular(16.0),
               ),
-              value: subjectAvg,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "subjectavg".i18n,
+                    style: TextStyle(
+                      fontSize: 12.0,
+                      fontWeight: FontWeight.w500,
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onSurface
+                          .withValues(alpha: 0.6),
+                    ),
+                  ),
+                  const SizedBox(height: 4.0),
+                  Text(
+                    subjectAvg > 0 ? subjectAvg.toStringAsFixed(2) : "?",
+                    style: TextStyle(
+                      fontSize: 32.0,
+                      fontWeight: FontWeight.w800,
+                      color: gradeColor(context: context, value: subjectAvg),
+                      height: 1.1,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
-          const SizedBox(width: 24.0),
+          const SizedBox(width: 12.0),
           Expanded(
-            child: StatisticsTile(
-              outline: true,
-              title: AutoSizeText(
-                "classavg".i18n,
-                textAlign: TextAlign.center,
-                maxLines: 1,
-                wrapWords: false,
-                overflow: TextOverflow.ellipsis,
+            child: Container(
+              padding: const EdgeInsets.all(16.0),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surface,
+                borderRadius: BorderRadius.circular(16.0),
               ),
-              value: classAvg,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "classavg".i18n,
+                    style: TextStyle(
+                      fontSize: 12.0,
+                      fontWeight: FontWeight.w500,
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onSurface
+                          .withValues(alpha: 0.6),
+                    ),
+                  ),
+                  const SizedBox(height: 4.0),
+                  Text(
+                    classAvg > 0 ? classAvg.toStringAsFixed(2) : "?",
+                    style: TextStyle(
+                      fontSize: 32.0,
+                      fontWeight: FontWeight.w800,
+                      color: gradeColor(context: context, value: classAvg),
+                      height: 1.1,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],
@@ -506,31 +542,6 @@ class GradesPageState extends State<GradesPage> {
     yearlyGraph = Padding(
       padding: const EdgeInsets.only(top: 12.0, bottom: 8.0),
       child: Panel(
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            AverageSelector(
-              value: avgDropValue,
-              onChanged: (value) {
-                setState(() {
-                  avgDropValue = value!;
-                });
-              },
-            ),
-            Row(
-              children: [
-                // if (totalClassAvg >= 1.0) AverageDisplay(average: totalClassAvg, border: true),
-                // const SizedBox(width: 4.0),
-                TrendDisplay(
-                    previous: prevStudentAvg, current: currentStudentAvg),
-                if ((importedViewMode ? jsonGrades : gradeProvider.grades)
-                    .where((e) => e.type == GradeType.midYear)
-                    .isNotEmpty)
-                  AverageDisplay(average: currentStudentAvg),
-              ],
-            )
-          ],
-        ),
         child: Container(
           padding: const EdgeInsets.only(top: 12.0, right: 12.0),
           child:
@@ -548,105 +559,223 @@ class GradesPageState extends State<GradesPage> {
 
     return Scaffold(
       key: _scaffoldKey,
-      body: Padding(
-        padding: const EdgeInsets.only(top: 9.0),
-        child: NestedScrollView(
-          physics: const BouncingScrollPhysics(
-              parent: AlwaysScrollableScrollPhysics()),
-          headerSliverBuilder: (context, _) => [
-            SliverAppBar(
-              centerTitle: false,
-              pinned: true,
-              floating: false,
-              snap: false,
-              surfaceTintColor: Theme.of(context).scaffoldBackgroundColor,
-              actions: [
-                if (!gradeCalcMode)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 5.0, vertical: 0.0),
-                    child: IconButton(
-                      splashRadius: 24.0,
-                      onPressed: () {
-                        showQuickSettings(context);
-                      },
-                      icon: Icon(
-                        FeatherIcons.moreHorizontal,
-                        color: AppColors.of(context).text,
+      body: NestedScrollView(
+        physics: const BouncingScrollPhysics(
+            parent: AlwaysScrollableScrollPhysics()),
+        headerSliverBuilder: (context, innerBoxIsScrolled) => [
+          SliverAppBar(
+            centerTitle: false,
+            pinned: true,
+            floating: false,
+            snap: false,
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+            surfaceTintColor: Colors.transparent,
+            scrolledUnderElevation: 0.0,
+            elevation: 0,
+            shadowColor: Colors.transparent,
+            automaticallyImplyLeading: false,
+            actions: [
+              if (!gradeCalcMode)
+                Padding(
+                  padding: const EdgeInsets.only(right: 4.0),
+                  child: IconButton(
+                    onPressed: () => showQuickSettings(context),
+                    icon: Icon(
+                      Icons.more_horiz_rounded,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                  ),
+                ),
+            ],
+            title: Row(
+              children: [
+                const SizedBox(width: 8.0),
+                Text(
+                  "page_title_grades".i18n,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurface,
+                    fontSize: 28.0,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                if (currentStudentAvg > 0)
+                  AnimatedOpacity(
+                    opacity: innerBoxIsScrolled ? 1.0 : 0.0,
+                    duration: const Duration(milliseconds: 200),
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 10.0),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10.0, vertical: 4.0),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.primaryContainer,
+                          borderRadius: BorderRadius.circular(12.0),
+                        ),
+                        child: Text(
+                          currentStudentAvg.toStringAsFixed(2),
+                          style: TextStyle(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onPrimaryContainer,
+                            fontSize: 16.0,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
                       ),
                     ),
                   ),
-
-                // profile Icon
-                Padding(
-                  padding: const EdgeInsets.only(right: 24.0),
-                  child: ProfileButton(
-                    child: ProfileImage(
-                      heroTag: "profile",
-                      name: firstName,
-                      backgroundColor: Theme.of(context)
-                          .colorScheme
-                          .tertiary, //ColorUtils.stringToColor(user.displayName ?? "?"),
-                      badge: updateProvider.available,
-                      role: user.role,
-                      profilePictureString: user.picture,
-                      gradeStreak: (user.gradeStreak ?? 0) > 1,
-                    ),
+              ],
+            ),
+          ),
+          // Hero avg card — scrolls away
+          if (currentStudentAvg > 0)
+            SliverToBoxAdapter(
+              child: Padding(
+                padding:
+                    const EdgeInsets.fromLTRB(16.0, 0, 16.0, 12.0),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color:
+                        Theme.of(context).colorScheme.primaryContainer,
+                    borderRadius: BorderRadius.circular(28.0),
+                  ),
+                  padding: const EdgeInsets.fromLTRB(24.0, 20.0, 24.0, 20.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "page_title_grades".i18n,
+                                style: TextStyle(
+                                  fontSize: 13.0,
+                                  fontWeight: FontWeight.w600,
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onPrimaryContainer
+                                      .withValues(alpha: 0.7),
+                                ),
+                              ),
+                              const SizedBox(height: 2.0),
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  Text(
+                                    currentStudentAvg.toStringAsFixed(2),
+                                    style: TextStyle(
+                                      fontSize: 58.0,
+                                      fontWeight: FontWeight.w800,
+                                      height: 1.0,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onPrimaryContainer,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10.0),
+                                  Padding(
+                                    padding:
+                                        const EdgeInsets.only(bottom: 8.0),
+                                    child: TrendDisplay(
+                                      previous: prevStudentAvg,
+                                      current: currentStudentAvg,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                          const Spacer(),
+                          if (totalClassAvg >= 1.0)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 16.0, vertical: 12.0),
+                              decoration: BoxDecoration(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onPrimaryContainer
+                                    .withValues(alpha: 0.12),
+                                borderRadius: BorderRadius.circular(20.0),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    "classavg".i18n,
+                                    style: TextStyle(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onPrimaryContainer
+                                          .withValues(alpha: 0.65),
+                                      fontSize: 11.0,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2.0),
+                                  Text(
+                                    totalClassAvg.toStringAsFixed(2),
+                                    style: TextStyle(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onPrimaryContainer,
+                                      fontSize: 28.0,
+                                      fontWeight: FontWeight.w700,
+                                      height: 1.0,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 14.0),
+                      Row(
+                        children: [
+                          AverageSelector(
+                            value: avgDropValue,
+                            onChanged: (v) => setState(() {
+                              avgDropValue = v ?? 0;
+                              generateTiles();
+                            }),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
-              ],
-              automaticallyImplyLeading: false,
-              title: Padding(
-                padding: const EdgeInsets.only(left: 8.0),
-                child: Text(
-                  "page_title_grades".i18n,
-                  style: Provider.of<SettingsProvider>(context).fontFamily !=
-                              '' &&
-                          Provider.of<SettingsProvider>(context).titleOnlyFont
-                      ? GoogleFonts.getFont(
-                          Provider.of<SettingsProvider>(context).fontFamily,
-                          textStyle: TextStyle(
-                              color: AppColors.of(context).text,
-                              fontSize: 32.0,
-                              fontWeight: FontWeight.bold),
-                        )
-                      : TextStyle(
-                          color: AppColors.of(context).text,
-                          fontSize: 32.0,
-                          fontWeight: FontWeight.bold),
-                ),
               ),
-              shadowColor: Theme.of(context).shadowColor,
             ),
-          ],
-          body: RefreshIndicator(
-            onRefresh: () => gradeProvider.fetch(),
-            color: Theme.of(context).colorScheme.secondary,
-            child: ListView.builder(
-              padding: EdgeInsets.zero,
-              physics: const BouncingScrollPhysics(),
-              itemCount: max(subjectTiles.length, 1),
-              itemBuilder: (context, index) {
-                if (subjectTiles.isNotEmpty) {
-                  EdgeInsetsGeometry panelPadding =
-                      const EdgeInsets.symmetric(horizontal: 24.0);
+        ],
+        body: RefreshIndicator(
+          onRefresh: () => gradeProvider.fetch(),
+          color: Theme.of(context).colorScheme.secondary,
+          child: ListView.builder(
+            padding: EdgeInsets.zero,
+            physics: const BouncingScrollPhysics(),
+            itemCount: max(subjectTiles.length, 1),
+            itemBuilder: (context, index) {
+              if (subjectTiles.isNotEmpty) {
+                EdgeInsetsGeometry panelPadding =
+                    const EdgeInsets.symmetric(horizontal: 24.0);
 
-                  if (subjectTiles[index].runtimeType == GradeSubjectTile) {
-                    return Padding(
-                        padding: panelPadding,
-                        child: PanelBody(
-                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                          child: subjectTiles[index],
-                        ));
-                  } else {
-                    return Padding(
-                        padding: panelPadding, child: subjectTiles[index]);
-                  }
+                if (subjectTiles[index].runtimeType == GradeSubjectTile) {
+                  return Padding(
+                      padding: panelPadding,
+                      child: PanelBody(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        child: subjectTiles[index],
+                      ));
                 } else {
-                  return Container();
+                  return Padding(
+                      padding: panelPadding, child: subjectTiles[index]);
                 }
-              },
-            ),
+              } else {
+                return Container();
+              }
+            },
           ),
         ),
       ),
@@ -660,7 +789,9 @@ class GradesPageState extends State<GradesPage> {
 
     _sheetController = _scaffoldKey.currentState?.showBottomSheet(
       (context) => const RoundedBottomSheet(
-          borderRadius: 14.0, child: GradeCalculator(null)),
+          borderRadius: 14.0,
+          showHandle: false,
+          child: GradeCalculator(null)),
       backgroundColor: const Color(0x00000000),
       elevation: 12.0,
     );
@@ -692,7 +823,7 @@ class GradesPageState extends State<GradesPage> {
           child: ListTile(
             title: Row(
               children: [
-                const Icon(FeatherIcons.plusCircle),
+                const Icon(Icons.add_circle_outline_rounded),
                 const SizedBox(
                   width: 10.0,
                 ),
@@ -731,7 +862,7 @@ class GradesPageState extends State<GradesPage> {
                 Text('import_grades'.i18n),
               ],
             ),
-            trailing: importedViewMode ? const Icon(FeatherIcons.x) : null,
+            trailing: importedViewMode ? const Icon(Icons.close_rounded) : null,
             onTap: () {
               if (importedViewMode) {
                 importedViewMode = false;

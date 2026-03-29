@@ -14,7 +14,6 @@ import 'package:refilc_mobile_ui/common/panel/panel_button.dart';
 import 'package:refilc_mobile_ui/common/splitted_panel/splitted_panel.dart';
 // import 'package:refilc_mobile_ui/screens/settings/settings_helper.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:provider/provider.dart';
 
 import 'edit_subject.i18n.dart';
@@ -85,7 +84,7 @@ class EditSubjectScreenState extends State<EditSubjectScreen> {
               Navigator.of(context).pop();
               setState(() {});
             },
-            icon: const Icon(FeatherIcons.trash2),
+            icon: const Icon(Icons.delete_rounded),
           ),
           const SizedBox(
             width: 8.0,
@@ -109,7 +108,7 @@ class EditSubjectScreenState extends State<EditSubjectScreen> {
                     },
                     title: Text("rename_it".i18n),
                     leading: Icon(
-                      FeatherIcons.penTool,
+                      Icons.draw_rounded,
                       size: 22.0,
                       color: AppColors.of(context).text.withValues(alpha: 0.95),
                     ),
@@ -132,7 +131,7 @@ class EditSubjectScreenState extends State<EditSubjectScreen> {
                     },
                     title: Text("rename_te".i18n),
                     leading: Icon(
-                      FeatherIcons.user,
+                      Icons.person_rounded,
                       size: 22.0,
                       color: AppColors.of(context).text.withValues(alpha: 0.95),
                     ),
@@ -161,7 +160,7 @@ class EditSubjectScreenState extends State<EditSubjectScreen> {
               //         ),
               //       ),
               //       leading: Icon(
-              //         FeatherIcons.gitCommit,
+              //         Icons.commit_rounded,
               //         size: 22.0,
               //         color: AppColors.of(context).text.withValues(alpha: .95),
               //       ),
@@ -216,7 +215,7 @@ class EditSubjectScreenState extends State<EditSubjectScreen> {
               ),
               const Padding(
                 padding: EdgeInsets.symmetric(vertical: 8.0),
-                child: Icon(FeatherIcons.arrowDown, size: 32),
+                child: Icon(Icons.arrow_downward_rounded, size: 32),
               ),
               TextField(
                 controller: _subjectName,
@@ -235,7 +234,7 @@ class EditSubjectScreenState extends State<EditSubjectScreen> {
                   hintText: "modified_name".i18n,
                   suffixIcon: IconButton(
                     icon: const Icon(
-                      FeatherIcons.x,
+                      Icons.close_rounded,
                       color: Colors.grey,
                     ),
                     onPressed: () {
@@ -319,7 +318,7 @@ class EditSubjectScreenState extends State<EditSubjectScreen> {
               ),
               const Padding(
                 padding: EdgeInsets.symmetric(vertical: 8.0),
-                child: Icon(FeatherIcons.arrowDown, size: 32),
+                child: Icon(Icons.arrow_downward_rounded, size: 32),
               ),
               TextField(
                 controller: _teacherName,
@@ -338,7 +337,7 @@ class EditSubjectScreenState extends State<EditSubjectScreen> {
                   hintText: "modified_name".i18n,
                   suffixIcon: IconButton(
                     icon: const Icon(
-                      FeatherIcons.x,
+                      Icons.close_rounded,
                       color: Colors.grey,
                     ),
                     onPressed: () {

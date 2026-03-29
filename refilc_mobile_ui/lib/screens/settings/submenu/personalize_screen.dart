@@ -19,17 +19,14 @@ import 'package:refilc_mobile_ui/common/splitted_panel/splitted_panel.dart';
 import 'package:refilc_mobile_ui/common/widgets/custom_segmented_control.dart';
 import 'package:refilc_mobile_ui/screens/settings/settings_helper.dart';
 import 'package:refilc_mobile_ui/screens/settings/submenu/edit_subject.dart';
-import 'package:refilc_mobile_ui/screens/settings/submenu/paint_list.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:provider/provider.dart';
 import 'package:refilc_mobile_ui/screens/settings/settings_screen.i18n.dart';
 import 'package:refilc_plus/models/premium_scopes.dart';
 import 'package:refilc_plus/providers/plus_provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import 'grade_colors.dart';
 
 class MenuPersonalizeSettings extends StatelessWidget {
   const MenuPersonalizeSettings({
@@ -54,7 +51,7 @@ class MenuPersonalizeSettings extends StatelessWidget {
         color: AppColors.of(context).text.withValues(alpha: 0.95),
       ),
       trailing: Icon(
-        FeatherIcons.chevronRight,
+        Icons.keyboard_arrow_right_rounded,
         size: 22.0,
         color: AppColors.of(context).text.withValues(alpha: 0.95),
       ),
@@ -200,7 +197,7 @@ class PersonalizeSettingsScreenState extends State<PersonalizeSettingsScreen>
           color: AppColors.of(context).text.withValues(alpha: .95),
         ),
         trailing: Icon(
-          FeatherIcons.chevronRight,
+          Icons.keyboard_arrow_right_rounded,
           size: 22.0,
           color: AppColors.of(context).text.withValues(alpha: 0.95),
         ),
@@ -249,7 +246,7 @@ class PersonalizeSettingsScreenState extends State<PersonalizeSettingsScreen>
   //       ),
   //       trailing: settingsProvider.fontFamily == f
   //           ? Icon(
-  //               FeatherIcons.chevronRight,
+  //               Icons.keyboard_arrow_right_rounded,
   //               size: 22.0,
   //               color: AppColors.of(context).text.withValues(alpha: 0.95),
   //             )
@@ -323,7 +320,7 @@ class PersonalizeSettingsScreenState extends State<PersonalizeSettingsScreen>
                         },
                         title: Text("theme".i18n),
                         leading: Icon(
-                          FeatherIcons.sun,
+                          Icons.wb_sunny_rounded,
                           size: 22.0,
                           color: AppColors.of(context)
                               .text
@@ -335,92 +332,6 @@ class PersonalizeSettingsScreenState extends State<PersonalizeSettingsScreen>
                         ),
                         borderRadius: const BorderRadius.vertical(
                           top: Radius.circular(12.0),
-                          bottom: Radius.circular(12.0),
-                        ),
-                      ),
-                    ],
-                  ),
-                  // color magic shit
-                  SplittedPanel(
-                    padding: const EdgeInsets.only(top: 9.0),
-                    cardPadding: const EdgeInsets.all(4.0),
-                    isSeparated: false,
-                    children: [
-                      PanelButton(
-                        padding: const EdgeInsets.only(left: 14.0, right: 14.0),
-                        onPressed: () async {
-                          await _hideContainersController.forward();
-                          SettingsHelper.accentColor(context);
-                          setState(() {});
-                          _hideContainersController.reset();
-                        },
-                        title: Text(
-                          "color".i18n,
-                          style: TextStyle(
-                            color: AppColors.of(context)
-                                .text
-                                .withValues(alpha: .95),
-                          ),
-                        ),
-                        leading: Icon(
-                          FeatherIcons.droplet,
-                          size: 22.0,
-                          color:
-                              AppColors.of(context).text.withValues(alpha: .95),
-                        ),
-                        trailing: Container(
-                          width: 12.0,
-                          height: 12.0,
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.secondary,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        borderRadius: const BorderRadius.vertical(
-                          top: Radius.circular(12.0),
-                          bottom: Radius.circular(4.0),
-                        ),
-                      ),
-                      PanelButton(
-                        padding: const EdgeInsets.only(left: 14.0, right: 6.0),
-                        onPressed: () async {
-                          settingsProvider.update(
-                              newColors: !settingsProvider.newColors);
-                          Provider.of<ThemeModeObserver>(context, listen: false)
-                              .changeTheme(settingsProvider.theme);
-
-                          setState(() {});
-                        },
-                        title: Text(
-                          "new_colors".i18n,
-                          style: TextStyle(
-                            color: AppColors.of(context).text.withValues(
-                                alpha: settingsProvider.newColors ? .95 : .25),
-                          ),
-                        ),
-                        leading: Icon(
-                          Icons.flare_outlined,
-                          size: 22.0,
-                          color: AppColors.of(context).text.withValues(
-                              alpha: settingsProvider.newColors ? .95 : .25),
-                        ),
-                        trailing: Switch(
-                          onChanged: (v) async {
-                            settingsProvider.update(newColors: v);
-
-                            setState(() {});
-                          },
-                          value: settingsProvider.newColors,
-                          activeColor: Theme.of(context).colorScheme.secondary,
-                        ),
-                        borderRadius: const BorderRadius.vertical(
-                          top: Radius.circular(4.0),
-                          bottom: Radius.circular(4.0),
-                        ),
-                      ),
-                      const MenuPaintList(
-                        borderRadius: BorderRadius.vertical(
-                          top: Radius.circular(4.0),
                           bottom: Radius.circular(12.0),
                         ),
                       ),
@@ -449,7 +360,7 @@ class PersonalizeSettingsScreenState extends State<PersonalizeSettingsScreen>
                           ),
                         ),
                         leading: Icon(
-                          FeatherIcons.moon,
+                          Icons.nightlight_round,
                           size: 22.0,
                           color: AppColors.of(context).text.withValues(
                               alpha: settingsProvider.shadowEffect ? .95 : .25),
@@ -461,49 +372,6 @@ class PersonalizeSettingsScreenState extends State<PersonalizeSettingsScreen>
                             setState(() {});
                           },
                           value: settingsProvider.shadowEffect,
-                          activeColor: Theme.of(context).colorScheme.secondary,
-                        ),
-                        borderRadius: const BorderRadius.vertical(
-                          top: Radius.circular(12.0),
-                          bottom: Radius.circular(12.0),
-                        ),
-                      ),
-                    ],
-                  ),
-                  // new popup toggle
-                  SplittedPanel(
-                    padding: const EdgeInsets.only(top: 9.0),
-                    cardPadding: const EdgeInsets.all(4.0),
-                    isSeparated: true,
-                    children: [
-                      PanelButton(
-                        padding: const EdgeInsets.only(left: 14.0, right: 6.0),
-                        onPressed: () async {
-                          settingsProvider.update(
-                              newPopups: !settingsProvider.newPopups);
-
-                          setState(() {});
-                        },
-                        title: Text(
-                          "new_popups".i18n,
-                          style: TextStyle(
-                            color: AppColors.of(context).text.withValues(
-                                alpha: settingsProvider.newPopups ? .95 : .25),
-                          ),
-                        ),
-                        leading: Icon(
-                          FeatherIcons.alertOctagon,
-                          size: 22.0,
-                          color: AppColors.of(context).text.withValues(
-                              alpha: settingsProvider.newPopups ? .95 : .25),
-                        ),
-                        trailing: Switch(
-                          onChanged: (v) async {
-                            settingsProvider.update(newPopups: v);
-
-                            setState(() {});
-                          },
-                          value: settingsProvider.newPopups,
                           activeColor: Theme.of(context).colorScheme.secondary,
                         ),
                         borderRadius: const BorderRadius.vertical(
@@ -530,7 +398,7 @@ class PersonalizeSettingsScreenState extends State<PersonalizeSettingsScreen>
                   //         ),
                   //       ),
                   //       leading: Icon(
-                  //         FeatherIcons.grid,
+                  //         Icons.grid_view_rounded,
                   //         size: 22.0,
                   //         color: AppColors.of(context).text.withValues(alpha: .95),
                   //       ),
@@ -545,59 +413,6 @@ class PersonalizeSettingsScreenState extends State<PersonalizeSettingsScreen>
                   //     ),
                   //   ],
                   // ),
-                  // grade colors
-                  SplittedPanel(
-                    padding: const EdgeInsets.only(top: 9.0),
-                    cardPadding: const EdgeInsets.all(4.0),
-                    isSeparated: true,
-                    children: [
-                      PanelButton(
-                        onPressed: () {
-                          // SettingsHelper.gradeColors(context);
-                          // setState(() {});
-                          Navigator.of(context, rootNavigator: true).push(
-                            CupertinoPageRoute(
-                              builder: (context) =>
-                                  const GradeColorsSettingsScreen(),
-                            ),
-                          );
-                        },
-                        title: Text(
-                          "grade_colors".i18n,
-                          style: TextStyle(
-                            color: AppColors.of(context)
-                                .text
-                                .withValues(alpha: .95),
-                          ),
-                        ),
-                        leading: Icon(
-                          FeatherIcons.star,
-                          size: 22.0,
-                          color:
-                              AppColors.of(context).text.withValues(alpha: .95),
-                        ),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: List.generate(
-                            5,
-                            (i) => Container(
-                              margin: const EdgeInsets.only(left: 2.0),
-                              width: 12.0,
-                              height: 12.0,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: settingsProvider.gradeColors[i],
-                              ),
-                            ),
-                          ),
-                        ),
-                        borderRadius: const BorderRadius.vertical(
-                          top: Radius.circular(12.0),
-                          bottom: Radius.circular(12.0),
-                        ),
-                      ),
-                    ],
-                  ),
                   // rename things
                   SplittedPanel(
                     padding: const EdgeInsets.only(top: 9.0),
@@ -692,7 +507,7 @@ class PersonalizeSettingsScreenState extends State<PersonalizeSettingsScreen>
                           ),
                         ),
                         leading: Icon(
-                          FeatherIcons.user,
+                          Icons.person_rounded,
                           size: 22.0,
                           color: AppColors.of(context).text.withValues(
                               alpha: settingsProvider.renamedTeachersEnabled
@@ -745,7 +560,7 @@ class PersonalizeSettingsScreenState extends State<PersonalizeSettingsScreen>
                             ),
                           ),
                           leading: Icon(
-                            FeatherIcons.activity,
+                            Icons.show_chart_rounded,
                             size: 22.0,
                             color: AppColors.of(context)
                                 .text
@@ -798,7 +613,7 @@ class PersonalizeSettingsScreenState extends State<PersonalizeSettingsScreen>
                           children: [
                             DropdownButton2(
                               items: otherShit
-                                  .map((item) => DropdownMenuItem<String>(
+                                  .map((item) => DropdownItem<String>(
                                         value: item.subject.id,
                                         child: Text(
                                           item.subject.name,
@@ -835,7 +650,6 @@ class PersonalizeSettingsScreenState extends State<PersonalizeSettingsScreen>
                               ),
                               underline: const SizedBox(),
                               menuItemStyleData: const MenuItemStyleData(
-                                height: 40,
                                 padding: EdgeInsets.only(left: 14, right: 14),
                               ),
                               buttonStyleData: ButtonStyleData(
@@ -872,7 +686,7 @@ class PersonalizeSettingsScreenState extends State<PersonalizeSettingsScreen>
                                   ),
                                 ),
                                 leading: Icon(
-                                  FeatherIcons.plus,
+                                  Icons.add_rounded,
                                   size: 22.0,
                                   color: AppColors.of(context)
                                       .text
@@ -988,7 +802,7 @@ class PersonalizeSettingsScreenState extends State<PersonalizeSettingsScreen>
                                           hintText: "ff_name".i18n,
                                           suffixIcon: IconButton(
                                             icon: const Icon(
-                                              FeatherIcons.x,
+                                              Icons.close_rounded,
                                               color: Colors.grey,
                                             ),
                                             onPressed: () {
@@ -1041,7 +855,7 @@ class PersonalizeSettingsScreenState extends State<PersonalizeSettingsScreen>
                           ),
                         ),
                         leading: Icon(
-                          FeatherIcons.type,
+                          Icons.text_fields_rounded,
                           size: 22.0,
                           color:
                               AppColors.of(context).text.withValues(alpha: .95),

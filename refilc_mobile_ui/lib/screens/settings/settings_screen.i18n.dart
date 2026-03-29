@@ -1,9 +1,9 @@
 import 'package:i18n_extension/i18n_extension.dart';
 
 extension SettingsLocalization on String {
-  static final _t = Translations.byLocale("hu_hu") +
+  static final _t = Translations.byLocale("hu-HU") +
       {
-        "en_en": {
+        "en-US": {
           "heads_up": "Heads up!",
           "export_warning":
               "Exported grades are currently not yet viewable in reFilc, you'll only be able to view them manually in JSON format. In the future, this functionality will be extended and you will be able to view the tickets in the app interface.",
@@ -97,8 +97,19 @@ extension SettingsLocalization on String {
           "current_paint": "Current Paint",
           "rename_subjects": "Rename Subjects",
           "rename_teachers": "Rename Teachers",
+          "rename_it": "Rename subject",
+          "rename_te": "Rename teacher",
+          "modified_name": "New name...",
+          "grades": "Grades",
+          "search": "Search...",
+          "goodstudent": "Good Student Mode",
+          "goodstudent_disclaimer": "reFilc can not be held liable for the usage of this feature.\n\n(if your mother beats you up because you showed her fake grades, you can only blame yourself for it)",
+          "presentation": "Presentation Mode",
           "show_breaks": "Show Breaks",
           "live_activity_enabled": "Live Activity",
+          "android_live_activity": "Android Live Activity",
+          "android_notification_type": "Notification Type",
+          "native_android": "Native Android",
           "live_activity_consent_title": "Live Activity – Data Privacy",
           "live_activity_consent_body": "The Live Activity feature sends data to our server for real-time push notification updates.\n\nData sent:\n• Device identifier\n• APNs push token\n• Your timetable\n\nPurpose:\n• Real-time Live Activity updates via push notifications\n\nData is stored on an encrypted server. You can disable this at any time in Settings > General.",
           "live_activity_accept": "Accept",
@@ -190,8 +201,16 @@ extension SettingsLocalization on String {
           "success": "Success!",
           "versiontext": "v%s, modified by the Firka team",
           "packagetext": "reFilc, modified by the Firka team",
+          "notifications_section": "Notifications",
+          "countdown_enabled": "Countdown",
+          "countdown_before_lesson": "Countdown before lessons",
+          "countdown_before_minutes": "Minutes before",
+          "countdown_during_lesson": "Countdown during lessons",
+          "countdown_during_break": "Countdown during breaks",
+          "min_before": "%s min before",
+          "developer_settings": "Developer Settings",
         },
-        "hu_hu": {
+        "hu-HU": {
           "heads_up": "Figyelem!",
           "export_warning":
               "Az exportált jegyek jelenleg még nem megtekinthetők a reFilc-ben, csak te magad tudod átnézni őket JSON formátumban. A jövőben ez a funkció bővülni fog, és a jegyeket meg is tekintheted majd a reFilc felületén.",
@@ -285,8 +304,19 @@ extension SettingsLocalization on String {
           "current_paint": "Jelenlegi téma",
           "rename_subjects": "Tantárgyak átnevezése",
           "rename_teachers": "Tanárok átnevezése",
+          "rename_it": "Tantárgy átnevezése",
+          "rename_te": "Tanár átnevezése",
+          "modified_name": "Új név...",
+          "grades": "Jegyek",
+          "search": "Keresés...",
+          "goodstudent": "Jó tanuló mód",
+          "goodstudent_disclaimer": "A reFilc nem vállal felelősséget a funkció használatáért.\n\n(ha anyád megver, mert hamis jegyeket mutattál neki, csak magadat okolhatod érte)",
+          "presentation": "Bemutató mód",
           "show_breaks": "Szünetek megjelenítése",
           "live_activity_enabled": "Live Activity",
+          "android_live_activity": "Android Live Activity",
+          "android_notification_type": "Értesítés típusa",
+          "native_android": "Natív Android",
           "live_activity_consent_title": "Live Activity – Adatvédelem",
           "live_activity_consent_body": "A Live Activity funkció adatokat küld a szerverünkre a valós idejű push értesítés frissítésekhez.\n\nKüldött adatok:\n• Eszközazonosító\n• APNs push token\n• Órarendjeid\n\nCél:\n• Valós idejű Live Activity frissítések push értesítéssel\n\nAz adatokat titkosított szerveren tároljuk. Bármikor kikapcsolhatod a Beállítások > Általános menüben.",
           "live_activity_accept": "Elfogadom",
@@ -375,11 +405,19 @@ extension SettingsLocalization on String {
           "feedback": "Visszajelzés",
           "other": "Egyéb",
           "stickermap": "Matrica térkép",
+          "notifications_section": "Értesítések",
+          "countdown_enabled": "Visszaszámlálás",
+          "countdown_before_lesson": "Visszaszámlálás tanórák előtt",
+          "countdown_before_minutes": "Hány perccel előtte",
+          "countdown_during_lesson": "Visszaszámlálás tanórákon",
+          "countdown_during_break": "Visszaszámlálás szünetekben",
+          "min_before": "%s perccel előtte",
+          "developer_settings": "Fejlesztői beállítások",
           "success": "Siker!",
           "versiontext": "v%s, módosítva a Firka csapat által",
           "packagetext": "reFilc, módosítva a Firka csapat által",
         },
-        "de_de": {
+        "de-DE": {
           "heads_up": "Achtung!",
           "export_warning":
               "Exportierte Tickets sind derzeit noch nicht in reFilc einsehbar, Sie können sie nur selbst im JSON- Format überprüfen. In Zukunft wird diese Funktionalität erweitert und Sie werden die Tickets in der reFilc-Oberfläche anzeigen können",
@@ -473,8 +511,19 @@ extension SettingsLocalization on String {
           "current_paint": "Aktuelles Thema",
           "rename_subjects": "Fächer umbenennen",
           "rename_teachers": "Lehrer umbenennen",
+          "rename_it": "Fach umbenennen",
+          "rename_te": "Lehrer umbenennen",
+          "modified_name": "Neuer Name...",
+          "grades": "Noten",
+          "search": "Suchen...",
+          "goodstudent": "Guter Student Modus",
+          "goodstudent_disclaimer": "reFilc kann nicht für die Nutzung dieser Funktion haftbar gemacht werden.\n\n(Wenn deine Mutter dich verprügelt, weil du ihr falsche Noten gezeigt hast, kannst du dir nur die Schuld dafür geben)",
+          "presentation": "Präsentationsmodus",
           "show_breaks": "Pausen anzeigen",
           "live_activity_enabled": "Live Activity",
+          "android_live_activity": "Android Live Activity",
+          "android_notification_type": "Benachrichtigungstyp",
+          "native_android": "Natives Android",
           "live_activity_consent_title": "Live Activity – Datenschutz",
           "live_activity_consent_body": "Die Live Activity-Funktion sendet Daten an unseren Server für Echtzeit-Push-Benachrichtigungen.\n\nGesendete Daten:\n• Gerätekennung\n• APNs Push-Token\n• Ihr Stundenplan\n\nZweck:\n• Echtzeit Live Activity-Updates über Push-Benachrichtigungen\n\nDaten werden auf einem verschlüsselten Server gespeichert. Sie können dies jederzeit unter Einstellungen > Allgemein deaktivieren.",
           "live_activity_accept": "Akzeptieren",
@@ -566,6 +615,14 @@ extension SettingsLocalization on String {
           "success": "Erfolg!",
           "versiontext": "v%s, geändert vom Firka",
           "packagetext": "reFilc, geändert vom Firka",
+          "notifications_section": "Benachrichtigungen",
+          "countdown_enabled": "Countdown",
+          "countdown_before_lesson": "Countdown vor Stunden",
+          "countdown_before_minutes": "Minuten vorher",
+          "countdown_during_lesson": "Countdown während Stunden",
+          "countdown_during_break": "Countdown in Pausen",
+          "min_before": "%s Min. vorher",
+          "developer_settings": "Entwickleroptionen",
         },
       };
 
@@ -574,3 +631,4 @@ extension SettingsLocalization on String {
   String plural(int value) => localizePlural(value, this, _t);
   String version(Object modifier) => localizeVersion(modifier, this, _t);
 }
+

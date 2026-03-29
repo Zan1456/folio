@@ -3,7 +3,6 @@ import 'package:refilc/api/providers/user_provider.dart';
 import 'package:refilc/models/settings.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:provider/provider.dart';
 import 'package:wtf_sliding_sheet/wtf_sliding_sheet.dart';
 import 'summary_screen.i18n.dart';
@@ -165,8 +164,8 @@ class SummaryScreenState extends State<SummaryScreen>
                             },
                             icon: Icon(
                               widget.currentPage == 'personality'
-                                  ? FeatherIcons.x
-                                  : FeatherIcons.arrowRight,
+                                  ? Icons.close_rounded
+                                  : Icons.arrow_forward_rounded,
                               color: Colors.white,
                             ),
                           )

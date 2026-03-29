@@ -1,6 +1,5 @@
 import 'package:refilc/theme/colors/colors.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 
 class TickTile extends StatefulWidget {
   const TickTile({
@@ -65,7 +64,7 @@ class TickTileState extends State<TickTile> {
                   ),
                 )
               : Icon(
-                  FeatherIcons.checkCircle,
+                  Icons.check_circle_outline_rounded,
                   size: 22.0,
                   color: Theme.of(context).colorScheme.secondary,
                 ),

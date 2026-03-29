@@ -1,6 +1,5 @@
 import 'package:refilc/api/providers/user_provider.dart';
 import 'package:refilc/api/providers/database_provider.dart';
-// import 'package:refilc/models/settings.dart';
 import 'package:refilc/models/user.dart';
 import 'package:refilc_kreta_api/client/api.dart';
 import 'package:refilc_kreta_api/client/client.dart';

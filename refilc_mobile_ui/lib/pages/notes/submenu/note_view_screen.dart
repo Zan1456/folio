@@ -7,7 +7,6 @@ import 'package:refilc/theme/colors/colors.dart';
 import 'package:refilc_mobile_ui/pages/notes/submenu/add_note_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:provider/provider.dart';
 import 'package:markdown/markdown.dart' as md;
 import 'notes_screen.i18n.dart';
@@ -68,7 +67,7 @@ class NoteViewScreenState extends State<NoteViewScreen> {
                             color: Theme.of(context).colorScheme.secondary,
                           ),
                           child: const Icon(
-                            FeatherIcons.edit,
+                            Icons.edit_rounded,
                             size: 20.0,
                           ),
                         ),
@@ -80,7 +79,7 @@ class NoteViewScreenState extends State<NoteViewScreen> {
                                     : Colors.white.withValues(alpha: .3),
                           ),
                           child: const Icon(
-                            FeatherIcons.edit,
+                            Icons.edit_rounded,
                             size: 20.0,
                           ),
                         ),
@@ -120,7 +119,7 @@ class NoteViewScreenState extends State<NoteViewScreen> {
                           color: Theme.of(context).colorScheme.secondary,
                         ),
                         child: const Icon(
-                          FeatherIcons.trash2,
+                          Icons.delete_rounded,
                           size: 20.0,
                         ),
                       ),
@@ -132,7 +131,7 @@ class NoteViewScreenState extends State<NoteViewScreen> {
                                   : Colors.white.withValues(alpha: .3),
                         ),
                         child: const Icon(
-                          FeatherIcons.trash2,
+                          Icons.delete_rounded,
                           size: 20.0,
                         ),
                       ),

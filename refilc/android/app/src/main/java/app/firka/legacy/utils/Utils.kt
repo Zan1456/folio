@@ -1,4 +1,4 @@
-package app.firka.legacy.utils
+package app.zan1456.folio.utils
 
 import android.content.Context
 import android.net.ConnectivityManager

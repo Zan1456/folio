@@ -1,15 +1,15 @@
 import 'package:i18n_extension/i18n_extension.dart';
 
 extension Localization on String {
-  static final _t = Translations.byLocale("hu_hu") +
+  static final _t = Translations.byLocale("hu-HU") +
       {
-        "en_en": {
+        "en-US": {
           "Failed to open attachment": "Failed to open attachment",
         },
-        "hu_hu": {
+        "hu-HU": {
           "Failed to open attachment": "Nem sikerült megnyitni a mellékletet",
         },
-        "de_de": {
+        "de-DE": {
           "Failed to open attachment": "Anhang konnte nicht geöffnet werden",
         }
       };
@@ -19,3 +19,4 @@ extension Localization on String {
   String plural(int value) => localizePlural(value, this, _t);
   String version(Object modifier) => localizeVersion(modifier, this, _t);
 }
+

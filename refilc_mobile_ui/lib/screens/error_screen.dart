@@ -1,7 +1,6 @@
 import 'package:refilc/theme/colors/colors.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 
 class ErrorScreen extends StatelessWidget {
   const ErrorScreen(this.details, {super.key});
@@ -23,7 +22,7 @@ class ErrorScreen extends StatelessWidget {
             children: [
               Padding(
                 padding: const EdgeInsets.all(12.0),
-                child: Icon(FeatherIcons.alertTriangle,
+                child: Icon(Icons.warning_amber_rounded,
                     size: 48.0, color: AppColors.of(context).red),
               ),
               const Padding(

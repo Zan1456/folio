@@ -31,7 +31,6 @@ import 'package:refilc_mobile_ui/common/panel/panel_button.dart';
 import 'package:refilc_mobile_ui/common/splitted_panel/splitted_panel.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:provider/provider.dart';
 import 'package:refilc_mobile_ui/screens/settings/settings_screen.i18n.dart';
 import 'package:refilc_mobile_ui/screens/settings/submenu/share_theme_popup.dart';
@@ -60,12 +59,12 @@ class MenuPaintList extends StatelessWidget {
         ),
       ),
       leading: Icon(
-        FeatherIcons.list,
+        Icons.list_rounded,
         size: 22.0,
         color: AppColors.of(context).text.withValues(alpha: .95),
       ),
       trailing: Icon(
-        FeatherIcons.chevronRight,
+        Icons.keyboard_arrow_right_rounded,
         size: 22.0,
         color: AppColors.of(context).text.withValues(alpha: 0.95),
       ),
@@ -285,7 +284,7 @@ class PaintListScreenState extends State<PaintListScreen>
                   hintText: 'paint_id'.i18n,
                   suffixIcon: IconButton(
                     icon: const Icon(
-                      FeatherIcons.x,
+                      Icons.close_rounded,
                       color: Colors.grey,
                     ),
                     onPressed: () {
@@ -298,7 +297,7 @@ class PaintListScreenState extends State<PaintListScreen>
               ),
               const Padding(
                 padding: EdgeInsets.symmetric(vertical: 8.0),
-                child: Icon(FeatherIcons.arrowDown, size: 32),
+                child: Icon(Icons.arrow_downward_rounded, size: 32),
               ),
               Container(
                 decoration: BoxDecoration(
@@ -460,7 +459,7 @@ Widget build(BuildContext context) {
                         ),
                       ),
                       leading: Icon(
-                        FeatherIcons.plus,
+                        Icons.add_rounded,
                         size: 22.0,
                         color: AppColors.of(context).text.withValues(alpha: .95),
                       ),

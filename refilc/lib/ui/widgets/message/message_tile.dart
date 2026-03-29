@@ -4,7 +4,6 @@ import 'package:refilc/utils/format.dart';
 import 'package:refilc_kreta_api/models/message.dart';
 import 'package:refilc_mobile_ui/common/profile_image/profile_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:provider/provider.dart';
 
 class MessageTile extends StatelessWidget {
@@ -80,7 +79,7 @@ class MessageTile extends StatelessWidget {
                       ),
                     ),
                     if (message.attachments.isNotEmpty)
-                      const Icon(FeatherIcons.paperclip, size: 16.0)
+                      const Icon(Icons.attach_file_rounded, size: 16.0)
                   ],
                 ),
           subtitle: censored

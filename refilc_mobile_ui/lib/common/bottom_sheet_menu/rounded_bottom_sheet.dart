@@ -5,7 +5,7 @@ class RoundedBottomSheet extends StatelessWidget {
   const RoundedBottomSheet({
     super.key,
     this.child,
-    this.borderRadius = 16.0,
+    this.borderRadius = 28.0,
     this.shrink = true,
     this.showHandle = true,
     this.backgroundColor,
@@ -22,7 +22,7 @@ class RoundedBottomSheet extends StatelessWidget {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 500),
       decoration: BoxDecoration(
-        color: backgroundColor ?? Theme.of(context).colorScheme.surface,
+        color: backgroundColor ?? Theme.of(context).scaffoldBackgroundColor,
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(borderRadius),
           topRight: Radius.circular(borderRadius),

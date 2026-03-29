@@ -49,19 +49,12 @@ import 'package:provider/provider.dart';
 import 'package:refilc_mobile_ui/common/system_chrome.dart' as mobile;
 import 'package:refilc_mobile_ui/screens/login/login_route.dart' as mobile;
 import 'package:refilc_mobile_ui/screens/login/login_screen.dart' as mobile;
-// import 'package:refilc_mobile_ui/screens/login/kreten_login.dart' as mobileTest;
 import 'package:refilc_mobile_ui/screens/navigation/navigation_screen.dart'
     as mobile;
 import 'package:refilc_mobile_ui/screens/settings/settings_route.dart'
     as mobile;
 import 'package:refilc_mobile_ui/screens/settings/settings_screen.dart'
     as mobile;
-
-// Desktop UI (no more desktop ui)
-// import 'package:refilc_desktop_ui/screens/navigation/navigation_screen.dart'
-//     as desktop;
-// import 'package:refilc_desktop_ui/screens/login/login_screen.dart' as desktop;
-// import 'package:refilc_desktop_ui/screens/login/login_route.dart' as desktop;
 
 // Providers
 import 'package:refilc/models/settings.dart';
@@ -94,7 +87,13 @@ class App extends StatelessWidget {
     mobile.setSystemChrome(context);
 
     // Set high refresh mode #28
-    if (Platform.isAndroid) FlutterDisplayMode.setHighRefreshRate();
+    if (Platform.isAndroid) {
+      try {
+        FlutterDisplayMode.setHighRefreshRate();
+      } catch (e) {
+        // Ignore error if display mode fails
+      }
+    }
 
     CorePalette? corePalette;
 
@@ -222,7 +221,13 @@ class App extends StatelessWidget {
                     child: MediaQuery(
                       data: MediaQuery.of(context)
                           .copyWith(textScaleFactor: textScaleFactor),
-                      child: child ?? Container(),
+                      child: child ??
+                          const Scaffold(
+                            backgroundColor: Colors.red,
+                            body: Center(
+                                child: Text("Route error - child is null",
+                                    style: TextStyle(color: Colors.white))),
+                          ),
                     ),
                   );
                 },

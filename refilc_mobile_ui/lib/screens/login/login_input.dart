@@ -1,6 +1,5 @@
 import 'package:refilc/theme/colors/colors.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 
 enum LoginInputStyle { username, password, school }
 
@@ -49,7 +48,7 @@ class _LoginInputState extends State<LoginInput> {
     return TextField(
       focusNode: widget.focusNode,
       controller: widget.controller,
-      cursorColor: AppColors.of(context).filc,
+      cursorColor: Theme.of(context).colorScheme.primary,
       textInputAction: TextInputAction.next,
       autofillHints: [autofill],
       obscureText: obscure,
@@ -72,7 +71,7 @@ class _LoginInputState extends State<LoginInput> {
           borderRadius: BorderRadius.circular(12.0),
           borderSide: BorderSide(
             width: 1,
-            color: AppColors.of(context).filc,
+            color: Theme.of(context).colorScheme.primary,
           ),
         ),
         errorBorder: OutlineInputBorder(
@@ -103,7 +102,7 @@ class _LoginInputState extends State<LoginInput> {
                     },
                     icon: widget.style == LoginInputStyle.password
                         ? Icon(
-                            obscure ? FeatherIcons.eye : FeatherIcons.eyeOff,
+                            obscure ? Icons.visibility_rounded : Icons.visibility_off_rounded,
                             color: AppColors.of(context)
                                 .text
                                 .withValues(alpha: 0.8),
@@ -111,7 +110,7 @@ class _LoginInputState extends State<LoginInput> {
                             size: 18.0,
                           )
                         : Icon(
-                            FeatherIcons.x,
+                            Icons.close_rounded,
                             color: AppColors.of(context)
                                 .text
                                 .withValues(alpha: 0.8),

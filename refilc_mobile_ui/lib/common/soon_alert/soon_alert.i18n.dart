@@ -1,17 +1,17 @@
 import 'package:i18n_extension/i18n_extension.dart';
 
 extension Localization on String {
-  static final _t = Translations.byLocale("hu_hu") +
+  static final _t = Translations.byLocale("hu-HU") +
       {
-        "en_en": {
+        "en-US": {
           "soon": "Soon...",
           "soon_body": "This feature is currently not available yet!",
         },
-        "hu_hu": {
+        "hu-HU": {
           "soon": "Hamarosan...",
           "soon_body": "Ez a funkció jelenleg még nem elérhető!",
         },
-        "de_de": {
+        "de-DE": {
           "soon": "Bald...",
           "soon_body": "Diese Funktion ist derzeit noch nicht verfügbar!",
         },
@@ -22,3 +22,4 @@ extension Localization on String {
   String plural(int value) => localizePlural(value, this, _t);
   String version(Object modifier) => localizeVersion(modifier, this, _t);
 }
+

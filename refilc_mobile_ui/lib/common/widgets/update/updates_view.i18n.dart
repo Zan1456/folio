@@ -1,9 +1,9 @@
 import 'package:i18n_extension/i18n_extension.dart';
 
 extension Localization on String {
-  static final _t = Translations.byLocale("hu_hu") +
+  static final _t = Translations.byLocale("hu-HU") +
       {
-        "en_en": {
+        "en-US": {
           "new_update": "New Update",
           "download": "download",
           "downloading": "downloading",
@@ -14,7 +14,7 @@ extension Localization on String {
           "mobileAlertTitle": "Hold up!",
           "mobileAlertDesc": "You're on mobile network trying to download a %s update. Are you sure you want to continue?"
         },
-        "hu_hu": {
+        "hu-HU": {
           "new_update": "Új frissítés",
           "download": "Letöltés",
           "downloading": "Letöltés",
@@ -25,7 +25,7 @@ extension Localization on String {
           "mobileAlertTitle": "Figyelem!",
           "mobileAlertDesc": "Jelenleg mobil interneten vagy, és egy %s méretű frissítést próbálsz letölteni. Biztosan folytatod?"
         },
-        "de_de": {
+        "de-DE": {
           "new_update": "Neues Update",
           "download": "herunterladen",
           "downloading": "Herunterladen",
@@ -44,3 +44,4 @@ extension Localization on String {
   String plural(int value) => localizePlural(value, this, _t);
   String version(Object modifier) => localizeVersion(modifier, this, _t);
 }
+

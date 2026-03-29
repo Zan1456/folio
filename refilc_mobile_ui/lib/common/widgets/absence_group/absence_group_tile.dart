@@ -5,7 +5,6 @@ import 'package:refilc_mobile_ui/common/widgets/absence_group/absence_group_cont
 import 'package:refilc_mobile_ui/common/widgets/absence/absence_tile.dart';
 import 'package:refilc/utils/format.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:rounded_expansion_tile/rounded_expansion_tile.dart';
 import 'absence_group_tile.i18n.dart';
 
@@ -41,7 +40,7 @@ class AbsenceGroupTile extends StatelessWidget {
                   const EdgeInsets.symmetric(horizontal: 12.0, vertical: 0),
               tileColor: Colors.transparent,
               duration: const Duration(milliseconds: 250),
-              trailing: const Icon(FeatherIcons.chevronDown),
+              trailing: const Icon(Icons.keyboard_arrow_down_rounded),
               leading: Container(
                 width: 39.0,
                 height: 39.0,

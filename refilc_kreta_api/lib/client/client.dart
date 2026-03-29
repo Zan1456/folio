@@ -3,14 +3,11 @@
 import 'dart:convert';
 import 'dart:io';
 
-// import 'package:refilc/api/login.dart';
-// import 'package:refilc/api/nonce.dart';
 import 'package:refilc/api/providers/database_provider.dart';
 import 'package:refilc/api/providers/user_provider.dart';
 import 'package:refilc/api/providers/status_provider.dart';
 import 'package:refilc/models/settings.dart';
 import 'package:refilc/models/user.dart';
-// import 'package:refilc/utils/jwt.dart';
 import 'package:refilc_kreta_api/client/api.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/io_client.dart' as http;
@@ -21,6 +18,7 @@ class KretaClient {
   String? refreshToken;
   String? idToken;
   String? userAgent;
+  String? idpApplicationCookie;
   late http.Client client;
 
   late final SettingsProvider _settings;
@@ -81,6 +79,11 @@ class KretaClient {
           }
           if (!headerMap.containsKey("user-agent") && userAgent != null) {
             headerMap["user-agent"] = "$userAgent";
+          }
+          if (!headerMap.containsKey("cookie") &&
+              idpApplicationCookie != null &&
+              idpApplicationCookie!.isNotEmpty) {
+            headerMap["cookie"] = "idp.application=$idpApplicationCookie";
           }
         }
 
@@ -149,6 +152,11 @@ class KretaClient {
           }
           if (!headerMap.containsKey("user-agent") && userAgent != null) {
             headerMap["user-agent"] = "$userAgent";
+          }
+          if (!headerMap.containsKey("cookie") &&
+              idpApplicationCookie != null &&
+              idpApplicationCookie!.isNotEmpty) {
+            headerMap["cookie"] = "idp.application=$idpApplicationCookie";
           }
           if (!headerMap.containsKey("content-type")) {
             headerMap["content-type"] = "application/json";

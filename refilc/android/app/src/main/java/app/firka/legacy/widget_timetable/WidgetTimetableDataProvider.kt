@@ -1,4 +1,4 @@
-package app.firka.legacy.widget_timetable
+package app.zan1456.folio.widget_timetable
 
 import android.app.UiModeManager
 import android.appwidget.AppWidgetManager
@@ -19,8 +19,8 @@ import org.json.JSONObject
 import java.util.Collections
 import java.util.Comparator
 
-import app.firka.legacy.database.DBManager
-import app.firka.legacy.R
+import app.zan1456.folio.database.DBManager
+import app.zan1456.folio.R
 
 class WidgetTimetableDataProvider(context: Context, intent: Intent) : RemoteViewsService.RemoteViewsFactory {
     private val context: Context
@@ -291,7 +291,7 @@ class WidgetTimetableDataProvider(context: Context, intent: Intent) : RemoteView
     fun jsonToLesson(json: JSONObject): Lesson {
         try {
             var name: String = json.getString("Nev")
-            name = name.substring(0, 1).toUpperCase() + name.substring(1) // Capitalize name
+            name = name.substring(0, 1).uppercase() + name.substring(1) // Capitalize name
             return Lesson(
                 json.getJSONObject("Allapot").getString("Nev"),
                 if (!json.getString("Oraszam").equals("null")) json.getString("Oraszam") else "+",

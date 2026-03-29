@@ -3,7 +3,6 @@ import 'dart:math';
 import 'package:refilc/helpers/dirtywords_helper.dart';
 import 'package:refilc/api/client.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'error_report_screen.i18n.dart';
 import 'package:refilc/theme/colors/colors.dart';
 
@@ -95,7 +94,7 @@ class ErrorReportScreen extends StatelessWidget {
                     ),
                   ),
                   IconButton(
-                    icon: Icon(FeatherIcons.info,
+                    icon: Icon(Icons.info_outline_rounded,
                         color: Theme.of(context).colorScheme.primary),
                     onPressed: () {
                       showDialog(

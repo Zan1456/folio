@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:refilc/helpers/share_helper.dart';
 import 'package:refilc/theme/colors/colors.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:photo_view/photo_view.dart';
 
 class ImageView extends StatelessWidget {
@@ -25,7 +24,7 @@ class ImageView extends StatelessWidget {
                 padding: const EdgeInsets.only(right: 8.0),
                 child: IconButton(
                   onPressed: () => ShareHelper.shareFile(path),
-                  icon: Icon(FeatherIcons.share2,
+                  icon: Icon(Icons.share_rounded,
                       color: AppColors.of(context).text),
                   splashRadius: 24.0,
                 ),

@@ -11,7 +11,6 @@ import 'package:refilc_mobile_ui/common/widgets/absence/absence_tile.dart';
 import 'package:refilc/utils/format.dart';
 import 'package:refilc_mobile_ui/pages/timetable/timetable_page.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:refilc/utils/reverse_search.dart';
 import 'package:provider/provider.dart';
 import 'absence_view.i18n.dart';
@@ -119,7 +118,7 @@ class AbsenceView extends StatelessWidget {
               padding: const EdgeInsets.only(
                   left: 16.0, right: 16.0, bottom: 6.0, top: 12.0),
               child: PanelActionButton(
-                leading: const Icon(FeatherIcons.calendar),
+                leading: const Icon(Icons.calendar_today_rounded),
                 title: Text(
                   "show in timetable".i18n,
                   maxLines: 2,

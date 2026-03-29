@@ -21,6 +21,7 @@
 allprojects {
     repositories {
         google()
+        mavenCentral()
         jcenter()
         maven {
             // [required] background_fetch
@@ -47,7 +48,7 @@ subprojects {
     afterEvaluate {project ->
         if (project.plugins.hasPlugin('android') || project.plugins.hasPlugin('android-library')) {
             android {
-                compileSdkVersion 35
+                compileSdkVersion 36
                 buildToolsVersion '35.0.0'
             }
         }
