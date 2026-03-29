@@ -24,18 +24,21 @@ class _HeadsUpCountdownState extends State<HeadsUpCountdown> {
   );
 
   late final Timer _timer;
-  late double elapsed;
+  late final ValueNotifier<int> _remaining;
+  bool _finished = false;
 
   @override
   void initState() {
     super.initState();
-    elapsed = widget.elapsedTime;
+    final initialRemaining =
+        (widget.maxTime - widget.elapsedTime).round().clamp(0, widget.maxTime.round());
+    _remaining = ValueNotifier<int>(initialRemaining);
     WakelockPlus.enable();
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (elapsed <= widget.maxTime) elapsed += 1;
-      setState(() {});
-
-      if (elapsed >= widget.maxTime) {
+      final next = _remaining.value - 1;
+      _remaining.value = next < 0 ? 0 : next;
+      if (!_finished && next <= 0) {
+        _finished = true;
         Future.delayed(const Duration(seconds: 5), () {
           if (mounted) Navigator.of(context).pop();
         });
@@ -46,62 +49,70 @@ class _HeadsUpCountdownState extends State<HeadsUpCountdown> {
   @override
   void dispose() {
     _timer.cancel();
-    super.dispose();
+    _remaining.dispose();
     WakelockPlus.disable();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final dur = Duration(seconds: (widget.maxTime - elapsed).round());
     return Center(
       child: Material(
         type: MaterialType.transparency,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            AnimatedOpacity(
-              opacity: dur.inSeconds > 0 ? 1.0 : 0.0,
-              duration: const Duration(milliseconds: 500),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  if ((dur.inHours % 24) > 0) ...[
-                    AnimatedFlipCounter(
-                      value: dur.inHours % 24,
-                      curve: Curves.fastLinearToSlowEaseIn,
-                      textStyle: _style,
-                    ),
-                    const Text(":", style: _style),
-                  ],
-                  AnimatedFlipCounter(
-                    duration: const Duration(seconds: 2),
-                    value: dur.inMinutes % 60,
-                    curve: Curves.fastLinearToSlowEaseIn,
-                    wholeDigits: (dur.inHours % 24) > 0 ? 2 : 1,
-                    textStyle: _style,
+        child: ValueListenableBuilder<int>(
+          valueListenable: _remaining,
+          builder: (context, remaining, _) {
+            final dur = Duration(seconds: remaining);
+            final finished = remaining <= 0;
+            return Stack(
+              alignment: Alignment.center,
+              children: [
+                AnimatedOpacity(
+                  opacity: finished ? 0.0 : 1.0,
+                  duration: const Duration(milliseconds: 500),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      if ((dur.inHours % 24) > 0) ...[
+                        AnimatedFlipCounter(
+                          value: dur.inHours % 24,
+                          duration: const Duration(milliseconds: 400),
+                          curve: Curves.easeOut,
+                          textStyle: _style,
+                        ),
+                        const Text(":", style: _style),
+                      ],
+                      AnimatedFlipCounter(
+                        duration: const Duration(milliseconds: 400),
+                        value: dur.inMinutes % 60,
+                        curve: Curves.easeOut,
+                        wholeDigits: (dur.inHours % 24) > 0 ? 2 : 1,
+                        textStyle: _style,
+                      ),
+                      const Text(":", style: _style),
+                      AnimatedFlipCounter(
+                        duration: const Duration(milliseconds: 300),
+                        value: dur.inSeconds % 60,
+                        curve: Curves.easeOut,
+                        wholeDigits: 2,
+                        textStyle: _style,
+                      ),
+                    ],
                   ),
-                  const Text(":", style: _style),
-                  AnimatedFlipCounter(
-                    duration: const Duration(seconds: 1),
-                    value: dur.inSeconds % 60,
-                    curve: Curves.fastLinearToSlowEaseIn,
-                    wholeDigits: 2,
-                    textStyle: _style,
-                  ),
-                ],
-              ),
-            ),
-            if (dur.inSeconds < 0)
-              AnimatedOpacity(
-                opacity: dur.inSeconds > 0 ? 0.0 : 1.0,
-                duration: const Duration(milliseconds: 500),
-                child: Icon(
-                  Icons.notifications_active,
-                  size: 120,
-                  color: Colors.white,
                 ),
-              ),
-          ],
+                if (finished)
+                  AnimatedOpacity(
+                    opacity: 1.0,
+                    duration: const Duration(milliseconds: 500),
+                    child: const Icon(
+                      Icons.notifications_active,
+                      size: 120,
+                      color: Colors.white,
+                    ),
+                  ),
+              ],
+            );
+          },
         ),
       ),
     );
