@@ -475,7 +475,7 @@ class SettingsScreenState extends State<SettingsScreen>
   Widget _buildSectionHeader(String catKey, String label) {
     return Padding(
       key: _sectionKeys[catKey],
-      padding: const EdgeInsets.only(top: 14.0, bottom: 6.0),
+      padding: const EdgeInsets.only(top: 8.0, bottom: 4.0),
       child: Row(
         children: [
           Container(
@@ -930,7 +930,7 @@ class SettingsScreenState extends State<SettingsScreen>
           'szünetek'
         ],
         widget: Padding(
-          padding: const EdgeInsets.only(top: 8.0),
+          padding: const EdgeInsets.only(top: 2.0),
           child: SplittedPanel(
             cardPadding: const EdgeInsets.all(4.0),
             isSeparated: false,
@@ -1211,7 +1211,7 @@ class SettingsScreenState extends State<SettingsScreen>
           'előtte',
         ],
         widget: Padding(
-          padding: const EdgeInsets.only(top: 5.0),
+          padding: const EdgeInsets.only(top: 2.0),
           child: SplittedPanel(
             cardPadding: const EdgeInsets.all(4.0),
             isSeparated: false,
@@ -1354,7 +1354,7 @@ class SettingsScreenState extends State<SettingsScreen>
         category: 'general',
         searchTerms: ['kezdőlap', 'start page', 'kezdőoldal'],
         widget: Padding(
-          padding: const EdgeInsets.only(top: 5.0),
+          padding: const EdgeInsets.only(top: 2.0),
           child: SplittedPanel(
             cardPadding: const EdgeInsets.all(4.0),
             isSeparated: false,
@@ -1419,7 +1419,7 @@ class SettingsScreenState extends State<SettingsScreen>
         category: 'general',
         searchTerms: ['nyelv', 'language', 'Hungarian', 'English'],
         widget: Padding(
-          padding: const EdgeInsets.only(top: 5.0),
+          padding: const EdgeInsets.only(top: 2.0),
           child: SplittedPanel(
             cardPadding: const EdgeInsets.all(4.0),
             isSeparated: false,
@@ -1486,7 +1486,7 @@ class SettingsScreenState extends State<SettingsScreen>
         category: 'general',
         searchTerms: ['rezgés', 'vibrate', 'vibráció'],
         widget: Padding(
-          padding: const EdgeInsets.only(top: 8.0),
+          padding: const EdgeInsets.only(top: 2.0),
           child: SplittedPanel(
             cardPadding: const EdgeInsets.all(4.0),
             isSeparated: false,
@@ -1566,7 +1566,7 @@ class SettingsScreenState extends State<SettingsScreen>
         category: 'appearance',
         searchTerms: ['téma', 'theme', 'sötét', 'világos', 'dark', 'light'],
         widget: Padding(
-          padding: const EdgeInsets.only(top: 8.0),
+          padding: const EdgeInsets.only(top: 2.0),
           child: SplittedPanel(
             cardPadding: const EdgeInsets.all(4.0),
             isSeparated: false,
@@ -1634,7 +1634,7 @@ class SettingsScreenState extends State<SettingsScreen>
         category: 'appearance',
         searchTerms: ['árnyék', 'shadow', 'effect'],
         widget: Padding(
-          padding: const EdgeInsets.only(top: 5.0),
+          padding: const EdgeInsets.only(top: 2.0),
           child: SplittedPanel(
             cardPadding: const EdgeInsets.all(4.0),
             isSeparated: false,
@@ -1682,7 +1682,7 @@ class SettingsScreenState extends State<SettingsScreen>
           'teacher'
         ],
         widget: Padding(
-          padding: const EdgeInsets.only(top: 5.0),
+          padding: const EdgeInsets.only(top: 2.0),
           child: SplittedPanel(
             cardPadding: const EdgeInsets.all(4.0),
             isSeparated: false,
@@ -1798,7 +1798,7 @@ class SettingsScreenState extends State<SettingsScreen>
           'class avg'
         ],
         widget: Padding(
-          padding: const EdgeInsets.only(top: 8.0),
+          padding: const EdgeInsets.only(top: 2.0),
           child: SplittedPanel(
             cardPadding: const EdgeInsets.all(4.0),
             isSeparated: false,
@@ -1862,7 +1862,7 @@ class SettingsScreenState extends State<SettingsScreen>
           'good student'
         ],
         widget: Padding(
-          padding: const EdgeInsets.only(top: 5.0),
+          padding: const EdgeInsets.only(top: 2.0),
           child: SplittedPanel(
             cardPadding: const EdgeInsets.all(4.0),
             isSeparated: false,
@@ -2003,7 +2003,7 @@ class SettingsScreenState extends State<SettingsScreen>
         category: 'grades',
         searchTerms: ['üdvözlés', 'welcome', 'üzenet', 'message'],
         widget: Padding(
-          padding: const EdgeInsets.only(top: 5.0),
+          padding: const EdgeInsets.only(top: 2.0),
           child: SplittedPanel(
             cardPadding: const EdgeInsets.all(4.0),
             isSeparated: true,
@@ -2026,7 +2026,7 @@ class SettingsScreenState extends State<SettingsScreen>
           'adatok elrejtése'
         ],
         widget: Padding(
-          padding: const EdgeInsets.only(top: 8.0),
+          padding: const EdgeInsets.only(top: 2.0),
           child: SplittedPanel(
             cardPadding: const EdgeInsets.all(4.0),
             isSeparated: true,
@@ -2072,7 +2072,7 @@ class SettingsScreenState extends State<SettingsScreen>
           'hibajelentés'
         ],
         widget: Padding(
-          padding: const EdgeInsets.only(top: 5.0),
+          padding: const EdgeInsets.only(top: 2.0),
           child: SplittedPanel(
             cardPadding: const EdgeInsets.all(4.0),
             children: [
@@ -2161,7 +2161,7 @@ class SettingsScreenState extends State<SettingsScreen>
           'about'
         ],
         widget: Padding(
-          padding: const EdgeInsets.only(top: 5.0),
+          padding: const EdgeInsets.only(top: 2.0),
           child: SplittedPanel(
             title: Text("about".i18n),
             cardPadding: const EdgeInsets.all(4.0),

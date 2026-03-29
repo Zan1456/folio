@@ -4,6 +4,7 @@
          HyperOS devices are API 26+; the Kotlin code uses try/catch as fallback. -->
     <uses-sdk tools:overrideLibrary="io.github.d4viddf.hyperisland_kit" />
     <application android:name="${applicationName}" android:label="Folio" tools:replace="android:label" android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
         android:requestLegacyExternalStorage="true" android:enableOnBackInvokedCallback="false">
 
         <!-- Force OpenGL -->
