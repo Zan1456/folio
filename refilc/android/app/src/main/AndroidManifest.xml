@@ -34,19 +34,9 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <!-- Accepts URIs that begin with YOUR_SCHEME://YOUR_HOST -->
                 <data
-                    android:scheme="refilcapp"
-                    android:host="refilc.hu" />
+                    android:scheme="folio"
+                    android:host="folio.zan1456.dev" />
             </intent-filter>
-            <!-- <intent-filter android:autoVerify="true">
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <!- Accepts URIs that begin with https://api.refilc.hu ->
-                <data
-                    android:scheme="https"
-                    android:host="api.refilc.hu"
-                    android:pathPrefix="/v2/rf-plus/auth/finish" />
-            </intent-filter> --> 
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -54,7 +44,7 @@
                 <!-- Accepts URIs that begin with https://refilc.hu -->
                 <data
                     android:scheme="https"
-                    android:host="refilc.hu"
+                    android:host="folio.zan1456.dev"
                     android:pathPrefix="/app" />
             </intent-filter>
         </activity>
