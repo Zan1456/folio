@@ -49,8 +49,12 @@ class LiveCardProvider extends ChangeNotifier {
   LiveCardState currentState = LiveCardState.empty;
   static LiveCardState _previousState = LiveCardState.empty;
   static String? _previousLessonId;
-  // ignore: unused_field
   late Timer _timer;
+
+  // UI change tracking – only notify when something visible actually changed
+  LiveCardState _lastNotifiedState = LiveCardState.empty;
+  String? _lastNotifiedCurrentLessonId;
+  String? _lastNotifiedNextLessonId;
   late final TimetableProvider _timetable;
   late final SettingsProvider _settings;
   static final ServerSyncProvider serverSync = ServerSyncProvider();
@@ -455,7 +459,27 @@ class LiveCardProvider extends ChangeNotifier {
     }
 
     LAData = toMap();
-    notifyListeners();
+
+    // Only rebuild UI when something structurally changed.
+    // Countdown/progress widgets have their own internal timers
+    // so the provider does not need to drive per-second repaints.
+    final stateChangedForUI = currentState != _lastNotifiedState;
+    final lessonChangedForUI =
+        currentLesson?.id != _lastNotifiedCurrentLessonId ||
+            nextLesson?.id != _lastNotifiedNextLessonId;
+
+    if (stateChangedForUI || lessonChangedForUI) {
+      _lastNotifiedState = currentState;
+      _lastNotifiedCurrentLessonId = currentLesson?.id;
+      _lastNotifiedNextLessonId = nextLesson?.id;
+      notifyListeners();
+    }
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
   }
 
   Future<void> _createAndSync() async {

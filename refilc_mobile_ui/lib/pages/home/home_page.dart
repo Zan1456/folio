@@ -63,6 +63,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
   ConfettiController? _confettiController;
   late LiveCardProvider _liveCard;
   late AnimationController _liveCardAnimation;
+  bool? _lastLiveCardShow;
 
   late String greeting;
   late String firstName;
@@ -176,7 +177,10 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
     gradeProvider = Provider.of<GradeProvider>(context);
     context.watch<PlusProvider>();
 
-    _liveCardAnimation.animateTo(_liveCard.show ? 1.0 : 0.0);
+    if (_liveCard.show != _lastLiveCardShow) {
+      _lastLiveCardShow = _liveCard.show;
+      _liveCardAnimation.animateTo(_liveCard.show ? 1.0 : 0.0);
+    }
 
     setGreeting();
     return Scaffold(

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:refilc/theme/colors/colors.dart';
 import 'live_card.i18n.dart';
@@ -12,6 +14,22 @@ class SegmentedCountdown extends StatefulWidget {
 }
 
 class SegmentedCountdownState extends State<SegmentedCountdown> {
+  late Timer _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (mounted) setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     Duration diffDate = widget.date.difference(DateTime.now());

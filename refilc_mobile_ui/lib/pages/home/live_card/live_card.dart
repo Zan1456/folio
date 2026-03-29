@@ -1,5 +1,7 @@
 // ignore_for_file: unnecessary_null_comparison
 
+import 'dart:async';
+
 import 'package:animations/animations.dart';
 import 'package:flutter/services.dart';
 import 'package:refilc/api/providers/user_provider.dart';
@@ -143,37 +145,16 @@ class LiveCardStateA extends State<LiveCard> {
   }
 
   Widget _progressRow({
-    required double current,
-    required double max,
-    required bool showMinutes,
-    VoidCallback? onTap,
+    required DateTime start,
+    required DateTime end,
+    required Duration bellDelay,
+    void Function(double maxTime, double elapsed)? onTap,
   }) {
-    final remaining = (max - current).clamp(0, double.infinity).round();
-    final label = showMinutes
-        ? "remaining min".plural(remaining)
-        : "remaining sec".plural(remaining);
-    return Row(
-      children: [
-        Expanded(
-          child: ProgressBar(
-            value: (current / max).clamp(0.0, 1.0),
-            height: 5.0,
-          ),
-        ),
-        const SizedBox(width: 10.0),
-        GestureDetector(
-          onTap: onTap,
-          behavior: HitTestBehavior.opaque,
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 12.0,
-              fontWeight: FontWeight.w600,
-              color: AppColors.of(context).text.withValues(alpha: 0.48),
-            ),
-          ),
-        ),
-      ],
+    return _LiveCardProgress(
+      start: start,
+      end: end,
+      bellDelay: bellDelay,
+      onTap: onTap,
     );
   }
 
@@ -453,17 +434,6 @@ class LiveCardStateA extends State<LiveCard> {
           break;
         }
 
-        final elapsedTime =
-            DateTime.now().difference(liveCard.currentLesson!.start).inSeconds.toDouble() +
-                bellDelay.inSeconds;
-        final maxTime = liveCard.currentLesson!.end
-            .difference(liveCard.currentLesson!.start)
-            .inSeconds
-            .toDouble();
-        final showMinutes = maxTime - elapsedTime > 60;
-        final progressMax = showMinutes ? maxTime / 60 : maxTime;
-        final progressCurrent = showMinutes ? elapsedTime / 60 : elapsedTime;
-
         final lessonName = (liveCard.currentLesson!.subject.isRenamed &&
                 settingsProvider.renamedSubjectsEnabled
             ? liveCard.currentLesson!.subject.renamedTo
@@ -526,10 +496,10 @@ class LiveCardStateA extends State<LiveCard> {
                     ],
                     const SizedBox(height: 12.0),
                     _progressRow(
-                      current: progressCurrent,
-                      max: progressMax,
-                      showMinutes: showMinutes,
-                      onTap: () => _showHeadsUp(maxTime, elapsedTime),
+                      start: liveCard.currentLesson!.start,
+                      end: liveCard.currentLesson!.end,
+                      bellDelay: bellDelay,
+                      onTap: (mt, et) => _showHeadsUp(mt, et),
                     ),
                   ],
                 ),
@@ -553,16 +523,6 @@ class LiveCardStateA extends State<LiveCard> {
         }
 
         final diff = liveCard.getFloorDifference();
-        final maxTime = liveCard.nextLesson!.start
-            .difference(liveCard.prevLesson!.end)
-            .inSeconds
-            .toDouble();
-        final elapsedTime =
-            DateTime.now().difference(liveCard.prevLesson!.end).inSeconds.toDouble() +
-                bellDelay.inSeconds.toDouble();
-        final showMinutes = maxTime - elapsedTime > 60;
-        final progressMax = showMinutes ? maxTime / 60 : maxTime;
-        final progressCurrent = showMinutes ? elapsedTime / 60 : elapsedTime;
 
         final breakDescription = liveCard.nextLesson!.room != liveCard.prevLesson!.room
             ? localizeFill("go $diff".i18n, [
@@ -632,10 +592,10 @@ class LiveCardStateA extends State<LiveCard> {
                     ),
                     const SizedBox(height: 12.0),
                     _progressRow(
-                      current: progressCurrent,
-                      max: progressMax,
-                      showMinutes: showMinutes,
-                      onTap: () => _showHeadsUp(maxTime, elapsedTime),
+                      start: liveCard.prevLesson!.end,
+                      end: liveCard.nextLesson!.start,
+                      bellDelay: bellDelay,
+                      onTap: (mt, et) => _showHeadsUp(mt, et),
                     ),
                   ],
                 ),
@@ -670,6 +630,86 @@ class LiveCardStateA extends State<LiveCard> {
         );
       },
       child: child,
+    );
+  }
+}
+
+/// Self-contained progress row that drives its own 1-second timer.
+/// Only this widget repaints every second — the parent LiveCard stays still.
+class _LiveCardProgress extends StatefulWidget {
+  const _LiveCardProgress({
+    required this.start,
+    required this.end,
+    required this.bellDelay,
+    this.onTap,
+  });
+
+  final DateTime start;
+  final DateTime end;
+  final Duration bellDelay;
+  final void Function(double maxTime, double elapsed)? onTap;
+
+  @override
+  State<_LiveCardProgress> createState() => _LiveCardProgressState();
+}
+
+class _LiveCardProgressState extends State<_LiveCardProgress> {
+  late Timer _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (mounted) setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final maxTime =
+        widget.end.difference(widget.start).inSeconds.toDouble();
+    final elapsedTime =
+        DateTime.now().difference(widget.start).inSeconds.toDouble() +
+            widget.bellDelay.inSeconds;
+    final showMinutes = maxTime - elapsedTime > 60;
+    final progressMax = showMinutes ? maxTime / 60 : maxTime;
+    final progressCurrent = showMinutes ? elapsedTime / 60 : elapsedTime;
+    final remaining =
+        (progressMax - progressCurrent).clamp(0, double.infinity).round();
+    final label = showMinutes
+        ? "remaining min".plural(remaining)
+        : "remaining sec".plural(remaining);
+
+    return Row(
+      children: [
+        Expanded(
+          child: ProgressBar(
+            value: (progressCurrent / progressMax).clamp(0.0, 1.0),
+            height: 5.0,
+          ),
+        ),
+        const SizedBox(width: 10.0),
+        GestureDetector(
+          onTap: widget.onTap != null
+              ? () => widget.onTap!(maxTime, elapsedTime)
+              : null,
+          behavior: HitTestBehavior.opaque,
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 12.0,
+              fontWeight: FontWeight.w600,
+              color: AppColors.of(context).text.withValues(alpha: 0.48),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
