@@ -379,19 +379,25 @@ class TimetablePageState extends State<TimetablePage>
                             .colorScheme
                             .onPrimaryContainer
                             .withValues(alpha: 0.65),
+                        labelStyle: const TextStyle(
+                          fontWeight: FontWeight.w700,
+                        ),
+                        unselectedLabelStyle: const TextStyle(
+                          fontWeight: FontWeight.w500,
+                        ),
                         indicatorSize: TabBarIndicatorSize.tab,
                         indicatorPadding: const EdgeInsets.symmetric(
                             horizontal: 8.0, vertical: 6.0),
                         indicator: BoxDecoration(
                           color: Theme.of(context)
                               .colorScheme
-                              .onPrimaryContainer
+                              .secondary
                               .withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(14.0),
                         ),
                         overlayColor: WidgetStateProperty.all(Theme.of(context)
                             .colorScheme
-                            .onPrimaryContainer
+                            .secondary
                             .withValues(alpha: 0.08)),
                         padding:
                             const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 14.0),

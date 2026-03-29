@@ -19,7 +19,6 @@ import 'package:refilc_mobile_ui/screens/navigation/navigation_route.dart';
 import 'package:refilc_mobile_ui/screens/navigation/navigation_route_handler.dart';
 import 'package:refilc_mobile_ui/screens/navigation/status_bar.dart';
 import 'package:refilc_mobile_ui/screens/news/news_view.dart';
-import 'package:refilc_mobile_ui/screens/settings/settings_screen.dart';
 import 'package:refilc_mobile_ui/screens/settings/live_activity_consent_dialog.dart';
 import 'package:refilc_mobile_ui/common/widgets/update/update_dialog.dart';
 import 'package:refilc_plus/ui/mobile/goal_planner/goal_complete_modal.dart';
@@ -30,8 +29,6 @@ import 'package:provider/provider.dart';
 import 'package:refilc_mobile_ui/common/screens.i18n.dart';
 import 'package:refilc/api/providers/news_provider.dart';
 import 'package:refilc/api/providers/sync.dart';
-import 'package:home_widget/home_widget.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:background_fetch/background_fetch.dart';
 import 'package:refilc_plus/providers/goal_provider.dart';
 import 'package:refilc/api/providers/ad_provider.dart';
@@ -70,28 +67,6 @@ class NavigationScreenState extends State<NavigationScreen>
     initializers.add(id);
 
     return true;
-  }
-
-  void _checkForWidgetLaunch() {
-    HomeWidget.initiallyLaunchedFromHomeWidget().then(_launchedFromWidget);
-  }
-
-  void _launchedFromWidget(Uri? uri) async {
-    if (uri == null) return;
-
-    if (uri.scheme == "timetable" && uri.authority == "refresh") {
-      Navigator.of(context).popUntil((route) => route.isFirst);
-
-      setPage("timetable");
-      _navigatorState.currentState
-          ?.pushNamedAndRemoveUntil("timetable", (_) => false);
-    } else if (uri.scheme == "settings" && uri.authority == "premium") {
-      Navigator.of(context).popUntil((route) => route.isFirst);
-
-      Navigator.of(context, rootNavigator: true).push(
-        CupertinoPageRoute(builder: (context) => const SettingsScreen()),
-      );
-    }
   }
 
   // Platform messages are asynchronous, so we initialize in an async method.
@@ -137,11 +112,6 @@ class NavigationScreenState extends State<NavigationScreen>
   @override
   void initState() {
     super.initState();
-
-    HomeWidget.setAppGroupId('app.zan1456.folio.group');
-
-    _checkForWidgetLaunch();
-    HomeWidget.widgetClicked.listen(_launchedFromWidget);
 
     settings = Provider.of<SettingsProvider>(context, listen: false);
     selected = NavigationRoute();

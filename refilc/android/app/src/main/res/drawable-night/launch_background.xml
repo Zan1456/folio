@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Dark gradient background (#0D1202 → #141A03) -->
     <item android:drawable="@drawable/splash_bg" />
     <!-- Centered logo -->
     <item>

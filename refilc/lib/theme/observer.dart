@@ -1,22 +1,6 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:home_widget/home_widget.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
 import 'package:shake_flutter/models/shake_theme.dart';
 import 'package:shake_flutter/shake_flutter.dart';
-
-Future<bool?> updateWidget() async {
-  try {
-    return HomeWidget.updateWidget(name: 'widget_timetable.WidgetTimetable');
-  } on PlatformException catch (exception) {
-    if (kDebugMode) {
-      print('Error Updating Widget After changeTheme. $exception');
-    }
-  }
-  return false;
-}
 
 class ThemeModeObserver extends ChangeNotifier {
   ThemeMode _themeMode;
@@ -33,7 +17,6 @@ class ThemeModeObserver extends ChangeNotifier {
   void changeTheme(ThemeMode mode, {bool updateNavbarColor = true}) {
     _themeMode = mode;
     _updateNavbarColor = updateNavbarColor;
-    if (Platform.isAndroid) updateWidget();
     notifyListeners();
 
     // change shake theme as well

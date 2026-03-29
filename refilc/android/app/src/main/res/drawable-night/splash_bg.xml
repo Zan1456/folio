@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Dark mode splash background -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <gradient
+        android:startColor="#0D1202"
+        android:endColor="#141A03"
+        android:angle="315"
+        android:type="linear" />
+</shape>

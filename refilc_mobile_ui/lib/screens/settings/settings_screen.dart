@@ -724,7 +724,7 @@ class SettingsScreenState extends State<SettingsScreen>
                                   color: isActive
                                       ? Theme.of(context)
                                           .colorScheme
-                                          .onPrimaryContainer
+                                          .secondary
                                           .withValues(alpha: 0.15)
                                       : Colors.transparent,
                                   borderRadius: BorderRadius.circular(14.0),

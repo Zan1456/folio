@@ -1,7 +1,5 @@
 // ignore_for_file: use_build_context_synchronously
 
-import 'dart:io';
-
 import 'package:flutter/foundation.dart';
 import 'package:refilc/api/providers/database_provider.dart';
 import 'package:refilc/api/providers/status_provider.dart';
@@ -18,10 +16,8 @@ import 'package:refilc_kreta_api/providers/homework_provider.dart';
 import 'package:refilc_kreta_api/providers/message_provider.dart';
 import 'package:refilc_kreta_api/providers/note_provider.dart';
 import 'package:refilc_kreta_api/providers/timetable_provider.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
-import 'package:home_widget/home_widget.dart';
 
 
 // Mutex
@@ -146,18 +142,7 @@ Future<void> syncAll(BuildContext context) async {
     }()),
   ];
 
-  Future<bool?> updateWidget() async {
-    try {
-      return HomeWidget.updateWidget(name: 'widget_timetable.WidgetTimetable');
-    } on PlatformException catch (exception) {
-      debugPrint('Error Updating Widget. $exception');
-    }
-    return false;
-  }
-
   return Future.wait(tasks).then((value) {
     lock = false;
-
-    if (Platform.isAndroid) updateWidget();
   });
 }

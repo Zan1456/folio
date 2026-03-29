@@ -4,6 +4,7 @@ extension SettingsLocalization on String {
   static final _t = Translations.byLocale("hu-HU") +
       {
         "en-US": {
+          "save": "Save",
           "notes": "Notes",
           "empty": "You don't have any notes",
           "todo": "Tasks",
@@ -22,6 +23,7 @@ extension SettingsLocalization on String {
           "title": "Image title...",
         },
         "hu-HU": {
+          "save": "Mentés",
           "notes": "Füzet",
           "empty": "Nincsenek jegyzeteid",
           "todo": "Feladatok",
@@ -40,6 +42,7 @@ extension SettingsLocalization on String {
           "title": "Kép címe...",
         },
         "de-DE": {
+          "save": "Speichern",
           "notes": "Broschüre",
           "empty": "Sie haben keine Notizen",
           "todo": "Aufgaben",

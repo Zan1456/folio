@@ -9,7 +9,6 @@ import 'package:refilc/api/providers/user_provider.dart';
 import 'package:refilc/models/self_note.dart';
 import 'package:refilc/theme/colors/colors.dart';
 import 'package:refilc_kreta_api/providers/homework_provider.dart';
-import 'package:refilc_mobile_ui/common/outlined_round_button.dart';
 import 'package:refilc_mobile_ui/pages/notes/submenu/notes_screen.i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -33,12 +32,24 @@ class AddNoteScreenState extends State<AddNoteScreen> {
   final _contentController = TextEditingController();
   final _titleController = TextEditingController();
 
+  int _charCount = 0;
+
   @override
   void initState() {
     _contentController.text = widget.initialNote?.content ?? '';
     _titleController.text = widget.initialNote?.title ?? '';
-
+    _charCount = _contentController.text.length;
+    _contentController.addListener(() {
+      setState(() => _charCount = _contentController.text.length);
+    });
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _contentController.dispose();
+    _titleController.dispose();
+    super.dispose();
   }
 
   @override
@@ -48,78 +59,68 @@ class AddNoteScreenState extends State<AddNoteScreen> {
     databaseProvider = Provider.of<DatabaseProvider>(context);
     selfNoteProvider = Provider.of<SelfNoteProvider>(context);
 
+    final bool isEditing = widget.initialNote != null;
+    final Color accentColor = Theme.of(context).colorScheme.secondary;
+
     return Scaffold(
       bottomNavigationBar: Transform.translate(
         offset: Offset(0.0, -1 * MediaQuery.of(context).viewInsets.bottom),
         child: Container(
           height: 60.0,
           decoration: BoxDecoration(
+            color: Theme.of(context).scaffoldBackgroundColor,
             border: Border(
               top: BorderSide(
-                color: Theme.of(context)
-                    .colorScheme
-                    .secondary
-                    .withValues(alpha: 0.1),
-                width: 1.1,
+                color: accentColor.withValues(alpha: 0.12),
+                width: 1.0,
               ),
             ),
           ),
-          padding: const EdgeInsets.symmetric(
-            horizontal: 20.0,
-            vertical: 10.0,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              OutlinedRoundButton(
-                size: 35.0,
-                onTap: () {
-                  insertTextAtCur('**;c;**');
-                },
-                child: Text(
-                  'B',
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.robotoMono(
-                    textStyle: const TextStyle(
-                      height: 1.0,
-                      fontWeight: FontWeight.w900,
-                      fontSize: 16.0,
-                    ),
+              _FormatButton(
+                label: 'B',
+                style: GoogleFonts.robotoMono(
+                  textStyle: const TextStyle(
+                    height: 1.0,
+                    fontWeight: FontWeight.w900,
+                    fontSize: 15.0,
                   ),
                 ),
+                onTap: () => insertTextAtCur('**;c;**'),
+                accentColor: accentColor,
               ),
-              const SizedBox(
-                width: 10.0,
-              ),
-              OutlinedRoundButton(
-                size: 35.0,
-                onTap: () {
-                  insertTextAtCur('*;c;*');
-                },
-                child: Text(
-                  'I',
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.robotoMono(
-                    textStyle: const TextStyle(
-                      height: 1.0,
-                      fontWeight: FontWeight.w500,
-                      fontStyle: FontStyle.italic,
-                      fontSize: 16.0,
-                    ),
+              const SizedBox(width: 8.0),
+              _FormatButton(
+                label: 'I',
+                style: GoogleFonts.robotoMono(
+                  textStyle: const TextStyle(
+                    height: 1.0,
+                    fontWeight: FontWeight.w500,
+                    fontStyle: FontStyle.italic,
+                    fontSize: 15.0,
                   ),
                 ),
+                onTap: () => insertTextAtCur('*;c;*'),
+                accentColor: accentColor,
               ),
-              const SizedBox(
-                width: 10.0,
+              const SizedBox(width: 8.0),
+              _FormatButton(
+                icon: Icons.code_rounded,
+                onTap: () => insertTextAtCur('`;c;`'),
+                accentColor: accentColor,
               ),
-              OutlinedRoundButton(
-                size: 35.0,
-                onTap: () {
-                  insertTextAtCur('`;c;`');
-                },
-                child: Transform.translate(
-                  offset: const Offset(-0.6, -0.5),
-                  child: const Icon(Icons.code_rounded),
+              const Spacer(),
+              Text(
+                '$_charCount',
+                style: TextStyle(
+                  fontSize: 12.0,
+                  fontWeight: FontWeight.w500,
+                  color: Theme.of(context)
+                      .colorScheme
+                      .onPrimaryContainer
+                      .withValues(alpha: 0.4),
                 ),
               ),
             ],
@@ -130,7 +131,7 @@ class AddNoteScreenState extends State<AddNoteScreen> {
         surfaceTintColor: Theme.of(context).scaffoldBackgroundColor,
         leading: BackButton(color: AppColors.of(context).text),
         title: Text(
-          widget.initialNote == null ? 'new_note'.i18n : 'edit_note'.i18n,
+          isEditing ? 'edit_note'.i18n : 'new_note'.i18n,
           style: TextStyle(
             color: AppColors.of(context).text,
             fontSize: 26.0,
@@ -138,94 +139,76 @@ class AddNoteScreenState extends State<AddNoteScreen> {
           ),
         ),
         actions: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(10.1),
-            child: GestureDetector(
-              onTap: () async {
-                // handle tap
-                if (_contentController.text.replaceAll(' ', '') == '') {
-                  return;
-                }
+          GestureDetector(
+            onTap: () async {
+              if (_contentController.text.replaceAll(' ', '') == '') return;
 
-                var notes = selfNoteProvider.notes;
+              var notes = selfNoteProvider.notes;
 
-                if (widget.initialNote == null) {
-                  notes.add(SelfNote.fromJson({
-                    'id': const Uuid().v4(),
-                    'title': _titleController.text.replaceAll(' ', '') == ''
-                        ? null
-                        : _titleController.text,
-                    'content': _contentController.text,
-                    'note_type': 'text',
-                  }));
-                } else {
-                  var i =
-                      notes.indexWhere((e) => e.id == widget.initialNote!.id);
+              if (!isEditing) {
+                notes.add(SelfNote.fromJson({
+                  'id': const Uuid().v4(),
+                  'title': _titleController.text.replaceAll(' ', '') == ''
+                      ? null
+                      : _titleController.text,
+                  'content': _contentController.text,
+                  'note_type': 'text',
+                }));
+              } else {
+                var i = notes.indexWhere((e) => e.id == widget.initialNote!.id);
+                notes[i] = SelfNote.fromJson({
+                  'id': notes[i].id,
+                  'title': _titleController.text.replaceAll(' ', '') == ''
+                      ? null
+                      : _titleController.text,
+                  'content': _contentController.text,
+                  'note_type': 'text',
+                });
+              }
 
-                  notes[i] = SelfNote.fromJson({
-                    'id': notes[i].id,
-                    'title': _titleController.text.replaceAll(' ', '') == ''
-                        ? null
-                        : _titleController.text,
-                    'content': _contentController.text,
-                    'note_type': 'text',
-                  });
-                }
+              await selfNoteProvider.store(notes);
 
-                await selfNoteProvider.store(notes);
-
-                Navigator.of(context).pop();
-                if (widget.initialNote != null) {
-                  Navigator.of(context).pop();
-                }
-              },
+              Navigator.of(context).pop();
+              if (isEditing) Navigator.of(context).pop();
+            },
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(10.0),
               child: Container(
-                color: Theme.of(context)
-                    .colorScheme
-                    .secondary
-                    .withValues(alpha: 0.2),
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Stack(
-                    children: [
-                      IconTheme(
-                        data: IconThemeData(
-                          color: Theme.of(context).colorScheme.secondary,
-                        ),
-                        child: const Icon(
-                          Icons.check_rounded,
-                          size: 20.0,
-                        ),
+                color: accentColor.withValues(alpha: 0.15),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 14.0, vertical: 8.0),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.check_rounded,
+                      size: 16.0,
+                      color: accentColor,
+                    ),
+                    const SizedBox(width: 6.0),
+                    Text(
+                      'save'.i18n,
+                      style: TextStyle(
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.w700,
+                        color: accentColor,
                       ),
-                      IconTheme(
-                        data: IconThemeData(
-                          color:
-                              Theme.of(context).brightness == Brightness.light
-                                  ? Colors.black.withValues(alpha: .5)
-                                  : Colors.white.withValues(alpha: .3),
-                        ),
-                        child: const Icon(
-                          Icons.check_rounded,
-                          size: 20.0,
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ),
           ),
-          const SizedBox(
-            width: 20,
-          ),
+          const SizedBox(width: 16.0),
         ],
       ),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 22.0),
-          child: Column(
-            children: [
-              TextField(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(22.0, 4.0, 22.0, 0.0),
+              child: TextField(
                 controller: _titleController,
                 expands: false,
                 maxLines: 1,
@@ -234,18 +217,37 @@ class AddNoteScreenState extends State<AddNoteScreen> {
                   enabledBorder: InputBorder.none,
                   focusedBorder: InputBorder.none,
                   hintText: "hint_t".i18n,
-                  hintStyle: const TextStyle(
+                  hintStyle: TextStyle(
                     fontSize: 22.0,
                     fontWeight: FontWeight.w600,
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onPrimaryContainer
+                        .withValues(alpha: 0.35),
                   ),
                 ),
                 textAlign: TextAlign.start,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 22.0,
                   fontWeight: FontWeight.w600,
+                  color: AppColors.of(context).text,
                 ),
               ),
-              Expanded(
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 22.0),
+              child: Divider(
+                height: 1.0,
+                thickness: 1.0,
+                color: Theme.of(context)
+                    .colorScheme
+                    .onPrimaryContainer
+                    .withValues(alpha: 0.08),
+              ),
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(22.0, 0.0, 22.0, 0.0),
                 child: TextField(
                   controller: _contentController,
                   expands: true,
@@ -256,16 +258,26 @@ class AddNoteScreenState extends State<AddNoteScreen> {
                     enabledBorder: InputBorder.none,
                     focusedBorder: InputBorder.none,
                     hintText: "hint".i18n,
-                    hintStyle: const TextStyle(fontSize: 16.0),
+                    hintStyle: TextStyle(
+                      fontSize: 16.0,
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onPrimaryContainer
+                          .withValues(alpha: 0.35),
+                    ),
                   ),
                   textAlign: TextAlign.start,
-                  style: const TextStyle(fontSize: 16.0),
+                  style: TextStyle(
+                    fontSize: 16.0,
+                    color: AppColors.of(context).text,
+                    height: 1.55,
+                  ),
                 ),
               ),
-              if (MediaQuery.of(context).viewInsets.bottom != 0)
-                const SizedBox(height: 60),
-            ],
-          ),
+            ),
+            if (MediaQuery.of(context).viewInsets.bottom != 0)
+              const SizedBox(height: 60),
+          ],
         ),
       ),
     );
@@ -313,5 +325,67 @@ class AddNoteScreenState extends State<AddNoteScreen> {
         );
       });
     }
+  }
+}
+
+class _FormatButton extends StatelessWidget {
+  const _FormatButton({
+    this.label,
+    this.style,
+    this.icon,
+    required this.onTap,
+    required this.accentColor,
+  });
+
+  final String? label;
+  final TextStyle? style;
+  final IconData? icon;
+  final VoidCallback onTap;
+  final Color accentColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 120),
+        width: 36.0,
+        height: 36.0,
+        decoration: BoxDecoration(
+          color: Theme.of(context)
+              .colorScheme
+              .onPrimaryContainer
+              .withValues(alpha: 0.07),
+          borderRadius: BorderRadius.circular(10.0),
+          border: Border.all(
+            color: Theme.of(context)
+                .colorScheme
+                .onPrimaryContainer
+                .withValues(alpha: 0.1),
+            width: 1.0,
+          ),
+        ),
+        alignment: Alignment.center,
+        child: icon != null
+            ? Icon(
+                icon,
+                size: 17.0,
+                color: Theme.of(context)
+                    .colorScheme
+                    .onPrimaryContainer
+                    .withValues(alpha: 0.75),
+              )
+            : Text(
+                label!,
+                textAlign: TextAlign.center,
+                style: style?.copyWith(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .onPrimaryContainer
+                      .withValues(alpha: 0.75),
+                ),
+              ),
+      ),
+    );
   }
 }

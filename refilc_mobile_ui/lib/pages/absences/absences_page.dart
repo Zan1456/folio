@@ -230,20 +230,28 @@ class AbsencesPageState extends State<AbsencesPage>
                           .colorScheme
                           .onPrimaryContainer
                           .withValues(alpha: 0.65),
+                      labelStyle: const TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 13.5,
+                      ),
+                      unselectedLabelStyle: const TextStyle(
+                        fontWeight: FontWeight.w500,
+                        fontSize: 13.5,
+                      ),
                       indicatorSize: TabBarIndicatorSize.tab,
                       indicatorPadding: const EdgeInsets.symmetric(
                           horizontal: 8.0, vertical: 6.0),
                       indicator: BoxDecoration(
                         color: Theme.of(context)
                             .colorScheme
-                            .onPrimaryContainer
+                            .secondary
                             .withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(14.0),
                       ),
                       overlayColor: WidgetStateProperty.all(
                         Theme.of(context)
                             .colorScheme
-                            .onPrimaryContainer
+                            .secondary
                             .withValues(alpha: 0.08),
                       ),
                       padding: const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 14.0),
