@@ -34,6 +34,7 @@ extension Localization on String {
           "goal": "Goal",
           "goal_state": "Tracking",
           "class": "class",
+          "stats": "Stats",
         },
         "hu-HU": {
           "Grades": "Jegyek",
@@ -66,6 +67,7 @@ extension Localization on String {
           "goal": "Célkitűzés",
           "goal_state": "Követés",
           "class": "osztály",
+          "stats": "Statisztika",
         },
         "de-DE": {
           "Grades": "Klassen",
@@ -98,6 +100,7 @@ extension Localization on String {
           "goal": "Ziel",
           "goal_state": "Verfolgung",
           "class": "Klasse",
+          "stats": "Statistiken",
         },
       };
 

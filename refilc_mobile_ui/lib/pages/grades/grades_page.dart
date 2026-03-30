@@ -27,7 +27,7 @@ import 'package:refilc_mobile_ui/common/widgets/exam/exam_viewable.dart';
 import 'package:refilc_mobile_ui/common/widgets/grade/grade_subject_tile.dart';
 import 'package:refilc_mobile_ui/common/trend_display.dart';
 import 'package:refilc_mobile_ui/pages/grades/fail_warning.dart';
-import 'package:refilc_mobile_ui/pages/grades/grades_count.dart';
+import 'package:refilc_mobile_ui/pages/grades/grades_count_item.dart';
 import 'package:refilc_mobile_ui/pages/grades/graph.dart';
 import 'package:refilc_mobile_ui/pages/grades/grade_subject_view.dart';
 import 'package:refilc_mobile_ui/screens/navigation/navigation_route_handler.dart';
@@ -77,11 +77,10 @@ class GradesPageState extends State<GradesPage> {
   late SettingsProvider settingsProvider;
 
   late String firstName;
-  late Widget yearlyGraph;
-  late Widget gradesCount;
   List<Widget> subjectTiles = [];
 
   int avgDropValue = 0;
+  double subjectAvg = 0.0;
 
   bool gradeCalcMode = false;
   bool importedViewMode = false;
@@ -339,17 +338,8 @@ class GradesPageState extends State<GradesPage> {
     }
 
     if (tiles.isNotEmpty || gradeCalcMode) {
-      tiles.insert(0, yearlyGraph);
-      tiles.insert(1, gradesCount);
       if (!gradeCalcMode) {
-        tiles.insert(2, FailWarning(subjectAvgs: subjectAvgs));
-        tiles.insert(
-          3,
-          PanelTitle(
-              title: Text(
-            avgDropValue == 0 ? "Subjects".i18n : "Subjects_changes".i18n,
-          )),
-        );
+        tiles.insert(1, FailWarning(subjectAvgs: subjectAvgs));
 
         // tiles.insert(4, const PanelHeader(padding: EdgeInsets.only(top: 12.0)));
         // tiles.add(const PanelFooter(padding: EdgeInsets.only(bottom: 12.0)));
@@ -370,101 +360,14 @@ class GradesPageState extends State<GradesPage> {
     // print('rounding:');
     // print(settingsProvider.rounding);
 
-    double subjectAvg = subjectAvgs.isNotEmpty
+    subjectAvg = subjectAvgs.isNotEmpty
         ? subjectAvgs.values.fold(
                 0.0,
                 (double a, double b) =>
                     a.round().toDouble() + b.round().toDouble()) /
             subjectAvgs.length
         : 0.0;
-    final double classAvg = gradeProvider.groupAverages.isNotEmpty
-        ? gradeProvider.groupAverages
-                .map((e) => e.average)
-                .fold(0.0, (double a, double b) => a + b) /
-            gradeProvider.groupAverages.length
-        : 0.0;
 
-    if (subjectAvg > 0 && !gradeCalcMode) {
-      tiles.add(
-        PanelTitle(title: Text("data".i18n)),
-      );
-      tiles.add(Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: Container(
-              padding: const EdgeInsets.all(16.0),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surface,
-                borderRadius: BorderRadius.circular(16.0),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "subjectavg".i18n,
-                    style: TextStyle(
-                      fontSize: 12.0,
-                      fontWeight: FontWeight.w500,
-                      color: Theme.of(context)
-                          .colorScheme
-                          .onSurface
-                          .withValues(alpha: 0.6),
-                    ),
-                  ),
-                  const SizedBox(height: 4.0),
-                  Text(
-                    subjectAvg > 0 ? subjectAvg.toStringAsFixed(2) : "?",
-                    style: TextStyle(
-                      fontSize: 32.0,
-                      fontWeight: FontWeight.w800,
-                      color: gradeColor(context: context, value: subjectAvg),
-                      height: 1.1,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(width: 12.0),
-          Expanded(
-            child: Container(
-              padding: const EdgeInsets.all(16.0),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surface,
-                borderRadius: BorderRadius.circular(16.0),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "classavg".i18n,
-                    style: TextStyle(
-                      fontSize: 12.0,
-                      fontWeight: FontWeight.w500,
-                      color: Theme.of(context)
-                          .colorScheme
-                          .onSurface
-                          .withValues(alpha: 0.6),
-                    ),
-                  ),
-                  const SizedBox(height: 4.0),
-                  Text(
-                    classAvg > 0 ? classAvg.toStringAsFixed(2) : "?",
-                    style: TextStyle(
-                      fontSize: 32.0,
-                      fontWeight: FontWeight.w800,
-                      color: gradeColor(context: context, value: classAvg),
-                      height: 1.1,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ));
-    }
 
     tiles.add(Provider.of<PlusProvider>(context, listen: false).hasPremium
         ? const SizedBox()
@@ -538,22 +441,6 @@ class GradesPageState extends State<GradesPage> {
                 e.date.isAfter(
                     DateTime.now().subtract(Duration(days: avgDropValue)))))
             .toList();
-
-    yearlyGraph = Padding(
-      padding: const EdgeInsets.only(top: 12.0, bottom: 8.0),
-      child: Panel(
-        child: Container(
-          padding: const EdgeInsets.only(top: 12.0, right: 12.0),
-          child:
-              GradeGraph(graphGrades, dayThreshold: 2, classAvg: totalClassAvg),
-        ),
-      ),
-    );
-
-    gradesCount = Padding(
-      padding: const EdgeInsets.only(bottom: 24.0),
-      child: Panel(child: GradesCount(grades: graphGrades)),
-    );
 
     generateTiles();
 
@@ -689,10 +576,10 @@ class GradesPageState extends State<GradesPage> {
                             ],
                           ),
                           const Spacer(),
-                          if (totalClassAvg >= 1.0)
+                          if (subjectAvg > 0) ...[
                             Container(
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 16.0, vertical: 12.0),
+                                  horizontal: 14.0, vertical: 10.0),
                               decoration: BoxDecoration(
                                 color: Theme.of(context)
                                     .colorScheme
@@ -703,16 +590,52 @@ class GradesPageState extends State<GradesPage> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
+                                  Icon(
+                                    Icons.menu_book_rounded,
+                                    size: 14.0,
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onPrimaryContainer
+                                        .withValues(alpha: 0.65),
+                                  ),
+                                  const SizedBox(height: 2.0),
                                   Text(
-                                    "classavg".i18n,
+                                    subjectAvg.toStringAsFixed(2),
                                     style: TextStyle(
                                       color: Theme.of(context)
                                           .colorScheme
-                                          .onPrimaryContainer
-                                          .withValues(alpha: 0.65),
-                                      fontSize: 11.0,
-                                      fontWeight: FontWeight.w600,
+                                          .onPrimaryContainer,
+                                      fontSize: 22.0,
+                                      fontWeight: FontWeight.w700,
+                                      height: 1.0,
                                     ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 8.0),
+                          ],
+                          if (totalClassAvg >= 1.0)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 14.0, vertical: 10.0),
+                              decoration: BoxDecoration(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onPrimaryContainer
+                                    .withValues(alpha: 0.12),
+                                borderRadius: BorderRadius.circular(20.0),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.group_rounded,
+                                    size: 14.0,
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onPrimaryContainer
+                                        .withValues(alpha: 0.65),
                                   ),
                                   const SizedBox(height: 2.0),
                                   Text(
@@ -721,7 +644,7 @@ class GradesPageState extends State<GradesPage> {
                                       color: Theme.of(context)
                                           .colorScheme
                                           .onPrimaryContainer,
-                                      fontSize: 28.0,
+                                      fontSize: 22.0,
                                       fontWeight: FontWeight.w700,
                                       height: 1.0,
                                     ),
@@ -740,6 +663,47 @@ class GradesPageState extends State<GradesPage> {
                               avgDropValue = v ?? 0;
                               generateTiles();
                             }),
+                          ),
+                          const Spacer(),
+                          GestureDetector(
+                            onTap: () => _showGradesStatsModal(
+                                context, graphGrades, totalClassAvg),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12.0, vertical: 8.0),
+                              decoration: BoxDecoration(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onPrimaryContainer
+                                    .withValues(alpha: 0.12),
+                                borderRadius: BorderRadius.circular(14.0),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.bar_chart_rounded,
+                                    size: 16.0,
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onPrimaryContainer
+                                        .withValues(alpha: 0.8),
+                                  ),
+                                  const SizedBox(width: 4.0),
+                                  Text(
+                                    "stats".i18n,
+                                    style: TextStyle(
+                                      fontSize: 13.0,
+                                      fontWeight: FontWeight.w600,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onPrimaryContainer
+                                          .withValues(alpha: 0.8),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
                         ],
                       ),
@@ -778,6 +742,63 @@ class GradesPageState extends State<GradesPage> {
             },
           ),
         ),
+      ),
+    );
+  }
+
+  void _showGradesStatsModal(BuildContext context, List<Grade> grades, double classAvg) {
+    List<int> counts = List.generate(
+        5, (i) => grades.where((e) => e.value.value == i + 1).length);
+    int total = counts.reduce((a, b) => a + b);
+    double maxCount =
+        counts.reduce((a, b) => a > b ? a : b) + counts.reduce((a, b) => a > b ? a : b) / 5;
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24.0)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Padding(
+        padding: const EdgeInsets.fromLTRB(24.0, 24.0, 24.0, 16.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'grades_cnt'.i18n.fill([total.toString()]),
+              style: const TextStyle(
+                fontSize: 18.0,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 12.0),
+            Container(
+              padding: const EdgeInsets.only(top: 12.0, right: 12.0),
+              child: GradeGraph(grades, dayThreshold: 2, classAvg: classAvg),
+            ),
+            const SizedBox(height: 8.0),
+            ...counts.reversed
+                .toList()
+                .asMap()
+                .entries
+                .map((entry) {
+              final value = 5 - entry.key;
+              final count = entry.value;
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 10.0),
+                child: GradesCountItem(
+                  count: count,
+                  value: value,
+                  total: maxCount,
+                ),
+              );
+            }),
+          ],
+        ),
+      ),
       ),
     );
   }

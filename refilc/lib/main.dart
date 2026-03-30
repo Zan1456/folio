@@ -78,7 +78,7 @@ void main() async {
 
     // shakebugs initialization
     // Shake.setInvokeShakeOnScreenshot(true);
-    Shake.start('Y44AwzfY6091xO2Nr0w59RHSpNxJhhiSFGs4enmoJwelN82ZRzTLE5X');
+    Shake.start('UmVBizZGuaDuLoavBrQQvYJpIxsjKGliCF2vHWI0m7R2GSZ33uNJ9Ws');
 
     // pre-cache required icons
     const todaySvg = SvgAssetLoader('assets/svg/menu_icons/today_selected.svg');
