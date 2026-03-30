@@ -18,7 +18,7 @@ import 'package:folio_mobile_ui/common/empty.dart';
 import 'package:folio_mobile_ui/common/widgets/absence/absence_subject_tile.dart';
 import 'package:folio_mobile_ui/common/widgets/absence/absence_viewable.dart';
 import 'package:folio_mobile_ui/common/widgets/miss_tile.dart';
-import 'package:folio_mobile_ui/pages/absences/absence_subject_view.dart';
+import 'package:folio_mobile_ui/pages/absences/absence_subject_modal.dart';
 import 'package:folio/ui/filter/sort.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -87,6 +87,14 @@ class AbsencesPageState extends State<AbsencesPage>
   void dispose() {
     _tabController.dispose();
     super.dispose();
+  }
+
+  void _showSubjectAbsencesModal(GradeSubject subject, List<Absence> absences) {
+    AbsenceSubjectModal.show(
+      context: context,
+      subject: subject,
+      absences: absences,
+    );
   }
 
   void buildSubjectAbsences() {
@@ -299,8 +307,7 @@ class AbsencesPageState extends State<AbsencesPage>
               pending: a.absences
                   .where((a) => a.state == Justification.pending)
                   .length,
-              onTap: () => AbsenceSubjectView.show(a.subject, a.absences,
-                  context: context),
+              onTap: () => _showSubjectAbsencesModal(a.subject, a.absences),
             ),
           ));
         }

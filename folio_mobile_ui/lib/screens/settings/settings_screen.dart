@@ -30,6 +30,7 @@ import 'package:folio/api/providers/live_card_provider.dart';
 import 'package:folio/api/providers/update_provider.dart';
 import 'package:folio/models/settings.dart';
 import 'package:folio/theme/colors/colors.dart';
+import 'package:folio/theme/observer.dart';
 import 'package:folio/utils/format.dart';
 import 'package:folio_kreta_api/models/grade.dart';
 import 'package:folio_kreta_api/providers/absence_provider.dart';
@@ -1612,6 +1613,8 @@ class SettingsScreenState extends State<SettingsScreen>
                   return PanelButton(
                     onPressed: () {
                       settings.update(theme: mode);
+                      Provider.of<ThemeModeObserver>(context, listen: false)
+                          .changeTheme(mode);
                       setState(() => _themeExpanded = false);
                     },
                     title: Text(labelKey.i18n,

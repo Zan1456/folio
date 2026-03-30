@@ -58,8 +58,6 @@ class SettingsHelper {
     Pages.grades: "grades",
     Pages.timetable: "timetable",
     // Pages.messages: "messages",
-    Pages.absences: "absences",
-    Pages.notes: "notes",
   };
 
   static Map<VibrationStrength, String> vibrationTitle = {
@@ -208,14 +206,14 @@ class SettingsHelper {
       Pages.home: Icons.home_rounded,
       Pages.grades: Icons.bar_chart_rounded,
       Pages.timetable: Icons.calendar_today_rounded,
-      Pages.notes: Icons.sticky_note_2_rounded,
-      Pages.absences: Icons.sick_rounded,
     };
+
+    const allowedPages = [Pages.home, Pages.grades, Pages.timetable];
 
     showBottomSheetMenu(
       context,
-      items: List.generate(Pages.values.length, (index) {
-        final page = Pages.values[index];
+      items: List.generate(allowedPages.length, (index) {
+        final page = allowedPages[index];
         final isSelected =
             Provider.of<SettingsProvider>(context, listen: false).startPage ==
                 page;
@@ -1013,6 +1011,112 @@ class _CountdownBeforeMinutesSettingState
           ),
         ),
       ],
+    );
+  }
+}
+
+class GradeRarityTextSetting extends StatefulWidget {
+  const GradeRarityTextSetting({
+    super.key,
+    required this.title,
+    required this.cancel,
+    required this.done,
+    required this.defaultRarities,
+  });
+
+  final String title;
+  final String cancel;
+  final String done;
+  final List<String> defaultRarities;
+
+  @override
+  State<GradeRarityTextSetting> createState() => _GradeRarityTextSettingState();
+}
+
+class _GradeRarityTextSettingState extends State<GradeRarityTextSetting> {
+  late List<TextEditingController> _controllers;
+  final List<String> _keys = ['common', 'uncommon', 'rare', 'epic', 'legendary'];
+
+  @override
+  void initState() {
+    super.initState();
+    _controllers = List.generate(
+      widget.defaultRarities.length,
+      (i) => TextEditingController(text: widget.defaultRarities[i]),
+    );
+    _loadFromDb();
+  }
+
+  void _loadFromDb() async {
+    final db = Provider.of<DatabaseProvider>(context, listen: false);
+    final user = Provider.of<UserProvider>(context, listen: false);
+    final stored = await db.userQuery.getGradeRarities(userId: user.id!);
+    for (int i = 0; i < _keys.length && i < _controllers.length; i++) {
+      if (stored.containsKey(_keys[i])) {
+        _controllers[i].text = stored[_keys[i]]!;
+      }
+    }
+    setState(() {});
+  }
+
+  @override
+  void dispose() {
+    for (final c in _controllers) {
+      c.dispose();
+    }
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            widget.title,
+            style: const TextStyle(fontSize: 18.0, fontWeight: FontWeight.w700),
+          ),
+          const SizedBox(height: 12.0),
+          ...List.generate(_controllers.length, (i) => Padding(
+            padding: const EdgeInsets.only(bottom: 10.0),
+            child: TextField(
+              controller: _controllers[i],
+              decoration: InputDecoration(
+                labelText: _keys[i],
+                border: const OutlineInputBorder(),
+              ),
+            ),
+          )),
+          const SizedBox(height: 8.0),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              TextButton(
+                onPressed: () => Navigator.of(context).maybePop(),
+                child: Text(widget.cancel),
+              ),
+              const SizedBox(width: 8.0),
+              FilledButton(
+                onPressed: () async {
+                  final db = Provider.of<DatabaseProvider>(context, listen: false);
+                  final user = Provider.of<UserProvider>(context, listen: false);
+                  final Map<String, String> rarities = {};
+                  for (int i = 0; i < _keys.length && i < _controllers.length; i++) {
+                    rarities[_keys[i]] = _controllers[i].text;
+                  }
+                  await db.userStore.storeGradeRarities(rarities, userId: user.id!);
+                  Navigator.of(context).maybePop();
+                },
+                child: Text(widget.done),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8.0),
+        ],
+      ),
     );
   }
 }
