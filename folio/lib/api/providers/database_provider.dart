@@ -1,0 +1,23 @@
+import 'package:folio/database/query.dart';
+import 'package:folio/database/store.dart';
+// ignore: depend_on_referenced_packages
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+
+class DatabaseProvider {
+  // late Database _database;
+  late DatabaseQuery query;
+  late UserDatabaseQuery userQuery;
+  late DatabaseStore store;
+  late UserDatabaseStore userStore;
+
+  Future<void> init() async {
+    Database db;
+
+    db = await openDatabase("app.db");
+
+    query = DatabaseQuery(db: db);
+    store = DatabaseStore(db: db);
+    userQuery = UserDatabaseQuery(db: db);
+    userStore = UserDatabaseStore(db: db);
+  }
+}
