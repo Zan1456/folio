@@ -1,11 +1,11 @@
-/* 
+/*
  * Maintainer: DarK
  * Translated from C version
  * Minimal Working Fixed @ 2022.12.25
  * ##Please do NOT modify if you don't know whats going on##
- * 
+ *
  * Issue: #59
- * 
+ *
  * Future changes / ideas:
  *  - `best` should be configurable
  */

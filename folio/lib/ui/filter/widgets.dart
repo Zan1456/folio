@@ -28,8 +28,6 @@ import 'package:folio_kreta_api/providers/timetable_provider.dart';
 import 'package:folio_mobile_ui/common/widgets/cretification/certification_card.dart';
 import 'package:folio_mobile_ui/common/widgets/grade/new_grades.dart';
 import 'package:folio_mobile_ui/common/widgets/note/note_viewable.dart';
-import 'package:folio_plus/providers/plus_provider.dart';
-import 'package:folio_plus/ui/mobile/plus/premium_inline.dart';
 import 'package:folio_mobile_ui/common/panel/panel.dart';
 import 'package:flutter/material.dart';
 import 'package:animated_list_plus/transitions.dart';
@@ -193,20 +191,6 @@ Widget filterItemBuilder(
   bool isAfterSeparated = false,
   bool isBeforeSeparated = false,
 }) {
-  if (item.key == const Key("\$premium")) {
-    return Provider.of<PlusProvider>(context, listen: false).hasPremium ||
-            DateTime.now().weekday <= 5
-        ? const SizedBox()
-        : const Padding(
-            padding: EdgeInsets.only(bottom: 24.0),
-            child: PremiumInline(features: [
-              PremiumInlineFeature.nickname,
-              PremiumInlineFeature.theme,
-              PremiumInlineFeature.widget,
-            ]),
-          );
-  }
-
   final wrappedItem = SizeFadeTransition(
     curve: Curves.easeInOutCubic,
     animation: animation,

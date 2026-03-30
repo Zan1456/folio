@@ -16,9 +16,6 @@ dependencies:
     path: "../folio_mobile_ui/"
   folio_kreta_api:
     path: "../folio_kreta_api/"
-  folio_plus:
-    path: "../folio_plus/"
-
   flutter_localizations:
     sdk: flutter
   i18n_extension: ^15.1.0

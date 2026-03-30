@@ -3,7 +3,7 @@ import 'package:folio/api/providers/user_provider.dart';
 import 'package:folio/theme/colors/colors.dart';
 import 'package:folio_kreta_api/models/subject.dart';
 import 'package:folio_mobile_ui/common/average_display.dart';
-import 'package:folio_plus/ui/mobile/goal_planner/goal_state_screen.i18n.dart';
+import 'package:folio_mobile_ui/pages/grades/goal_planner/goal_state_screen.i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -66,13 +66,6 @@ class GoalCompleteModal extends StatelessWidget {
                       fontWeight: FontWeight.w800,
                     ),
                   ),
-                  // const SizedBox(width: 10.0),
-                  // Icon(
-                  //   SubjectIcon.resolveVariant(
-                  //       subject: subject, context: context),
-                  //   color: Colors.white,
-                  //   size: 64.0,
-                  // ),
                 ],
               ),
             ),
@@ -200,21 +193,6 @@ class GoalCompleteModal extends StatelessWidget {
         ),
       ),
     );
-
-    // return Padding(
-    //   padding: const EdgeInsets.symmetric(vertical: 100.0, horizontal: 32.0),
-    //   child: Material(
-    //     borderRadius: BorderRadius.circular(12.0),
-    //     child: Padding(
-    //       padding: const EdgeInsets.all(12.0),
-    //       child: Column(
-    //         children: [
-    //           // content or idk
-    //         ],
-    //       ),
-    //     ),
-    //   ),
-    // );
   }
 
   static Future<T?> show<T>(
@@ -226,8 +204,6 @@ class GoalCompleteModal extends StatelessWidget {
 
     var goalAvgRes = await db.userQuery.subjectGoalAverages(userId: user.id!);
     var beforeAvgRes = await db.userQuery.subjectGoalBefores(userId: user.id!);
-
-    //DateTime goalPinDate = DateTime.parse((await db.userQuery.subjectGoalPinDates(userId: user.id!))[widget.subject.id]!);
 
     String? goalAvgStr = goalAvgRes[subject.id];
     String? beforeAvgStr = beforeAvgRes[subject.id];

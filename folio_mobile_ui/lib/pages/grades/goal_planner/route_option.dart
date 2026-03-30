@@ -1,7 +1,7 @@
 import 'package:folio/theme/colors/colors.dart';
-import 'package:folio_plus/ui/mobile/goal_planner/goal_planner.dart';
-import 'package:folio_plus/ui/mobile/goal_planner/goal_planner_screen.i18n.dart';
-import 'package:folio_plus/ui/mobile/goal_planner/grade_display.dart';
+import 'package:folio_mobile_ui/pages/grades/goal_planner/goal_planner.dart';
+import 'package:folio_mobile_ui/pages/grades/goal_planner/goal_planner_screen.i18n.dart';
+import 'package:folio_mobile_ui/pages/grades/goal_planner/grade_display.dart';
 import 'package:flutter/material.dart';
 
 enum RouteMark { recommended, fastest }
@@ -110,21 +110,6 @@ class RouteOption extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   if (mark != null) ...[
-                    // Chip(
-                    //   label: markLabel(),
-                    //   visualDensity: VisualDensity.compact,
-                    //   backgroundColor:
-                    //       selected ? markColor(context) : Colors.transparent,
-                    //   labelPadding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    //   labelStyle:
-                    //       TextStyle(color: selected ? Colors.white : null),
-                    //   shape: StadiumBorder(
-                    //     side: BorderSide(
-                    //       color: markColor(context),
-                    //       width: 3.0,
-                    //     ),
-                    //   ),
-                    // ),
                     markLabel(
                         colorOverride: selected ? markColor(context) : null),
                     const SizedBox(height: 6.0),

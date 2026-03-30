@@ -5,6 +5,7 @@ import 'package:folio/api/providers/user_provider.dart';
 import 'package:folio/helpers/average_helper.dart';
 import 'package:folio/helpers/subject.dart';
 import 'package:folio/models/settings.dart';
+import 'package:folio/providers/goal_provider.dart';
 import 'package:folio_kreta_api/models/grade.dart';
 import 'package:folio_kreta_api/models/subject.dart';
 import 'package:folio_kreta_api/providers/grade_provider.dart';
@@ -13,11 +14,10 @@ import 'package:folio_mobile_ui/common/average_display.dart';
 import 'package:folio_mobile_ui/common/panel/panel.dart';
 import 'package:folio_mobile_ui/common/progress_bar.dart';
 import 'package:folio_mobile_ui/common/round_border_icon.dart';
-import 'package:folio_plus/providers/goal_provider.dart';
-import 'package:folio_plus/ui/mobile/goal_planner/goal_planner.dart';
-import 'package:folio_plus/ui/mobile/goal_planner/goal_state_screen.i18n.dart';
-import 'package:folio_plus/ui/mobile/goal_planner/goal_track_popup.dart';
-import 'package:folio_plus/ui/mobile/goal_planner/route_option.dart';
+import 'package:folio_mobile_ui/pages/grades/goal_planner/goal_planner.dart';
+import 'package:folio_mobile_ui/pages/grades/goal_planner/goal_state_screen.i18n.dart';
+import 'package:folio_mobile_ui/pages/grades/goal_planner/goal_track_popup.dart';
+import 'package:folio_mobile_ui/pages/grades/goal_planner/route_option.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -212,11 +212,9 @@ class _GoalStateScreenState extends State<GoalStateScreen> {
                                   ActionButton(
                                     label: "delete".i18n,
                                     onTap: () async {
-                                      // clear the goal
                                       await Provider.of<GoalProvider>(context,
                                               listen: false)
                                           .clearGoal(widget.subject);
-                                      // close the modal and the goal page
                                       Navigator.of(context).pop();
                                       Navigator.of(context).pop();
                                     },
@@ -244,9 +242,7 @@ class _GoalStateScreenState extends State<GoalStateScreen> {
                           padding: 8.0,
                           width: 2.5,
                         ),
-                        const SizedBox(
-                          height: 10.0,
-                        ),
+                        const SizedBox(height: 10.0),
                         Text(
                           (widget.subject.isRenamed
                                   ? widget.subject.renamedTo
@@ -297,8 +293,6 @@ class _GoalStateScreenState extends State<GoalStateScreen> {
                               ),
                               const SizedBox(width: 5.0),
                               AverageDisplay(average: currAvg),
-                              const SizedBox(width: 5.0),
-                              // ide majd kell average difference
                             ],
                           ),
                         ],
@@ -326,11 +320,6 @@ class _GoalStateScreenState extends State<GoalStateScreen> {
                                   onPressed: () async {
                                     GoalTrackPopup.show(context,
                                         subject: widget.subject);
-                                    // Navigator.of(context).push(
-                                    //     CupertinoPageRoute(
-                                    //         builder: (context) =>
-                                    //             GoalPlannerScreen(
-                                    //                 subject: widget.subject)));
                                   },
                                   fillColor: Colors.black,
                                   shape: const StadiumBorder(),
@@ -428,24 +417,16 @@ class _GoalStateScreenState extends State<GoalStateScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'you_need'.i18n,
-                                  style: const TextStyle(
-                                    fontSize: 23.0,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                              ],
+                            Text(
+                              'you_need'.i18n,
+                              style: const TextStyle(
+                                fontSize: 23.0,
+                                fontWeight: FontWeight.w700,
+                              ),
                             ),
                             const SizedBox(height: 8.0),
                             plan != null
-                                ? RouteOptionRow(
-                                    plan: plan!,
-                                  )
+                                ? RouteOptionRow(plan: plan!)
                                 : const Text(''),
                           ],
                         ),

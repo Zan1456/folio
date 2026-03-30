@@ -4,7 +4,7 @@ import 'package:folio/helpers/average_helper.dart';
 import 'package:folio/models/settings.dart';
 import 'package:folio/theme/colors/colors.dart';
 import 'package:folio_kreta_api/models/grade.dart';
-import 'package:folio_plus/ui/mobile/goal_planner/graph.i18n.dart';
+import 'package:folio_mobile_ui/pages/grades/goal_planner/graph.i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:provider/provider.dart';
@@ -120,7 +120,6 @@ class GoalGraphState extends State<GoalGraph> {
       ));
     }
 
-    // LineChart is really cute because it tries to render it's contents outside of it's rect.
     return widget.data.length <= 2
         ? SizedBox(
             height: 150,
@@ -165,15 +164,6 @@ class GoalGraphState extends State<GoalGraph> {
                                   ],
                                   stops: const [0.1, 0.6, 0.8, 1],
                                 ),
-                                // colors: [
-                                //   averageColor.withOpacity(0.7),
-                                //   averageColor.withOpacity(0.3),
-                                //   averageColor.withOpacity(0.2),
-                                //   averageColor.withOpacity(0.1),
-                                // ],
-                                // gradientColorStops: [0.1, 0.6, 0.8, 1],
-                                // gradientFrom: const Offset(0, 0),
-                                // gradientTo: const Offset(0, 1),
                               ),
                             ),
                             if (ghostData.isNotEmpty && ghostSpots.isNotEmpty)
@@ -214,19 +204,9 @@ class GoalGraphState extends State<GoalGraph> {
                           gridData: const FlGridData(
                             show: true,
                             horizontalInterval: 1,
-                            // checkToShowVerticalLine: (_) => false,
-                            // getDrawingHorizontalLine: (_) => FlLine(
-                            //   color: AppColors.of(context).text.withOpacity(.15),
-                            //   strokeWidth: 2,
-                            // ),
-                            // getDrawingVerticalLine: (_) => FlLine(
-                            //   color: AppColors.of(context).text.withOpacity(.25),
-                            //   strokeWidth: 2,
-                            // ),
                           ),
                           lineTouchData: LineTouchData(
                             touchTooltipData: const LineTouchTooltipData(
-                              // tooltipBgColor: Colors.grey.shade800,
                               fitInsideVertically: true,
                               fitInsideHorizontally: true,
                             ),

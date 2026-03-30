@@ -26,8 +26,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
-import 'package:folio_plus/models/premium_scopes.dart';
-import 'package:folio_plus/providers/plus_provider.dart';
 import 'timetable_page.i18n.dart';
 
 // todo: "fix" overflow (priority: -1)
@@ -157,12 +155,7 @@ class TimetablePageState extends State<TimetablePage>
       }
     }
 
-    // push timetable to calendar
-    if (mounted) {
-      if (Provider.of<PlusProvider>(context, listen: false).hasPremium &&
-          Provider.of<PlusProvider>(context, listen: false)
-              .hasScope(PremiumScopes.calendarSync)) {}
-    }
+    // push timetable to calendar (calendar sync removed)
 
     // Listen for user changes
     user = Provider.of<UserProvider>(context, listen: false);

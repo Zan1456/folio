@@ -13,10 +13,6 @@ dependencies:
   # e-KRETA API (kreten) client
   folio_kreta_api:
     path: ../folio_kreta_api/
-  # Folio Plus
-  folio_plus:
-    path: ../folio_plus/
-
   provider: ^6.1.2
   fl_chart: ^1.2.0
   url_launcher: ^6.3.1

@@ -46,9 +46,6 @@ import 'package:folio_mobile_ui/pages/notes/submenu/add_note_screen.dart';
 import 'package:folio_mobile_ui/pages/notes/submenu/create_image_note.dart';
 import 'package:folio_mobile_ui/pages/notes/submenu/note_view_screen.dart';
 import 'package:folio_mobile_ui/pages/notes/submenu/self_note_tile.dart';
-import 'package:folio_plus/models/premium_scopes.dart';
-import 'package:folio_plus/providers/plus_provider.dart';
-import 'package:folio_plus/ui/mobile/plus/premium_inline.dart';
 import 'package:uuid/uuid.dart';
 import 'notes_page.i18n.dart';
 
@@ -123,9 +120,7 @@ Future<void> deleteTodoItem(TodoItem item) async {
 
     List<Widget> toDoTiles = [];
 
-    if (hw.isNotEmpty &&
-        Provider.of<PlusProvider>(context, listen: false)
-            .hasScope(PremiumScopes.unlimitedSelfNotes)) {
+    if (hw.isNotEmpty) {
       toDoTiles.addAll(hw.map((e) => TickTile(
             padding: EdgeInsets.zero,
             title: 'homework'.i18n,
@@ -261,15 +256,6 @@ if (selfNoteProvider.todos.isNotEmpty) {
         ),
       );
     }
-
-    tiles.add(Provider.of<PlusProvider>(context, listen: false).hasPremium
-        ? const SizedBox()
-        : const Padding(
-            padding: EdgeInsets.only(top: 24.0),
-            child: PremiumInline(features: [
-              PremiumInlineFeature.stats,
-            ]),
-          ));
 
     // padding
     tiles.add(const SizedBox(height: 32.0));

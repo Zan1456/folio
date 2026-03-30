@@ -8,8 +8,6 @@ import 'package:folio/api/providers/database_provider.dart';
 import 'package:folio/api/providers/user_provider.dart';
 import 'package:folio/models/user.dart';
 import 'package:folio_mobile_ui/common/bottom_sheet_menu/bottom_sheet_menu_item.dart';
-// import 'package:folio_plus/models/premium_scopes.dart';
-// import 'package:folio_plus/providers/plus_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:folio_mobile_ui/screens/settings/settings_screen.i18n.dart';

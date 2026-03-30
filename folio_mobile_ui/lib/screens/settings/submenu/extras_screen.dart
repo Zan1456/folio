@@ -18,7 +18,6 @@
 
 // import 'package:folio/models/settings.dart';
 
-import 'package:folio/api/providers/user_provider.dart';
 import 'package:folio/models/settings.dart';
 import 'package:folio/theme/colors/colors.dart';
 import 'package:folio_mobile_ui/common/chips/new_chip.dart';
@@ -28,11 +27,6 @@ import 'package:folio_mobile_ui/screens/settings/settings_helper.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:folio_plus/ui/mobile/settings/submenu/grade_exporting.dart';
-import 'package:folio_plus/models/premium_scopes.dart';
-import 'package:folio_plus/providers/plus_provider.dart';
-import 'package:folio_plus/ui/mobile/settings/welcome_message.dart';
-
 import 'package:folio_kreta_api/providers/grade_provider.dart';
 import 'package:folio_mobile_ui/common/action_button.dart';
 
@@ -60,20 +54,10 @@ class MenuExtrasSettings extends StatelessWidget {
         size: 22.0,
         color: AppColors.of(context).text.withValues(alpha: 0.95),
       ),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (Provider.of<SettingsProvider>(context)
-              .unseenNewFeatures
-              .toSet()
-              .intersection({'grade_exporting'}).isNotEmpty)
-            const NewChip(),
-          Icon(
-            Icons.keyboard_arrow_right_rounded,
-            size: 22.0,
-            color: AppColors.of(context).text.withValues(alpha: 0.95),
-          )
-        ],
+      trailing: Icon(
+        Icons.keyboard_arrow_right_rounded,
+        size: 22.0,
+        color: AppColors.of(context).text.withValues(alpha: 0.95),
       ),
       borderRadius: borderRadius,
     );
@@ -89,12 +73,10 @@ class ExtrasSettingsScreen extends StatefulWidget {
 
 class ExtrasSettingsScreenState extends State<ExtrasSettingsScreen> {
   late SettingsProvider settingsProvider;
-  late UserProvider user;
 
   @override
   Widget build(BuildContext context) {
     SettingsProvider settingsProvider = Provider.of<SettingsProvider>(context);
-    UserProvider user = Provider.of<UserProvider>(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -120,11 +102,6 @@ class ExtrasSettingsScreenState extends State<ExtrasSettingsScreen> {
                   PanelButton(
                     padding: const EdgeInsets.only(left: 14.0, right: 6.0),
                     onPressed: () async {
-                      if (!Provider.of<PlusProvider>(context, listen: false)
-                          .hasScope(PremiumScopes.customGradeRarities)) {
-                        return;
-                      }
-
                       // settingsProvider.update(
                       //     gradeOpeningFun: !settingsProvider.gradeOpeningFun);
                       SettingsHelper.surpriseGradeRarityText(
@@ -170,24 +147,6 @@ class ExtrasSettingsScreenState extends State<ExtrasSettingsScreen> {
                       top: Radius.circular(12.0),
                       bottom: Radius.circular(12.0),
                     ),
-                  ),
-                ],
-              ),
-              SplittedPanel(
-                padding: const EdgeInsets.only(top: 9.0),
-                cardPadding: const EdgeInsets.all(4.0),
-                isSeparated: true,
-                children: [
-                  WelcomeMessagePanelButton(settingsProvider, user),
-                ],
-              ),
-              SplittedPanel(
-                padding: const EdgeInsets.only(top: 9.0),
-                cardPadding: const EdgeInsets.all(4.0),
-                isSeparated: true,
-                children: [
-                  MenuGradeExporting(
-                    borderRadius: BorderRadius.circular(12.0),
                   ),
                 ],
               ),

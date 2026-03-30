@@ -35,7 +35,7 @@ import 'package:folio/theme/observer.dart';
 import 'package:folio/theme/theme.dart';
 import 'package:folio_kreta_api/client/client.dart';
 import 'package:folio_kreta_api/providers/grade_provider.dart';
-import 'package:folio_plus/providers/goal_provider.dart';
+import 'package:folio/providers/goal_provider.dart';
 import 'package:folio_kreta_api/providers/share_provider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -69,7 +69,6 @@ import 'package:folio/api/providers/user_provider.dart';
 import 'package:folio/api/providers/update_provider.dart';
 import 'package:folio_mobile_ui/pages/grades/calculator/grade_calculator_provider.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
-import 'package:folio_plus/providers/plus_provider.dart';
 
 class App extends StatelessWidget {
   final SettingsProvider settings;
@@ -102,19 +101,16 @@ class App extends StatelessWidget {
         user: user, settings: settings, database: database, status: status);
     final timetable =
         TimetableProvider(user: user, database: database, kreta: kreta);
-    final premium = PlusProvider(settings: settings);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       FilcAPI.getConfig(settings).then((Config? config) {
         if (config != null) settings.update(config: config);
       });
-      premium.activate();
     });
 
     return MultiProvider(
       providers: [
         // folio providers
-        ChangeNotifierProvider<PlusProvider>(create: (_) => premium),
         ChangeNotifierProvider<SettingsProvider>(create: (_) => settings),
         ChangeNotifierProvider<UserProvider>(create: (_) => user),
         ChangeNotifierProvider<StatusProvider>(create: (_) => status),

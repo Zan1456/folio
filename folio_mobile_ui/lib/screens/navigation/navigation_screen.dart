@@ -21,7 +21,7 @@ import 'package:folio_mobile_ui/screens/navigation/status_bar.dart';
 import 'package:folio_mobile_ui/screens/news/news_view.dart';
 import 'package:folio_mobile_ui/screens/settings/live_activity_consent_dialog.dart';
 import 'package:folio_mobile_ui/common/widgets/update/update_dialog.dart';
-import 'package:folio_plus/ui/mobile/goal_planner/goal_complete_modal.dart';
+import 'package:folio_mobile_ui/pages/grades/goal_planner/goal_complete_modal.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -30,7 +30,7 @@ import 'package:folio_mobile_ui/common/screens.i18n.dart';
 import 'package:folio/api/providers/news_provider.dart';
 import 'package:folio/api/providers/sync.dart';
 import 'package:background_fetch/background_fetch.dart';
-import 'package:folio_plus/providers/goal_provider.dart';
+import 'package:folio/providers/goal_provider.dart';
 import 'package:folio/api/providers/ad_provider.dart';
 import 'dart:io' show Platform;
 

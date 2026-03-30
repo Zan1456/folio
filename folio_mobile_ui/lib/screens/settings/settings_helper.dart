@@ -35,12 +35,6 @@ import 'package:flutter_material_color_picker/flutter_material_color_picker.dart
 import 'package:folio/models/icon_pack.dart';
 import 'package:folio/utils/format.dart';
 import 'package:folio_mobile_ui/screens/settings/theme_screen.dart';
-import 'package:folio_plus/models/premium_scopes.dart';
-import 'package:folio_plus/providers/plus_provider.dart';
-// import 'package:folio_plus/models/premium_scopes.dart';
-// import 'package:folio_plus/providers/plus_provider.dart';
-// import 'package:folio_plus/ui/mobile/plus/upsell.dart';
-import 'package:folio_plus/ui/mobile/settings/settings_helper.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class SettingsHelper {
@@ -908,11 +902,6 @@ class _LiveActivityColorSettingState extends State<LiveActivityColorSetting> {
               colors: [...fullMaterialColors],
               selectedColor: settings.liveActivityColor,
               onMainColorChange: (k) {
-                if (!Provider.of<PlusProvider>(context, listen: false)
-                    .hasScope(PremiumScopes.liveActivityColor)) {
-                  return;
-                }
-
                 setState(() {
                   currentColor = k as Color;
                   settings.update(

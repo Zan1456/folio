@@ -25,16 +25,12 @@ import 'package:folio_mobile_ui/pages/grades/calculator/grade_calculator_provide
 import 'package:folio_mobile_ui/pages/grades/grades_count.dart';
 import 'package:folio_mobile_ui/pages/grades/graph.dart';
 import 'package:folio_mobile_ui/pages/grades/subject_grades_container.dart';
-// import 'package:folio_plus/models/premium_scopes.dart';
-// import 'package:folio_plus/providers/plus_provider.dart';
-import 'package:folio_plus/ui/mobile/goal_planner/goal_state_screen.dart';
-// import 'package:folio_plus/ui/mobile/plus/upsell.dart';
+import 'package:folio_mobile_ui/pages/grades/goal_planner/goal_state_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:folio_plus/ui/mobile/goal_planner/goal_track_popup.dart';
+import 'package:folio_mobile_ui/pages/grades/goal_planner/goal_track_popup.dart';
 import 'grades_page.i18n.dart';
-// import 'package:folio_plus/ui/mobile/goal_planner/new_goal.dart';
 
 class GradeSubjectView extends StatefulWidget {
   const GradeSubjectView(this.subject, {super.key, this.groupAverage = 0.0});

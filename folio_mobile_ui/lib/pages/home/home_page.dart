@@ -8,7 +8,6 @@ import 'package:folio/ui/date_widget.dart';
 import 'package:folio/utils/format.dart';
 import 'package:i18n_extension/i18n_extension.dart';
 import 'package:intl/intl.dart';
-import 'package:folio_plus/providers/plus_provider.dart';
 import 'package:animated_list_plus/animated_list_plus.dart';
 import 'package:folio/api/providers/update_provider.dart';
 import 'package:folio/api/providers/sync.dart';
@@ -175,8 +174,6 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
     updateProvider = Provider.of<UpdateProvider>(context);
     _liveCard = Provider.of<LiveCardProvider>(context);
     gradeProvider = Provider.of<GradeProvider>(context);
-    context.watch<PlusProvider>();
-
     if (_liveCard.show != _lastLiveCardShow) {
       _lastLiveCardShow = _liveCard.show;
       _liveCardAnimation.animateTo(_liveCard.show ? 1.0 : 0.0);

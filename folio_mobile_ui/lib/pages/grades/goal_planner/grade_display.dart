@@ -1,5 +1,5 @@
 import 'package:folio/models/settings.dart';
-import 'package:folio_plus/ui/mobile/goal_planner/goal_input.dart';
+import 'package:folio_mobile_ui/pages/grades/goal_planner/goal_input.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

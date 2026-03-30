@@ -9,13 +9,10 @@ import 'package:folio_kreta_api/models/grade.dart';
 import 'package:folio_kreta_api/models/subject.dart';
 import 'package:folio_kreta_api/providers/grade_provider.dart';
 import 'package:folio_mobile_ui/common/bottom_sheet_menu/rounded_bottom_sheet.dart';
-import 'package:folio_plus/models/premium_scopes.dart';
-import 'package:folio_plus/providers/plus_provider.dart';
-import 'package:folio_plus/ui/mobile/goal_planner/goal_input.dart';
-import 'package:folio_plus/ui/mobile/goal_planner/goal_planner.dart';
-import 'package:folio_plus/ui/mobile/goal_planner/goal_planner_screen.dart';
-import 'package:folio_plus/ui/mobile/goal_planner/goal_planner_screen.i18n.dart';
-import 'package:folio_plus/ui/mobile/goal_planner/route_option.dart';
+import 'package:folio_mobile_ui/pages/grades/goal_planner/goal_input.dart';
+import 'package:folio_mobile_ui/pages/grades/goal_planner/goal_planner.dart';
+import 'package:folio_mobile_ui/pages/grades/goal_planner/goal_planner_screen.i18n.dart';
+import 'package:folio_mobile_ui/pages/grades/goal_planner/route_option.dart';
 
 class GoalTrackPopup extends StatefulWidget {
   const GoalTrackPopup({super.key, required this.subject});
@@ -128,13 +125,6 @@ class GoalTrackPopupState extends State<GoalTrackPopup> {
     }
 
     otherPlans = List.from(plans);
-
-    if (!Provider.of<PlusProvider>(context)
-        .hasScope(PremiumScopes.unlimitedGoalPlanner)) {
-      if (otherPlans.length > 2) {
-        otherPlans.removeRange(2, otherPlans.length - 1);
-      }
-    }
 
     return PlanResult.available;
   }
@@ -492,3 +482,5 @@ class GoalTrackPopupState extends State<GoalTrackPopup> {
     );
   }
 }
+
+enum PlanResult { available, unsolvable, unreachable, reached }

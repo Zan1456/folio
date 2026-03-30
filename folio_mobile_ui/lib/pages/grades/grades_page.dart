@@ -32,12 +32,9 @@ import 'package:folio_mobile_ui/pages/grades/graph.dart';
 import 'package:folio_mobile_ui/pages/grades/grade_subject_view.dart';
 import 'package:folio_mobile_ui/screens/navigation/navigation_route_handler.dart';
 import 'package:folio_mobile_ui/screens/navigation/navigation_screen.dart';
-import 'package:folio_plus/models/premium_scopes.dart';
-import 'package:folio_plus/providers/plus_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:folio/helpers/average_helper.dart';
-import 'package:folio_plus/ui/mobile/plus/premium_inline.dart';
 import 'average_selector.dart';
 import 'calculator/grade_calculator.dart';
 import 'calculator/grade_calculator_provider.dart';
@@ -369,16 +366,6 @@ class GradesPageState extends State<GradesPage> {
         : 0.0;
 
 
-    tiles.add(Provider.of<PlusProvider>(context, listen: false).hasPremium
-        ? const SizedBox()
-        : const Padding(
-            padding: EdgeInsets.only(top: 24.0),
-            child: PremiumInline(features: [
-              PremiumInlineFeature.goal,
-              PremiumInlineFeature.stats,
-            ]),
-          ));
-
     // padding
     tiles.add(const SizedBox(height: 32.0));
 
@@ -394,8 +381,6 @@ class GradesPageState extends State<GradesPage> {
     homeworkProvider = Provider.of<HomeworkProvider>(context);
     examProvider = Provider.of<ExamProvider>(context);
     settingsProvider = Provider.of<SettingsProvider>(context);
-
-    context.watch<PlusProvider>();
 
     List<String> nameParts = user.displayName?.split(" ") ?? ["?"];
     firstName = nameParts.length > 1 ? nameParts[1] : nameParts[0];
@@ -892,11 +877,6 @@ class GradesPageState extends State<GradesPage> {
                 setState(() {});
 
                 Navigator.of(context, rootNavigator: true).pop();
-                return;
-              }
-
-              if (!Provider.of<PlusProvider>(context, listen: false)
-                  .hasScope(PremiumScopes.gradeExporting)) {
                 return;
               }
 

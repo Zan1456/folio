@@ -23,8 +23,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:folio_mobile_ui/screens/settings/settings_screen.i18n.dart';
-import 'package:folio_plus/models/premium_scopes.dart';
-import 'package:folio_plus/providers/plus_provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 
@@ -878,11 +876,6 @@ class PersonalizeSettingsScreenState extends State<PersonalizeSettingsScreen>
                       PanelButton(
                         padding: const EdgeInsets.only(left: 14.0, right: 6.0),
                         onPressed: () async {
-                          if (!Provider.of<PlusProvider>(context, listen: false)
-                              .hasScope(PremiumScopes.customFont)) {
-                            return;
-                          }
-
                           settingsProvider.update(
                               titleOnlyFont: !settingsProvider.titleOnlyFont);
                           Provider.of<ThemeModeObserver>(context, listen: false)
@@ -907,12 +900,6 @@ class PersonalizeSettingsScreenState extends State<PersonalizeSettingsScreen>
                         ),
                         trailing: Switch(
                           onChanged: (v) async {
-                            if (!Provider.of<PlusProvider>(context,
-                                    listen: false)
-                                .hasScope(PremiumScopes.customFont)) {
-                              return;
-                            }
-
                             settingsProvider.update(titleOnlyFont: v);
                             Provider.of<ThemeModeObserver>(context,
                                     listen: false)

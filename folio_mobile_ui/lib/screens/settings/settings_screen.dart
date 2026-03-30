@@ -43,10 +43,6 @@ import 'package:folio_mobile_ui/common/widgets/update/update_viewable.dart';
 import 'package:folio_mobile_ui/screens/settings/live_activity_consent_dialog.dart';
 import 'package:folio_mobile_ui/screens/settings/privacy_view.dart';
 import 'package:folio_mobile_ui/screens/settings/settings_helper.dart';
-import 'package:folio_plus/models/premium_scopes.dart';
-import 'package:folio_plus/providers/plus_provider.dart';
-import 'package:folio_plus/ui/mobile/settings/submenu/grade_exporting.dart';
-import 'package:folio_plus/ui/mobile/settings/welcome_message.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -905,17 +901,6 @@ class SettingsScreenState extends State<SettingsScreen>
 
                         // Developer settings (shown below version after unlocking)
                         if (settings.developerMode) ...[
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                            child: SplittedPanel(
-                              title: Text('developer_settings'.i18n),
-                              cardPadding: const EdgeInsets.all(4.0),
-                              isSeparated: true,
-                              children: [
-                                MenuGradeExporting(borderRadius: BorderRadius.circular(12.0)),
-                              ],
-                            ),
-                          ),
                           const SizedBox(height: 20.0),
                         ],
                       ],
@@ -1889,8 +1874,6 @@ class SettingsScreenState extends State<SettingsScreen>
               PanelButton(
                 padding: const EdgeInsets.only(left: 14.0, right: 6.0),
                 onPressed: () async {
-                  if (!Provider.of<PlusProvider>(context, listen: false)
-                      .hasScope(PremiumScopes.customGradeRarities)) return;
                   SettingsHelper.surpriseGradeRarityText(
                     context,
                     title: 'rarity_title'.i18n,
@@ -2017,21 +2000,6 @@ class SettingsScreenState extends State<SettingsScreen>
         ),
       ),
 
-      // Welcome message
-      _SettingsSection(
-        category: 'grades',
-        searchTerms: ['üdvözlés', 'welcome', 'üzenet', 'message'],
-        widget: Padding(
-          padding: const EdgeInsets.only(top: 2.0),
-          child: SplittedPanel(
-            cardPadding: const EdgeInsets.all(4.0),
-            isSeparated: true,
-            children: [
-              WelcomeMessagePanelButton(settings, user),
-            ],
-          ),
-        ),
-      ),
 
       // ── OTHER ────────────────────────────────────────────────
 
