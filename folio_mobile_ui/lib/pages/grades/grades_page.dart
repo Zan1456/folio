@@ -336,7 +336,7 @@ class GradesPageState extends State<GradesPage> {
 
     if (tiles.isNotEmpty || gradeCalcMode) {
       if (!gradeCalcMode) {
-        tiles.insert(1, FailWarning(subjectAvgs: subjectAvgs));
+        tiles.insert(0, FailWarning(subjectAvgs: subjectAvgs));
 
         // tiles.insert(4, const PanelHeader(padding: EdgeInsets.only(top: 12.0)));
         // tiles.add(const PanelFooter(padding: EdgeInsets.only(bottom: 12.0)));
