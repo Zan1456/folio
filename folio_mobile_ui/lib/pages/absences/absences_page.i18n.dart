@@ -23,6 +23,8 @@ extension ScreensLocalization on String {
           "pending": "Pending",
           "sept": "September",
           "now": "Now",
+          "justification_breakdown_title": "Justification types",
+          "justification_unknown": "Unknown",
         },
         "hu-HU": {
           "Absences": "Hiányzások",
@@ -44,6 +46,8 @@ extension ScreensLocalization on String {
           "pending": "Függőben",
           "sept": "Szeptember",
           "now": "Most",
+          "justification_breakdown_title": "Igazolás típusok",
+          "justification_unknown": "Ismeretlen",
         },
         "de-DE": {
           "Absences": "Fehlen",
@@ -66,6 +70,8 @@ extension ScreensLocalization on String {
           "pending": "Anhängig",
           "sept": "September",
           "now": "Jetzt",
+          "justification_breakdown_title": "Entschuldigungstypen",
+          "justification_unknown": "Unbekannt",
         },
       };
 

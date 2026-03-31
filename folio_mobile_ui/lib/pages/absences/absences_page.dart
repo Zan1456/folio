@@ -97,6 +97,77 @@ class AbsencesPageState extends State<AbsencesPage>
     );
   }
 
+  void _showJustificationBreakdown(BuildContext context, List<Absence> excused) {
+    final Map<String, int> typeCounts = {};
+    for (final absence in excused) {
+      final name = absence.justification?.name;
+      final key = (name != null && name.isNotEmpty) ? name : "justification_unknown".i18n;
+      typeCounts[key] = (typeCounts[key] ?? 0) + 1;
+    }
+
+    final colorScheme = Theme.of(context).colorScheme;
+
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20.0)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: EdgeInsets.fromLTRB(
+            20.0, 20.0, 20.0, MediaQuery.of(context).padding.bottom + 20.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "justification_breakdown_title".i18n,
+                style: TextStyle(
+                  fontSize: 18.0,
+                  fontWeight: FontWeight.w700,
+                  color: colorScheme.onSurface,
+                ),
+              ),
+              const SizedBox(height: 12.0),
+              ...typeCounts.entries.map((e) => Padding(
+                padding: const EdgeInsets.symmetric(vertical: 6.0),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        e.key,
+                        style: TextStyle(
+                          fontSize: 15.0,
+                          color: colorScheme.onSurface,
+                        ),
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10.0, vertical: 4.0),
+                      decoration: BoxDecoration(
+                        color: AppColors.of(context).green.withValues(alpha: 0.14),
+                        borderRadius: BorderRadius.circular(12.0),
+                      ),
+                      child: Text(
+                        "${e.value}",
+                        style: TextStyle(
+                          fontSize: 14.0,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.of(context).green,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              )),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   void buildSubjectAbsences() {
     Map<GradeSubject, SubjectAbsence> _absences = {};
 
@@ -434,6 +505,9 @@ class AbsencesPageState extends State<AbsencesPage>
                     color: AppColors.of(context).green,
                     cardColor: colorScheme.surfaceContainerHigh,
                     onCardColor: colorScheme.onSurface,
+                    onTap: excused.isNotEmpty
+                        ? () => _showJustificationBreakdown(context, excused)
+                        : null,
                   ),
                   const SizedBox(width: 8.0),
                   _StatCard(
@@ -484,6 +558,7 @@ class _StatCard extends StatelessWidget {
     required this.color,
     required this.cardColor,
     required this.onCardColor,
+    this.onTap,
   });
 
   final int value;
@@ -492,11 +567,14 @@ class _StatCard extends StatelessWidget {
   final Color color;
   final Color cardColor;
   final Color onCardColor;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     return Expanded(
-      child: Container(
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 12.0),
         decoration: BoxDecoration(
           color: value > 0 ? color.withValues(alpha: 0.14) : cardColor,
@@ -529,6 +607,7 @@ class _StatCard extends StatelessWidget {
               ),
             ),
           ],
+        ),
         ),
       ),
     );
