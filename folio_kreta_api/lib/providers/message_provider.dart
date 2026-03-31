@@ -46,9 +46,9 @@ class MessageProvider with ChangeNotifier {
     }
   }
 
-  // Fetches all types of Messages
+  // Fetches all types of Messages in parallel
   Future<void> fetchAll() =>
-      Future.forEach(MessageType.values, (MessageType v) => fetch(type: v));
+      Future.wait(MessageType.values.map((v) => fetch(type: v)));
 
   // Fetches Messages from the Kreta API then stores them in the database
   Future<void> fetch({MessageType type = MessageType.inbox}) async {
@@ -123,35 +123,27 @@ class MessageProvider with ChangeNotifier {
     }
   }
 
-  // fetch all recipients
-  Future<void> fetchAllRecipients() => Future.forEach(
-      AddresseeType.values, (AddresseeType v) => fetchRecipients(type: v));
-
-  // fetch recipients
-  Future<void> fetchRecipients(
-      {AddresseeType type = AddresseeType.teachers}) async {
-    Map<AddresseeType, SendRecipientType> addressable = {};
-
-    // check user
+  // Fetches all recipient types in a single round-trip (3 parallel requests).
+  // Previously this called fetchRecipients() once per AddresseeType, which
+  // duplicated the same 3 API calls for each type.
+  Future<void> fetchAllRecipients() async {
     User? user = Provider.of<UserProvider>(_context, listen: false).user;
-    if (user == null) throw "Cannot fetch Messages for User null";
+    if (user == null) throw "Cannot fetch Recipients for User null";
 
     if (DemoData.isDemo(user.id)) return;
 
-    // get categories
-    List? availableCategoriesJson =
-        await Provider.of<KretaClient>(_context, listen: false)
-            .getAPI(KretaAPI.recipientCategories);
+    final kreta = Provider.of<KretaClient>(_context, listen: false);
 
-    // print(availableCategoriesJson);
+    // Fetch categories, teachers and directorate in parallel
+    final results = await Future.wait([
+      kreta.getAPI(KretaAPI.recipientCategories),
+      kreta.getAPI(KretaAPI.recipientTeachers),
+      kreta.getAPI(KretaAPI.recipientDirectorate),
+    ]);
 
-    // get recipients
-    List? recipientTeachersJson =
-        await Provider.of<KretaClient>(_context, listen: false)
-            .getAPI(KretaAPI.recipientTeachers);
-    List? recipientDirectorateJson =
-        await Provider.of<KretaClient>(_context, listen: false)
-            .getAPI(KretaAPI.recipientDirectorate);
+    List? availableCategoriesJson = results[0];
+    List? recipientTeachersJson = results[1];
+    List? recipientDirectorateJson = results[2];
 
     if (availableCategoriesJson == null ||
         recipientTeachersJson == null ||
@@ -159,8 +151,8 @@ class MessageProvider with ChangeNotifier {
       throw "Cannot fetch Recipients for User ${user.id}";
     }
 
+    Map<AddresseeType, SendRecipientType> addressable = {};
     for (var e in availableCategoriesJson) {
-      // print(e);
       switch (e['kod']) {
         case 'TANAR':
           addressable
@@ -175,47 +167,21 @@ class MessageProvider with ChangeNotifier {
       }
     }
 
-    // parse recipients
     List<SendRecipient> recipients = [];
 
-    if (addressable.containsKey(AddresseeType.teachers) &&
-        type == AddresseeType.teachers) {
+    if (addressable.containsKey(AddresseeType.teachers)) {
       recipients.addAll(recipientTeachersJson.map((e) =>
           SendRecipient.fromJson(e, addressable[AddresseeType.teachers]!)));
     }
-    if (addressable.containsKey(AddresseeType.directorate) &&
-        type == AddresseeType.directorate) {
+    if (addressable.containsKey(AddresseeType.directorate)) {
       recipients.addAll(recipientDirectorateJson.map((e) =>
           SendRecipient.fromJson(e, addressable[AddresseeType.directorate]!)));
     }
 
-    // if (kDebugMode) {
-    //   print(addressable);
-    //   print(recipients);
-    //   print(recipients.first.json);
-    // }
-
-    await storeRecipients(recipients, type);
-  }
-
-  // store recipients
-  Future<void> storeRecipients(
-      List<SendRecipient> recipients, AddresseeType type) async {
-    _recipients.removeWhere((r) => (type == AddresseeType.teachers
-        ? (r.type.code == 'TANAR')
-        : (type == AddresseeType.directorate
-            ? (r.type.code == 'IGAZGATOSAG')
-            : r.type.code != '')));
-    _recipients.addAll(recipients);
-
-    User? user = Provider.of<UserProvider>(_context, listen: false).user;
-    if (user == null) throw "Cannot store Recipients for User null";
-
-    String userId = user.id;
+    _recipients = recipients;
     await Provider.of<DatabaseProvider>(_context, listen: false)
         .userStore
-        .storeRecipients(_recipients, userId: userId);
-
+        .storeRecipients(_recipients, userId: user.id);
     notifyListeners();
   }
 

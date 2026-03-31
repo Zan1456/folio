@@ -35,27 +35,58 @@ Future<void> syncAll(BuildContext context) async {
 
   // Demo mode: load demo data into providers without API calls
   if (user.isDemo) {
-    await Provider.of<GradeProvider>(context, listen: false).fetch();
-    await Provider.of<TimetableProvider>(context, listen: false)
-        .fetch(week: Week.current());
-    await Provider.of<ExamProvider>(context, listen: false).fetch();
-    await Provider.of<HomeworkProvider>(context, listen: false)
-        .fetch(from: DateTime.now().subtract(const Duration(days: 30)));
-    await Provider.of<MessageProvider>(context, listen: false).fetchAll();
-    await Provider.of<NoteProvider>(context, listen: false).fetch();
-    await Provider.of<EventProvider>(context, listen: false).fetch();
-    await Provider.of<AbsenceProvider>(context, listen: false).fetch();
+    await Future.wait([
+      Provider.of<GradeProvider>(context, listen: false).fetch(),
+      Provider.of<TimetableProvider>(context, listen: false)
+          .fetch(week: Week.current()),
+      Provider.of<ExamProvider>(context, listen: false).fetch(),
+      Provider.of<HomeworkProvider>(context, listen: false)
+          .fetch(from: DateTime.now().subtract(const Duration(days: 30))),
+      Provider.of<MessageProvider>(context, listen: false).fetchAll(),
+      Provider.of<NoteProvider>(context, listen: false).fetch(),
+      Provider.of<EventProvider>(context, listen: false).fetch(),
+      Provider.of<AbsenceProvider>(context, listen: false).fetch(),
+    ]);
     lock = false;
     return Future.value();
   }
+
   StatusProvider statusProvider =
       Provider.of<StatusProvider>(context, listen: false);
 
-  // check if access token isn't expired
-  // if (user.user?.accessToken == null) {
-  //   lock = false;
-  //   return Future.value();
-  // }
+  // Validate user and token before launching parallel API calls.
+  // This avoids every parallel task getting a 401 + 1.5 s retry penalty.
+  if (user.user == null) {
+    Navigator.of(context).pushNamedAndRemoveUntil("login", (_) => false);
+    lock = false;
+    return Future.value();
+  }
+
+  if (user.user!.accessToken.replaceAll(" ", "") == "") {
+    String uid = user.user!.id;
+    user.removeUser(uid);
+    await Provider.of<DatabaseProvider>(context, listen: false)
+        .store
+        .removeUser(uid);
+    Navigator.of(context).pushNamedAndRemoveUntil("login", (_) => false);
+    lock = false;
+    return;
+  }
+
+  if (user.user!.accessTokenExpire.isBefore(DateTime.now())) {
+    String authRes = await Provider.of<KretaClient>(context, listen: false)
+            .refreshLogin() ??
+        '';
+    if (authRes != 'success') {
+      if (kDebugMode) print('ERROR: failed to refresh login');
+      lock = false;
+      return Future.value();
+    } else {
+      if (kDebugMode) print('INFO: access token refreshed');
+    }
+  } else {
+    if (kDebugMode) print('INFO: access token is not expired');
+  }
 
   List<Future<void>> tasks = [];
   int taski = 0;
@@ -67,49 +98,6 @@ Future<void> syncAll(BuildContext context) async {
   }
 
   tasks = [
-    // refresh login
-    syncStatus(() async {
-      // print(user.user?.accessTokenExpire);
-      // print('${user.user?.accessToken ?? "no token"} - ACCESS TOKEN');
-
-      // user.user!.accessToken = "";
-      if (user.user == null) {
-        Navigator.of(context).pushNamedAndRemoveUntil("login", (_) => false);
-
-        lock = false;
-        return Future.value();
-      }
-
-      if (user.user!.accessToken.replaceAll(" ", "") == "") {
-        String uid = user.user!.id;
-
-        user.removeUser(uid);
-        await Provider.of<DatabaseProvider>(context, listen: false)
-            .store
-            .removeUser(uid);
-
-        Navigator.of(context).pushNamedAndRemoveUntil("login", (_) => false);
-
-        lock = false;
-        return;
-      }
-
-      if (user.user!.accessTokenExpire.isBefore(DateTime.now())) {
-        String authRes = await Provider.of<KretaClient>(context, listen: false)
-                .refreshLogin() ??
-            '';
-        if (authRes != 'success') {
-          if (kDebugMode) print('ERROR: failed to refresh login');
-         lock = false;
-         return Future.value();
-       } else {
-         if (kDebugMode) print('INFO: access token refreshed');
-       }
-      } else {
-        if (kDebugMode) print('INFO: access token is not expired');
-      }
-    }()),
-
     syncStatus(Provider.of<GradeProvider>(context, listen: false).fetch()),
     syncStatus(Provider.of<TimetableProvider>(context, listen: false)
         .fetch(week: Week.current())),
@@ -130,8 +118,6 @@ Future<void> syncAll(BuildContext context) async {
           .getAPI(KretaAPI.student(user.instituteCode!));
       if (studentJson == null) return;
       Student student = Student.fromJson(studentJson);
-
-      // print(studentJson);
 
       user.user?.name = student.name;
 

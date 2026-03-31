@@ -176,13 +176,19 @@ Future<void> unseenAll() async {
 
     String iss = user.instituteCode;
 
-    List? gradesJson = await _kreta.getAPI(KretaAPI.grades(iss));
+    // Fetch grades and groups in parallel — they are independent endpoints.
+    final fetched = await Future.wait([
+      _kreta.getAPI(KretaAPI.grades(iss)),
+      _kreta.getAPI(KretaAPI.groups(iss)),
+    ]);
+    List? gradesJson = fetched[0];
+    List? groupsJson = fetched[1];
+
     if (gradesJson == null) throw "Cannot fetch Grades for User ${user.id}";
     List<Grade> grades = gradesJson.map((e) => Grade.fromJson(e)).toList();
 
     if (grades.isNotEmpty || _grades.isNotEmpty) await store(grades);
 
-    List? groupsJson = await _kreta.getAPI(KretaAPI.groups(iss));
     if (groupsJson == null || groupsJson.isEmpty) {
       throw "Cannot fetch Groups for User ${user.id}";
     }
