@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:folio/helpers/dirtywords_helper.dart';
 import 'package:folio/api/client.dart';
 import 'package:flutter/material.dart';
+import 'package:folio_mobile_ui/common/widgets/app_logo.dart';
 import 'error_report_screen.i18n.dart';
 import 'package:folio/theme/colors/colors.dart';
 
@@ -23,7 +24,7 @@ class ErrorReportScreen extends StatelessWidget {
           child: Column(
             children: [
               const SizedBox(height: 30),
-              Image.asset('assets/icons/ic_rounded.png', height: 40),
+              const AppLogo(size: 40.0),
               const SizedBox(height: 16),
               Padding(
                 padding: const EdgeInsets.only(bottom: 4.0),

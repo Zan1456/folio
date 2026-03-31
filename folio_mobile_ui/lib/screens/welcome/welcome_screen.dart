@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:folio_mobile_ui/common/widgets/app_logo.dart';
 
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key, this.onContinue});
@@ -114,13 +115,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                                 ),
                               ],
                             ),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(22.0),
-                              child: Image.asset(
-                                'assets/icons/ic_rounded.png',
-                                fit: BoxFit.cover,
-                              ),
-                            ),
+                            child: AppLogo(size: 88.0),
                           ),
                           const SizedBox(height: 20.0),
                           Text(

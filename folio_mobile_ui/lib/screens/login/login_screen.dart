@@ -17,6 +17,7 @@
 */
 
 import 'dart:io' show Platform;
+import 'package:folio_mobile_ui/common/widgets/app_logo.dart';
 import 'package:folio/api/client.dart';
 import 'package:folio/api/login.dart';
 import 'package:folio/api/providers/user_provider.dart';
@@ -149,13 +150,7 @@ class LoginScreenState extends State<LoginScreen> {
                               ),
                             ],
                           ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(28.0),
-                            child: Image.asset(
-                              'assets/icons/ic_rounded.png',
-                              fit: BoxFit.cover,
-                            ),
-                          ),
+                          child: AppLogo(size: 108.0),
                         ),
                       ),
 
