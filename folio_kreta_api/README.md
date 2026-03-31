@@ -1,4 +1,4 @@
-# refilc - Kréta library
+# folio - Kréta library
 
 ### A következőket tartalmazza:
 - endpointok elérési útvonalai
