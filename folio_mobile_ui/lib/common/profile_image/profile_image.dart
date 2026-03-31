@@ -268,7 +268,7 @@ class _ProfileImageState extends State<ProfileImage> {
                     child: Container(
                         alignment: Alignment.topLeft,
                         child: Image.asset(
-                          'assets/images/apple_fire_emoji.png',
+                          'assets/images/fire_emoji.png',
                           width: widget.radius,
                         )
                         // Text(

@@ -365,7 +365,7 @@ class ProfileScreenState extends State<ProfileScreen>
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Image.asset(
-                            'assets/images/apple_fire_emoji.png',
+                            'assets/images/fire_emoji.png',
                             width: 20.0,
                           ),
                           const SizedBox(width: 8.0),
