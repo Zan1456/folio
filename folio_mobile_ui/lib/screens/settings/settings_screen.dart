@@ -47,6 +47,7 @@ import 'package:folio_mobile_ui/screens/settings/settings_helper.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:folio/flavor.dart';
 import 'package:shake_flutter/enums/shake_screen.dart';
 import 'package:shake_flutter/shake_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -2119,19 +2120,20 @@ class SettingsScreenState extends State<SettingsScreen>
                   ),
                 ),
               ),
-              PanelButton(
-                leading: Icon(Icons.feedback_outlined,
-                    size: 22.0,
-                    color: AppColors.of(context).text.withValues(alpha: 0.95)),
-                title: Text("feedback".i18n),
-                onPressed: () => {
-                  Shake.setScreenshotIncluded(false),
-                  Shake.show(ShakeScreen.newTicket),
-                  Shake.setScreenshotIncluded(true),
-                },
-                borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(4.0), bottom: Radius.circular(12.0)),
-              ),
+              if (!kIsPlayStore)
+                PanelButton(
+                  leading: Icon(Icons.feedback_outlined,
+                      size: 22.0,
+                      color: AppColors.of(context).text.withValues(alpha: 0.95)),
+                  title: Text("feedback".i18n),
+                  onPressed: () => {
+                    Shake.setScreenshotIncluded(false),
+                    Shake.show(ShakeScreen.newTicket),
+                    Shake.setScreenshotIncluded(true),
+                  },
+                  borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(4.0), bottom: Radius.circular(12.0)),
+                ),
             ],
           ),
         ),

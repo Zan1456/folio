@@ -1,0 +1,37 @@
+<!-- Play Store flavor manifest.
+     The permissions below are NOT declared in src/main/ anymore, so they
+     will only appear in the merged manifest if a library AAR adds them.
+     The tools:node="remove" entries here act as a safety net against those
+     library manifests (open_filex, permission_handler, screenshot, shake). -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Ensure legacy storage attribute is absent from the application element -->
+    <application tools:remove="android:requestLegacyExternalStorage">
+
+        <!-- Remove Shake SDK's screen-recording service.
+             Its foregroundServiceType="mediaProjection" violates Play Store policy
+             even when the FOREGROUND_SERVICE_MEDIA_PROJECTION permission is absent. -->
+        <service
+            android:name="com.shakebugs.shake.internal.shake.recording.ScreenRecordingService"
+            tools:node="remove" />
+
+    </application>
+
+    <!-- APK self-install — forbidden on Play Store, may be added by open_filex -->
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES"
+        tools:node="remove" />
+
+    <!-- Broad storage — not needed without APK download -->
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
+        tools:node="remove" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        tools:node="remove" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+        tools:node="remove" />
+
+    <!-- Media projection — may be added by shake_flutter or screenshot package -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION"
+        tools:node="remove" />
+
+</manifest>

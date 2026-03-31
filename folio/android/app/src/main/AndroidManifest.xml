@@ -3,9 +3,10 @@
     <!-- Allow HyperIsland-ToolKit (minSdk 26) in a minSdk-24 app.
          HyperOS devices are API 26+; the Kotlin code uses try/catch as fallback. -->
     <uses-sdk tools:overrideLibrary="io.github.d4viddf.hyperisland_kit" />
-    <application android:name="${applicationName}" android:label="Folio" tools:replace="android:label" android:icon="@mipmap/ic_launcher"
+    <application android:name="${applicationName}" android:label="Folio" tools:replace="android:label"
+        android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher_round"
-        android:requestLegacyExternalStorage="true" android:enableOnBackInvokedCallback="false">
+        android:enableOnBackInvokedCallback="false">
 
         <!-- Enable Impeller (Vulkan) -->
         <meta-data
@@ -23,8 +24,7 @@
             <meta-data android:name="io.flutter.embedding.android.NormalTheme"
                 android:resource="@style/NormalTheme" />
             <intent-filter>
-                <!-- commented bc of dynamic app icons -->
-                <action android:name="android.intent.action.MAIN" /> 
+                <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
             <!-- Deep Links -->
@@ -32,40 +32,37 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <!-- Accepts URIs that begin with YOUR_SCHEME://YOUR_HOST -->
-                <data
-                    android:scheme="folio"
-                    android:host="folio.zan1456.dev" />
+                <data android:scheme="folio" android:host="folio.zan1456.dev" />
             </intent-filter>
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <!-- Accepts URIs that begin with https://folio.zan1456.dev -->
-                <data
-                    android:scheme="https"
-                    android:host="folio.zan1456.dev"
+                <data android:scheme="https" android:host="folio.zan1456.dev"
                     android:pathPrefix="/app" />
             </intent-filter>
         </activity>
         <meta-data android:name="flutterEmbedding" android:value="2" />
 
-
     </application>
 
     <meta-data android:name="flutterEmbedding" android:value="2" />
 
-    <!-- Permissions -->
+    <!-- ── Permissions shared by ALL flavors ──────────────────────────── -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.VIBRATE" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
-    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION" tools:node="remove" />
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+
+    <!-- ── Removed unconditionally (no flavor uses screen-capture projection) -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION"
+        tools:node="remove" />
+
+    <!-- ── GitHub-only permissions (storage + self-install) live in:
+             src/github/AndroidManifest.xml
+         ── Play Store removes them again as a safety net in:
+             src/playstore/AndroidManifest.xml                          -->
 </manifest>

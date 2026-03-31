@@ -59,6 +59,16 @@ subprojects {
 android {
     namespace = "app.zan1456.folio"
 
+    flavorDimensions "distribution"
+    productFlavors {
+        github {
+            dimension "distribution"
+        }
+        playstore {
+            dimension "distribution"
+        }
+    }
+
     ndkVersion "27.2.12479018"
 
     // compileSdkVersion rootProject.ext.compileSdkVersion

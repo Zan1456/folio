@@ -1,3 +1,4 @@
+import 'package:folio/flavor.dart';
 import 'package:folio/models/release.dart';
 import 'package:flutter/material.dart';
 import 'update_tile.i18n.dart';
@@ -68,11 +69,16 @@ class UpdateTile extends StatelessWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.download_rounded,
-                        size: 15.0, color: cs.onPrimaryContainer),
+                    Icon(
+                      kIsPlayStore
+                          ? Icons.open_in_new_rounded
+                          : Icons.download_rounded,
+                      size: 15.0,
+                      color: cs.onPrimaryContainer,
+                    ),
                     const SizedBox(width: 5.0),
                     Text(
-                      "download".i18n,
+                      kIsPlayStore ? "Play Store" : "download".i18n,
                       style: tt.bodySmall!.copyWith(
                         fontWeight: FontWeight.w600,
                         color: cs.onPrimaryContainer,

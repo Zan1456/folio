@@ -32,7 +32,7 @@ import 'package:folio/utils/service_locator.dart';
 import 'package:folio_mobile_ui/screens/error_screen.dart';
 import 'package:folio_mobile_ui/screens/error_report_screen.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:shake_flutter/models/shake_report_configuration.dart';
+import 'package:folio/flavor.dart';
 import 'package:shake_flutter/shake_flutter.dart';
 
 import 'helpers/live_activity_helper.dart';
@@ -78,7 +78,9 @@ void main() async {
 
     // shakebugs initialization
     // Shake.setInvokeShakeOnScreenshot(true);
-    Shake.start('UmVBizZGuaDuLoavBrQQvYJpIxsjKGliCF2vHWI0m7R2GSZ33uNJ9Ws');
+    if (!kIsPlayStore) {
+      Shake.start('UmVBizZGuaDuLoavBrQQvYJpIxsjKGliCF2vHWI0m7R2GSZ33uNJ9Ws');
+    }
 
     // pre-cache required icons
     const todaySvg = SvgAssetLoader('assets/svg/menu_icons/today_selected.svg');

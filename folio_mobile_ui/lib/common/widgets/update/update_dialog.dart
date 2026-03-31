@@ -2,10 +2,12 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_custom_tabs/flutter_custom_tabs.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:folio/api/client.dart';
+import 'package:folio/flavor.dart';
 import 'package:folio/models/release.dart';
 import 'package:folio/theme/colors/colors.dart';
 
@@ -292,32 +294,47 @@ class _UpdateDialogState extends State<UpdateDialog> {
               const SizedBox(width: 10.0),
               Expanded(
                 flex: 2,
-                child: FilledButton.icon(
-                  onPressed: (!hasApk ||
-                          _state == _DownloadState.downloading ||
-                          _state == _DownloadState.installing)
-                      ? null
-                      : _downloadAndInstall,
-                  style: FilledButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14.0)),
-                    padding: const EdgeInsets.symmetric(vertical: 14.0),
-                  ),
-                  icon: Icon(
-                    _state == _DownloadState.error
-                        ? Icons.refresh_rounded
-                        : Icons.download_rounded,
-                    size: 18.0,
-                  ),
-                  label: Text(
-                    !hasApk
-                        ? 'Nincs APK'
-                        : _state == _DownloadState.error
-                            ? 'Újra'
-                            : 'Letöltés és telepítés',
-                    style: const TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                ),
+                child: kIsPlayStore
+                    ? FilledButton.icon(
+                        onPressed: () => launchUrl(
+                          Uri.parse(
+                              'https://play.google.com/store/apps/details?id=app.zan1456.folio'),
+                        ),
+                        style: FilledButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14.0)),
+                          padding: const EdgeInsets.symmetric(vertical: 14.0),
+                        ),
+                        icon: const Icon(Icons.open_in_new_rounded, size: 18.0),
+                        label: const Text('Play Store',
+                            style: TextStyle(fontWeight: FontWeight.w600)),
+                      )
+                    : FilledButton.icon(
+                        onPressed: (!hasApk ||
+                                _state == _DownloadState.downloading ||
+                                _state == _DownloadState.installing)
+                            ? null
+                            : _downloadAndInstall,
+                        style: FilledButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14.0)),
+                          padding: const EdgeInsets.symmetric(vertical: 14.0),
+                        ),
+                        icon: Icon(
+                          _state == _DownloadState.error
+                              ? Icons.refresh_rounded
+                              : Icons.download_rounded,
+                          size: 18.0,
+                        ),
+                        label: Text(
+                          !hasApk
+                              ? 'Nincs APK'
+                              : _state == _DownloadState.error
+                                  ? 'Újra'
+                                  : 'Letöltés és telepítés',
+                          style: const TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                      ),
               ),
             ],
           ),
