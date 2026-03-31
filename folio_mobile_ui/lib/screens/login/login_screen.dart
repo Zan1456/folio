@@ -16,16 +16,17 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import 'dart:async';
 import 'dart:io' show Platform;
 import 'package:folio_mobile_ui/common/widgets/app_logo.dart';
 import 'package:folio/api/client.dart';
 import 'package:folio/api/login.dart';
 import 'package:folio/api/providers/user_provider.dart';
 import 'package:folio/models/user.dart';
+import 'package:folio/theme/colors/colors.dart';
+import 'package:folio_kreta_api/models/school.dart';
 import 'package:folio_mobile_ui/common/custom_snack_bar.dart';
 import 'package:folio_mobile_ui/common/system_chrome.dart';
-import 'package:folio_mobile_ui/screens/login/login_input.dart';
-import 'package:folio_mobile_ui/screens/login/school_input/school_input.dart';
 import 'package:folio_mobile_ui/screens/settings/privacy_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -294,45 +295,62 @@ class LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  void _openLoginSheet() {
-    showModalBottomSheet<_LoginSheetResult>(
-      backgroundColor: Colors.transparent,
+  Future<void> _openLoginSheet() async {
+    // Step 1 — school selection
+    final school = await showModalBottomSheet<School>(
       context: context,
       isScrollControlled: true,
-      builder: (BuildContext sheetContext) {
-        return Padding(
-          padding: EdgeInsets.only(
-              bottom: MediaQuery.of(sheetContext).viewInsets.bottom),
-          child: Container(
-            height: MediaQuery.of(context).size.height * 0.88,
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surface,
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(32.0),
-              ),
-            ),
-            child: _CredentialsSheet(
-              onLogin: (result) => Navigator.of(sheetContext).pop(result),
-              onDemoMode: () {
-                Navigator.of(sheetContext).pop();
-                final userProvider =
-                    Provider.of<UserProvider>(context, listen: false);
-                final demoUser = User.demo();
-                userProvider.addUser(demoUser);
-                userProvider.setUser(demoUser.id);
-                setSystemChrome(context);
-                Navigator.of(context)
-                    .pushReplacementNamed('login_to_navigation');
-              },
-            ),
-          ),
-        );
-      },
-    ).then((result) {
-      if (result != null && mounted) {
-        _processLogin(result);
-      }
-    });
+      backgroundColor: Colors.transparent,
+      builder: (sheetCtx) => AnimatedPadding(
+        duration: const Duration(milliseconds: 150),
+        curve: Curves.easeOut,
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(sheetCtx).viewInsets.bottom,
+        ),
+        child: DraggableScrollableSheet(
+          initialChildSize: 0.65,
+          minChildSize: 0.4,
+          maxChildSize: 0.92,
+          expand: false,
+          builder: (_, scrollController) =>
+              _SchoolSheet(scrollController: scrollController),
+        ),
+      ),
+    );
+
+    if (school == null || !mounted) return;
+
+    // Step 2 — credentials
+    final result = await showModalBottomSheet<_LoginSheetResult>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) => AnimatedPadding(
+        duration: const Duration(milliseconds: 150),
+        curve: Curves.easeOut,
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(sheetContext).viewInsets.bottom,
+        ),
+        child: _CredentialsSheet(
+          school: school,
+          onLogin: (result) => Navigator.of(sheetContext).pop(result),
+          onDemoMode: () {
+            Navigator.of(sheetContext).pop();
+            final userProvider =
+                Provider.of<UserProvider>(context, listen: false);
+            final demoUser = User.demo();
+            userProvider.addUser(demoUser);
+            userProvider.setUser(demoUser.id);
+            setSystemChrome(context);
+            Navigator.of(context).pushReplacementNamed('login_to_navigation');
+          },
+        ),
+      ),
+    );
+
+    if (result != null && mounted) {
+      _processLogin(result);
+    }
   }
 
   void _processLogin(_LoginSheetResult result) {
@@ -399,10 +417,259 @@ class _FeatureRow extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
+// School selection sheet
+// ---------------------------------------------------------------------------
+
+class _SchoolSheet extends StatefulWidget {
+  const _SchoolSheet({required this.scrollController});
+  final ScrollController scrollController;
+
+  @override
+  State<_SchoolSheet> createState() => _SchoolSheetState();
+}
+
+class _SchoolSheetState extends State<_SchoolSheet> {
+  final _searchController = TextEditingController();
+  final _searchFocus = FocusNode();
+  List<School> _results = [];
+  bool _searching = false;
+  Timer? _debounce;
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController.addListener(_onSearch);
+    WidgetsBinding.instance
+        .addPostFrameCallback((_) => _searchFocus.requestFocus());
+  }
+
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    _searchController.dispose();
+    _searchFocus.dispose();
+    super.dispose();
+  }
+
+  void _onSearch() {
+    final q = _searchController.text.trim();
+    if (q.length < 3) {
+      _debounce?.cancel();
+      setState(() {
+        _results = [];
+        _searching = false;
+      });
+      return;
+    }
+    _debounce?.cancel();
+    setState(() => _searching = true);
+    _debounce = Timer(const Duration(milliseconds: 350), () async {
+      final res = await FilcAPI.searchSchoolsFromKreta(q);
+      if (!mounted) return;
+      setState(() {
+        _results = res ?? [];
+        _searching = false;
+      });
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+    final q = _searchController.text.trim();
+
+    return Container(
+      decoration: BoxDecoration(
+        color: cs.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28.0)),
+      ),
+      child: Column(
+        children: [
+          // Handle
+          const SizedBox(height: 12.0),
+          Container(
+            width: 32.0,
+            height: 4.0,
+            decoration: BoxDecoration(
+              color: cs.onSurface.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(2.0),
+            ),
+          ),
+          const SizedBox(height: 20.0),
+
+          // Title
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'select_school'.i18n,
+                style: tt.titleLarge!.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: cs.onSurface,
+                  letterSpacing: -0.3,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16.0),
+
+          // Search field
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: TextField(
+              controller: _searchController,
+              focusNode: _searchFocus,
+              textInputAction: TextInputAction.search,
+              decoration: InputDecoration(
+                hintText: 'school_search_hint'.i18n,
+                hintStyle: TextStyle(
+                  color: cs.onSurface.withValues(alpha: 0.35),
+                  fontSize: 14.0,
+                ),
+                prefixIcon: Icon(
+                  Icons.search_rounded,
+                  color: cs.onSurface.withValues(alpha: 0.4),
+                  size: 20.0,
+                ),
+                suffixIcon: _searchController.text.isNotEmpty
+                    ? IconButton(
+                        icon: Icon(Icons.close_rounded,
+                            size: 18.0,
+                            color: cs.onSurface.withValues(alpha: 0.4)),
+                        onPressed: () => _searchController.clear(),
+                      )
+                    : null,
+                filled: true,
+                fillColor: cs.surfaceContainerHigh,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14.0),
+                  borderSide: BorderSide.none,
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14.0),
+                  borderSide: BorderSide.none,
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14.0),
+                  borderSide:
+                      BorderSide(color: cs.primary, width: 1.5),
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                    vertical: 12.0, horizontal: 16.0),
+              ),
+              style: TextStyle(
+                fontSize: 14.0,
+                color: cs.onSurface,
+              ),
+            ),
+          ),
+          const SizedBox(height: 8.0),
+
+          // Results
+          Expanded(
+            child: _searching
+                ? Center(
+                    child: CircularProgressIndicator(
+                      color: cs.primary,
+                      strokeWidth: 2.5,
+                    ),
+                  )
+                : _results.isEmpty
+                    ? Center(
+                        child: Text(
+                          q.length < 3
+                              ? 'school_type_hint'.i18n
+                              : 'school_no_results'.i18n,
+                          style: tt.bodyMedium!.copyWith(
+                            color: cs.onSurface.withValues(alpha: 0.4),
+                          ),
+                        ),
+                      )
+                    : ListView.builder(
+                        controller: widget.scrollController,
+                        padding: const EdgeInsets.only(bottom: 24.0),
+                        itemCount: _results.length,
+                        itemBuilder: (context, i) {
+                          final school = _results[i];
+                          return InkWell(
+                            onTap: () => Navigator.of(context).pop(school),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 24.0, vertical: 14.0),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    width: 36.0,
+                                    height: 36.0,
+                                    decoration: BoxDecoration(
+                                      color: cs.primaryContainer
+                                          .withValues(alpha: 0.6),
+                                      borderRadius:
+                                          BorderRadius.circular(10.0),
+                                    ),
+                                    child: Icon(
+                                      Icons.school_rounded,
+                                      size: 18.0,
+                                      color: cs.onPrimaryContainer,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 14.0),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          school.name,
+                                          style: tt.bodyMedium!.copyWith(
+                                            fontWeight: FontWeight.w500,
+                                            color: cs.onSurface,
+                                          ),
+                                        ),
+                                        if (school.city.isNotEmpty)
+                                          Text(
+                                            school.city,
+                                            style: tt.bodySmall!.copyWith(
+                                              color: cs.onSurface
+                                                  .withValues(alpha: 0.45),
+                                            ),
+                                          ),
+                                      ],
+                                    ),
+                                  ),
+                                  Icon(
+                                    Icons.chevron_right_rounded,
+                                    size: 20.0,
+                                    color:
+                                        cs.onSurface.withValues(alpha: 0.25),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Credentials sheet (username + password, AutofillGroup for Proton Pass)
+// ---------------------------------------------------------------------------
 
 class _CredentialsSheet extends StatefulWidget {
-  const _CredentialsSheet({required this.onLogin, this.onDemoMode});
+  const _CredentialsSheet({
+    required this.school,
+    required this.onLogin,
+    this.onDemoMode,
+  });
 
+  final School school;
   final void Function(_LoginSheetResult) onLogin;
   final VoidCallback? onDemoMode;
 
@@ -413,33 +680,28 @@ class _CredentialsSheet extends StatefulWidget {
 class _CredentialsSheetState extends State<_CredentialsSheet> {
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
-  final _schoolController = SchoolInputController();
-  final _scrollController = ScrollController();
+  final _usernameFocus = FocusNode();
+  final _passwordFocus = FocusNode();
+  bool _obscurePassword = true;
   bool _isLoading = false;
   LoginState _sheetError = LoginState.normal;
-
-  @override
-  void initState() {
-    super.initState();
-    _schoolController.schools = [];
-    _schoolController.onSearch = FilcAPI.searchSchoolsFromKreta;
-  }
 
   @override
   void dispose() {
     _usernameController.dispose();
     _passwordController.dispose();
-    _scrollController.dispose();
+    _usernameFocus.dispose();
+    _passwordFocus.dispose();
     super.dispose();
   }
 
   void _onSubmit() {
-    if (_schoolController.selectedSchool == null ||
-        _usernameController.text.trim().isEmpty ||
+    if (_usernameController.text.trim().isEmpty ||
         _passwordController.text.isEmpty) {
       setState(() => _sheetError = LoginState.missingFields);
       return;
     }
+    TextInput.finishAutofillContext();
     setState(() {
       _isLoading = true;
       _sheetError = LoginState.normal;
@@ -450,229 +712,311 @@ class _CredentialsSheetState extends State<_CredentialsSheet> {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
+    final bottomPad = MediaQuery.of(context).padding.bottom;
 
-    return Column(
-      children: [
-        // Handle
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 14.0),
-          child: Center(
-            child: Container(
-              width: 36.0,
-              height: 4.0,
-              decoration: BoxDecoration(
-                color: cs.onSurface.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(2.0),
-              ),
+    return Container(
+      decoration: BoxDecoration(
+        color: cs.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28.0)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Handle
+          const SizedBox(height: 12.0),
+          Container(
+            width: 32.0,
+            height: 4.0,
+            decoration: BoxDecoration(
+              color: cs.onSurface.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(2.0),
             ),
           ),
-        ),
+          const SizedBox(height: 24.0),
 
-        if (_isLoading)
-          Expanded(
-            child: Stack(
+          if (_isLoading)
+            _buildLoading(cs, tt, bottomPad)
+          else
+            _buildForm(cs, tt, bottomPad),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLoading(ColorScheme cs, TextTheme tt, double bottomPad) {
+    return SizedBox(
+      height: 220.0 + bottomPad,
+      child: Stack(
+        children: [
+          Positioned(
+            left: 0,
+            top: 0,
+            width: 1,
+            height: 1,
+            child: KretaBgLoginWidget(
+              instituteCode: widget.school.instituteCode,
+              username: _usernameController.text.trim(),
+              password: _passwordController.text,
+              rememberbrowserCookie: null,
+              onLogin: (code, app, rem) {
+                if (!mounted) return;
+                widget.onLogin(_LoginSheetResult(
+                  code: code,
+                  idpApplication: app,
+                  idpRememberBrowser: rem,
+                ));
+              },
+              onError: (state) {
+                if (!mounted) return;
+                setState(() {
+                  _isLoading = false;
+                  _sheetError = state;
+                });
+              },
+            ),
+          ),
+          Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                // Hidden WebView — rendered but invisible
-                Positioned(
-                  left: 0,
-                  top: 0,
-                  width: 1,
-                  height: 1,
-                  child: KretaBgLoginWidget(
-                    instituteCode:
-                        _schoolController.selectedSchool!.instituteCode,
-                    username: _usernameController.text.trim(),
-                    password: _passwordController.text,
-                    rememberbrowserCookie: null,
-                    onLogin: (code, app, rem) {
-                      if (!mounted) return;
-                      widget.onLogin(_LoginSheetResult(
-                        code: code,
-                        idpApplication: app,
-                        idpRememberBrowser: rem,
-                      ));
-                    },
-                    onError: (state) {
-                      if (!mounted) return;
-                      setState(() {
-                        _isLoading = false;
-                        _sheetError = state;
-                      });
-                    },
-                  ),
+                SizedBox(
+                  width: 44.0,
+                  height: 44.0,
+                  child: CircularProgressIndicator(
+                      color: cs.primary, strokeWidth: 3.0),
                 ),
+                const SizedBox(height: 20.0),
+                Text(
+                  'Bejelentkezés folyamatban',
+                  style: tt.titleSmall!.copyWith(
+                      fontWeight: FontWeight.w600, color: cs.onSurface),
+                ),
+                const SizedBox(height: 4.0),
+                Text(
+                  'Kérjük, várj...',
+                  style: tt.bodySmall!
+                      .copyWith(color: cs.onSurface.withValues(alpha: 0.45)),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
-                // Loading overlay (covers the WebView entirely)
-                Positioned.fill(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      SizedBox(
-                        width: 56.0,
-                        height: 56.0,
-                        child: CircularProgressIndicator(
-                          color: cs.primary,
-                          strokeWidth: 3.0,
-                        ),
-                      ),
-                      const SizedBox(height: 24.0),
-                      Text(
-                        'Bejelentkezés folyamatban',
-                        style: tt.titleMedium!.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: cs.onSurface,
-                        ),
-                      ),
-                      const SizedBox(height: 6.0),
-                      Text(
-                        'Kérjük, várj...',
-                        style: tt.bodyMedium!.copyWith(
-                          color: cs.onSurface.withValues(alpha: 0.5),
-                        ),
-                      ),
-                    ],
+  Widget _buildForm(ColorScheme cs, TextTheme tt, double bottomPad) {
+    final hasError = _sheetError == LoginState.missingFields ||
+        _sheetError == LoginState.invalidGrant ||
+        _sheetError == LoginState.failed;
+
+    return Padding(
+      padding: EdgeInsets.fromLTRB(24.0, 0, 24.0, bottomPad + 16.0),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Title
+          Text(
+            'login_w_kreta_acc'.i18n,
+            style: tt.titleLarge!.copyWith(
+              fontWeight: FontWeight.w700,
+              color: cs.onSurface,
+              letterSpacing: -0.3,
+            ),
+          ),
+          const SizedBox(height: 8.0),
+
+          // School chip
+          Container(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
+            decoration: BoxDecoration(
+              color: cs.primaryContainer.withValues(alpha: 0.5),
+              borderRadius: BorderRadius.circular(20.0),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.school_rounded,
+                    size: 13.0, color: cs.onPrimaryContainer),
+                const SizedBox(width: 5.0),
+                Flexible(
+                  child: Text(
+                    widget.school.name,
+                    overflow: TextOverflow.ellipsis,
+                    style: tt.labelSmall!.copyWith(
+                      color: cs.onPrimaryContainer,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ],
             ),
-          )
-        else
-          Expanded(
-            child: SingleChildScrollView(
-              controller: _scrollController,
-              padding:
-                  const EdgeInsets.fromLTRB(24.0, 0, 24.0, 24.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+          ),
+          const SizedBox(height: 20.0),
+
+          // Error banner
+          if (hasError) ...[
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 14.0, vertical: 10.0),
+              decoration: BoxDecoration(
+                color: cs.errorContainer,
+                borderRadius: BorderRadius.circular(12.0),
+              ),
+              child: Row(
                 children: [
-                  // Title
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 4.0),
+                  Icon(Icons.error_outline_rounded,
+                      size: 15.0, color: cs.onErrorContainer),
+                  const SizedBox(width: 8.0),
+                  Expanded(
                     child: Text(
-                      'login_w_kreta_acc'.i18n,
-                      style: tt.headlineSmall!.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: cs.onSurface,
-                        letterSpacing: -0.3,
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 24.0),
-                    child: Text(
-                      'login_w_kreten'.i18n,
+                      _sheetError == LoginState.missingFields
+                          ? "missing_fields".i18n
+                          : _sheetError == LoginState.invalidGrant
+                              ? "invalid_grant".i18n
+                              : "error".i18n,
                       style: tt.bodySmall!.copyWith(
-                        color: cs.onSurface.withValues(alpha: 0.5),
+                        color: cs.onErrorContainer,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ),
-
-                  // Error banner
-                  if (_sheetError == LoginState.missingFields ||
-                      _sheetError == LoginState.invalidGrant ||
-                      _sheetError == LoginState.failed)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 16.0),
-                      child: Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 14.0, vertical: 10.0),
-                        decoration: BoxDecoration(
-                          color: cs.errorContainer,
-                          borderRadius: BorderRadius.circular(12.0),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(Icons.error_outline_rounded,
-                                size: 16.0, color: cs.onErrorContainer),
-                            const SizedBox(width: 8.0),
-                            Expanded(
-                              child: Text(
-                                _sheetError == LoginState.missingFields
-                                    ? "missing_fields".i18n
-                                    : _sheetError ==
-                                            LoginState.invalidGrant
-                                        ? "invalid_grant".i18n
-                                        : "error".i18n,
-                                style: tt.bodySmall!.copyWith(
-                                  color: cs.onErrorContainer,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-
-                  // School
-                  _FieldLabel('school'.i18n),
-                  SchoolInput(
-                      controller: _schoolController,
-                      scroll: _scrollController),
-                  const SizedBox(height: 14.0),
-
-                  // Username
-                  _FieldLabel('username'.i18n),
-                  LoginInput(
-                    style: LoginInputStyle.username,
-                    controller: _usernameController,
-                  ),
-                  const SizedBox(height: 14.0),
-
-                  // Password
-                  _FieldLabel('password'.i18n),
-                  LoginInput(
-                    style: LoginInputStyle.password,
-                    controller: _passwordController,
-                  ),
-
-                  const SizedBox(height: 24.0),
-
-                  // Login button
-                  SizedBox(
-                    width: double.infinity,
-                    height: 54.0,
-                    child: FilledButton(
-                      style: FilledButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(18.0),
-                        ),
-                        elevation: 0,
-                      ),
-                      onPressed: _onSubmit,
-                      child: Text(
-                        'login'.i18n,
-                        style: const TextStyle(
-                          fontSize: 16.0,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  if (widget.onDemoMode != null) ...[
-                    const SizedBox(height: 10.0),
-                    SizedBox(
-                      width: double.infinity,
-                      child: TextButton(
-                        style: TextButton.styleFrom(
-                          foregroundColor:
-                              cs.onSurface.withValues(alpha: 0.5),
-                        ),
-                        onPressed: widget.onDemoMode,
-                        child: Text('demo_login'.i18n),
-                      ),
-                    ),
-                  ],
                 ],
               ),
             ),
+            const SizedBox(height: 16.0),
+          ],
+
+          // Both fields wrapped in AutofillGroup so Proton Pass / password
+          // managers can fill username AND password in a single tap.
+          AutofillGroup(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _FieldLabel('username'.i18n),
+                _buildTextField(
+                  controller: _usernameController,
+                  focusNode: _usernameFocus,
+                  autofillHints: const [AutofillHints.username],
+                  textInputAction: TextInputAction.next,
+                  onEditingComplete: () =>
+                      _passwordFocus.requestFocus(),
+                  cs: cs,
+                ),
+                const SizedBox(height: 12.0),
+                _FieldLabel('password'.i18n),
+                _buildTextField(
+                  controller: _passwordController,
+                  focusNode: _passwordFocus,
+                  autofillHints: const [AutofillHints.password],
+                  obscureText: _obscurePassword,
+                  textInputAction: TextInputAction.done,
+                  onEditingComplete: _onSubmit,
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscurePassword
+                          ? Icons.visibility_rounded
+                          : Icons.visibility_off_rounded,
+                      size: 18.0,
+                      color: AppColors.of(context)
+                          .text
+                          .withValues(alpha: 0.6),
+                    ),
+                    onPressed: () =>
+                        setState(() => _obscurePassword = !_obscurePassword),
+                  ),
+                  cs: cs,
+                ),
+              ],
+            ),
           ),
-      ],
+          const SizedBox(height: 20.0),
+
+          // Login button
+          SizedBox(
+            width: double.infinity,
+            height: 52.0,
+            child: FilledButton(
+              style: FilledButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16.0),
+                ),
+                elevation: 0,
+              ),
+              onPressed: _onSubmit,
+              child: Text(
+                'login'.i18n,
+                style: const TextStyle(
+                    fontSize: 15.0, fontWeight: FontWeight.w600),
+              ),
+            ),
+          ),
+
+          if (widget.onDemoMode != null) ...[
+            const SizedBox(height: 6.0),
+            SizedBox(
+              width: double.infinity,
+              child: TextButton(
+                style: TextButton.styleFrom(
+                  foregroundColor: cs.onSurface.withValues(alpha: 0.45),
+                ),
+                onPressed: widget.onDemoMode,
+                child: Text('demo_login'.i18n),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required FocusNode focusNode,
+    required List<String> autofillHints,
+    required TextInputAction textInputAction,
+    required VoidCallback onEditingComplete,
+    required ColorScheme cs,
+    bool obscureText = false,
+    Widget? suffixIcon,
+  }) {
+    return TextField(
+      controller: controller,
+      focusNode: focusNode,
+      autofillHints: autofillHints,
+      textInputAction: textInputAction,
+      onEditingComplete: onEditingComplete,
+      obscureText: obscureText,
+      cursorColor: cs.primary,
+      style: TextStyle(
+        fontSize: 14.0,
+        fontWeight: FontWeight.w500,
+        color: cs.onSurface.withValues(alpha: 0.85),
+      ),
+      decoration: InputDecoration(
+        isDense: true,
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
+        suffixIcon: suffixIcon,
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12.0),
+          borderSide: BorderSide(
+              color: cs.onSurface.withValues(alpha: 0.15), width: 1.0),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12.0),
+          borderSide: BorderSide(color: cs.primary, width: 1.5),
+        ),
+      ),
     );
   }
 }
+
+// ---------------------------------------------------------------------------
 
 class _FieldLabel extends StatelessWidget {
   const _FieldLabel(this.text);
@@ -684,13 +1028,13 @@ class _FieldLabel extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 6.0, left: 2.0),
       child: Text(
         text,
-        style: Theme.of(context).textTheme.labelMedium!.copyWith(
+        style: Theme.of(context).textTheme.labelSmall!.copyWith(
               color: Theme.of(context)
                   .colorScheme
                   .onSurface
-                  .withValues(alpha: 0.55),
+                  .withValues(alpha: 0.5),
               fontWeight: FontWeight.w600,
-              letterSpacing: 0.2,
+              letterSpacing: 0.4,
             ),
       ),
     );

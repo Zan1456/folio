@@ -659,6 +659,20 @@ class ProfileScreenState extends State<ProfileScreen>
                 onPressed: () async {
                   String? userId = user.id;
                   if (userId == null) return;
+                  final isDemo = user.isDemo;
+                  final hasOtherUsers = user.getUsers().length > 1;
+                  if (!hasOtherUsers) {
+                    Navigator.of(context).pushNamedAndRemoveUntil(
+                        "login", (_) => false);
+                    user.removeUser(userId);
+                    if (!isDemo) {
+                      await Provider.of<DatabaseProvider>(context,
+                              listen: false)
+                          .store
+                          .removeUser(userId);
+                    }
+                    return;
+                  }
                   user.removeUser(userId);
                   await Provider.of<DatabaseProvider>(context,
                           listen: false)
@@ -668,9 +682,6 @@ class ProfileScreenState extends State<ProfileScreen>
                     user.setUser(user.getUsers().first.id);
                     restore().then(
                         (_) => user.setUser(user.getUsers().first.id));
-                  } else {
-                    Navigator.of(context).pushNamedAndRemoveUntil(
-                        "login", (_) => false);
                   }
                 },
                 leading: Icon(
