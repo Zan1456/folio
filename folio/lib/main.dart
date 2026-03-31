@@ -32,8 +32,6 @@ import 'package:folio/utils/service_locator.dart';
 import 'package:folio_mobile_ui/screens/error_screen.dart';
 import 'package:folio_mobile_ui/screens/error_report_screen.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:folio/flavor.dart';
-import 'package:shake_flutter/shake_flutter.dart';
 
 import 'helpers/live_activity_helper.dart';
 
@@ -57,30 +55,6 @@ void main() async {
     ErrorWidget.builder = errorBuilder;
 
     BackgroundFetch.registerHeadlessTask(backgroundHeadlessTask);
-
-    // setting up things for shakebugs
-    // List<ShakePickerItem> pickerItems = [
-    //   ShakePickerItem('Bug', 'Hiba', tag: 'bug'),
-    //   ShakePickerItem('Suggestion', 'Fejlesztési javaslat', tag: 'suggestion'),
-    //   ShakePickerItem('Question', 'Kérdés', tag: 'question')
-    // ];
-    // ShakePicker picker =
-    //     ShakePicker('Feedback type', 'Visszajelzés típusa', pickerItems);
-    // ShakeTitle title = ShakeTitle('Title', 'Leírás', required: true);
-
-    // ShakeInspectButton inspect = ShakeInspectButton();
-    // ShakeAttachments attachments = ShakeAttachments();
-
-    // List<ShakeFormComponent> components = [picker, title, inspect, attachments];
-    // ShakeForm form = ShakeForm(components);
-
-    // Shake.setShakeForm(form);
-
-    // shakebugs initialization
-    // Shake.setInvokeShakeOnScreenshot(true);
-    if (!kIsPlayStore) {
-      Shake.start('UmVBizZGuaDuLoavBrQQvYJpIxsjKGliCF2vHWI0m7R2GSZ33uNJ9Ws');
-    }
 
     // pre-cache required icons
     const todaySvg = SvgAssetLoader('assets/svg/menu_icons/today_selected.svg');
