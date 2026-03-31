@@ -56,8 +56,13 @@ class _HeadsUpCountdownState extends State<HeadsUpCountdown> {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Material(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop) Navigator.of(context).pop();
+      },
+      child: Center(
+        child: Material(
         type: MaterialType.transparency,
         child: ValueListenableBuilder<int>(
           valueListenable: _remaining,
@@ -115,6 +120,7 @@ class _HeadsUpCountdownState extends State<HeadsUpCountdown> {
           },
         ),
       ),
+    ),
     );
   }
 }
