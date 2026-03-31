@@ -1,4 +1,4 @@
-# refilc - felület library
+# folio - felület library
 
 ### A következőket tartalmazza:
 - oldalak elrendezése
