@@ -12,6 +12,7 @@ import 'package:folio_mobile_ui/common/empty.dart';
 import 'package:folio/ui/filter/sort.dart';
 import 'package:folio_mobile_ui/common/widgets/message/message_viewable.dart';
 import 'package:flutter/material.dart';
+import 'package:folio_mobile_ui/common/haptic.dart';
 import 'package:provider/provider.dart';
 import 'messages_page.i18n.dart';
 import 'send_message/send_message.dart';
@@ -73,7 +74,10 @@ class MessagesPageState extends State<MessagesPage>
                     child: Row(
                       children: [
                         GestureDetector(
-                          onTap: () => Navigator.of(context).maybePop(),
+                          onTap: () {
+                            performHapticFeedback(settings.vibrate);
+                            Navigator.of(context).maybePop();
+                          },
                           child: Container(
                             padding: const EdgeInsets.all(8.0),
                             decoration: BoxDecoration(
@@ -118,7 +122,10 @@ class MessagesPageState extends State<MessagesPage>
                           ),
                         ),
                         GestureDetector(
-                          onTap: () => showSendMessageSheet(context),
+                          onTap: () {
+                            performHapticFeedback(settings.vibrate);
+                            showSendMessageSheet(context);
+                          },
                           child: Container(
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 16.0, vertical: 10.0),
@@ -194,6 +201,7 @@ class MessagesPageState extends State<MessagesPage>
                             .secondary
                             .withValues(alpha: 0.08),
                       ),
+                      onTap: (_) => performHapticFeedback(settings.vibrate),
                       padding: const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 14.0),
                       tabs: [
                         Tab(text: "Inbox".i18n),

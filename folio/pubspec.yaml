@@ -3,7 +3,7 @@ description: "Egy nem hivatalos e-KRÉTA kliens, diákoktól diákoknak."
 homepage: https://folio.zan1456.dev
 publish_to: "none"
 
-version: 1.0.5+6
+version: 1.0.6+7
 
 environment:
   sdk: ^3.6.0
@@ -11,7 +11,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  # reFilc packages
   folio_mobile_ui:
     path: "../folio_mobile_ui/"
   folio_kreta_api:
@@ -54,13 +53,13 @@ dependencies:
   google_fonts: ^8.0.2
   get_it: ^9.2.1
   xml: ^6.5.0
+  flutter_native_splash: ^2.4.4
 
 dependency_overrides:
   intl: 0.20.2
 
 dev_dependencies:
   flutter_launcher_icons: ^0.14.3
-  flutter_native_splash: ^2.4.4
   sqflite_common_ffi: ^2.3.4+4
 
 flutter:

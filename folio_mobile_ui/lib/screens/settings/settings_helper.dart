@@ -26,6 +26,7 @@ import 'package:folio_mobile_ui/common/system_chrome.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:folio_mobile_ui/common/haptic.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:i18n_extension/i18n_extension.dart';
 import 'package:provider/provider.dart';
@@ -708,7 +709,9 @@ class _BellDelaySettingState extends State<BellDelaySetting>
               mode: CupertinoTimerPickerMode.ms,
               initialTimerDuration: currentDelay.abs(),
               onTimerDurationChanged: (Duration d) {
-                HapticFeedback.selectionClick();
+                performHapticFeedback(
+                    Provider.of<SettingsProvider>(context, listen: false)
+                        .vibrate);
 
                 currentDelay = _tabController.index == 0 ? -d : d;
               },
@@ -979,7 +982,9 @@ class _CountdownBeforeMinutesSettingState
               scrollController: _scrollController,
               itemExtent: 44.0,
               onSelectedItemChanged: (i) {
-                HapticFeedback.selectionClick();
+                performHapticFeedback(
+                    Provider.of<SettingsProvider>(context, listen: false)
+                        .vibrate);
                 setState(() => _selected = _minMinutes + i);
               },
               children: List.generate(

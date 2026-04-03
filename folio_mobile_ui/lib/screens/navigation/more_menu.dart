@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:folio_mobile_ui/common/haptic.dart';
 import 'package:provider/provider.dart';
 import 'package:folio/api/providers/user_provider.dart';
 import 'package:folio/models/settings.dart';
@@ -47,6 +48,7 @@ class MoreMenu extends StatelessWidget {
           // Profile hero card with gradient
           GestureDetector(
             onTap: () {
+              performHapticFeedback(settings.vibrate);
               Navigator.of(context).pop();
               Navigator.of(outsideContext, rootNavigator: true).push(
                 CupertinoPageRoute(
@@ -133,6 +135,7 @@ class MoreMenu extends StatelessWidget {
                   color: colorScheme.secondaryContainer,
                   iconColor: colorScheme.onSecondaryContainer,
                   onTap: () {
+                    performHapticFeedback(settings.vibrate);
                     Navigator.of(context).pop();
                     Navigator.of(outsideContext, rootNavigator: true).push(
                       CupertinoPageRoute(
@@ -149,6 +152,7 @@ class MoreMenu extends StatelessWidget {
                   color: colorScheme.tertiaryContainer,
                   iconColor: colorScheme.onTertiaryContainer,
                   onTap: () {
+                    performHapticFeedback(settings.vibrate);
                     Navigator.of(context).pop();
                     Navigator.of(outsideContext, rootNavigator: true).push(
                       CupertinoPageRoute(
@@ -165,6 +169,7 @@ class MoreMenu extends StatelessWidget {
                   color: colorScheme.primaryContainer,
                   iconColor: colorScheme.onPrimaryContainer,
                   onTap: () {
+                    performHapticFeedback(settings.vibrate);
                     Navigator.of(context).pop();
                     Navigator.of(outsideContext, rootNavigator: true).push(
                       CupertinoPageRoute(builder: (_) => const NotesPage()),
@@ -180,6 +185,7 @@ class MoreMenu extends StatelessWidget {
           // Settings button
           GestureDetector(
             onTap: () {
+              performHapticFeedback(settings.vibrate);
               Navigator.of(context).pop();
               Navigator.of(outsideContext, rootNavigator: true).push(
                 CupertinoPageRoute(

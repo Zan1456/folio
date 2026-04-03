@@ -41,6 +41,7 @@ import 'package:folio_mobile_ui/common/panel/panel.dart';
 import 'package:folio_mobile_ui/common/soon_alert/soon_alert.dart';
 import 'package:folio_mobile_ui/common/widgets/tick_tile.dart';
 import 'package:flutter/material.dart';
+import 'package:folio_mobile_ui/common/haptic.dart';
 import 'package:provider/provider.dart';
 import 'package:folio_mobile_ui/pages/notes/submenu/add_note_screen.dart';
 import 'package:folio_mobile_ui/pages/notes/submenu/create_image_note.dart';
@@ -299,7 +300,10 @@ if (selfNoteProvider.todos.isNotEmpty) {
                     child: Row(
                       children: [
                         GestureDetector(
-                          onTap: () => Navigator.of(context).maybePop(),
+                          onTap: () {
+                            performHapticFeedback(settings.vibrate);
+                            Navigator.of(context).maybePop();
+                          },
                           child: Container(
                             padding: const EdgeInsets.all(8.0),
                             decoration: BoxDecoration(
@@ -334,7 +338,10 @@ if (selfNoteProvider.todos.isNotEmpty) {
                           ),
                         ),
                         GestureDetector(
-                          onTap: () => SoonAlert.show(context: context),
+                          onTap: () {
+                            performHapticFeedback(settings.vibrate);
+                            SoonAlert.show(context: context);
+                          },
                           child: Container(
                             padding: const EdgeInsets.all(10.0),
                             decoration: BoxDecoration(
@@ -381,9 +388,12 @@ if (selfNoteProvider.todos.isNotEmpty) {
                       label: "new_note".i18n,
                       color: colorScheme.secondaryContainer,
                       iconColor: colorScheme.onSecondaryContainer,
-                      onTap: () => Navigator.of(context, rootNavigator: true)
-                          .push(CupertinoPageRoute(
-                              builder: (context) => const AddNoteScreen())),
+                      onTap: () {
+                        performHapticFeedback(settings.vibrate);
+                        Navigator.of(context, rootNavigator: true)
+                            .push(CupertinoPageRoute(
+                                builder: (context) => const AddNoteScreen()));
+                      },
                     ),
                     const SizedBox(width: 8.0),
                     _QuickChip(
@@ -391,7 +401,10 @@ if (selfNoteProvider.todos.isNotEmpty) {
                       label: "new_task".i18n,
                       color: colorScheme.tertiaryContainer,
                       iconColor: colorScheme.onTertiaryContainer,
-                      onTap: () => showTaskCreation(context),
+                      onTap: () {
+                        performHapticFeedback(settings.vibrate);
+                        showTaskCreation(context);
+                      },
                     ),
                     const SizedBox(width: 8.0),
                     _QuickChip(
@@ -399,9 +412,12 @@ if (selfNoteProvider.todos.isNotEmpty) {
                       label: "new_image".i18n,
                       color: colorScheme.primaryContainer,
                       iconColor: colorScheme.onPrimaryContainer,
-                      onTap: () => showDialog(
-                          context: context,
-                          builder: (context) => ImageNoteEditor(user.user!)),
+                      onTap: () {
+                        performHapticFeedback(settings.vibrate);
+                        showDialog(
+                            context: context,
+                            builder: (context) => ImageNoteEditor(user.user!));
+                      },
                     ),
                   ],
                 ),
@@ -479,9 +495,13 @@ if (selfNoteProvider.todos.isNotEmpty) {
                 Text('new_note'.i18n),
               ],
             ),
-            onTap: () => Navigator.of(context, rootNavigator: true).push(
-                CupertinoPageRoute(
-                    builder: (context) => const AddNoteScreen())),
+            onTap: () {
+              performHapticFeedback(
+                  Provider.of<SettingsProvider>(context, listen: false).vibrate);
+              Navigator.of(context, rootNavigator: true).push(
+                  CupertinoPageRoute(
+                      builder: (context) => const AddNoteScreen()));
+            },
           ),
         ),
         const SizedBox(
@@ -502,6 +522,8 @@ if (selfNoteProvider.todos.isNotEmpty) {
               ],
             ),
             onTap: () {
+              performHapticFeedback(
+                  Provider.of<SettingsProvider>(context, listen: false).vibrate);
               showDialog(
                   context: context,
                   builder: (context) => ImageNoteEditor(user.user!));
@@ -526,6 +548,8 @@ if (selfNoteProvider.todos.isNotEmpty) {
               ],
             ),
             onTap: () {
+              performHapticFeedback(
+                  Provider.of<SettingsProvider>(context, listen: false).vibrate);
               // if (!Provider.of<PlusProvider>(context, listen: false)
               //     .hasScope(PremiumScopes.unlimitedSelfNotes)) {
               //   PlusLockedFeaturePopup.show(

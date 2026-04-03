@@ -46,6 +46,7 @@ import 'package:folio_mobile_ui/screens/settings/privacy_view.dart';
 import 'package:folio_mobile_ui/screens/settings/settings_helper.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'settings_screen.i18n.dart';
@@ -104,11 +105,8 @@ class SettingsScreenState extends State<SettingsScreen>
     'other': GlobalKey(),
   };
 
-  bool _vibrateExpanded = false;
-  bool _startPageExpanded = false;
-  bool _languageExpanded = false;
-  bool _themeExpanded = false;
-  bool _notifTypeExpanded = false;
+  double? _tempRounding;
+  double? _tempCountdownMinutes;
 
   late List<Grade> _editedSubjects;
 
@@ -497,6 +495,91 @@ class SettingsScreenState extends State<SettingsScreen>
     );
   }
 
+  void _haptic() {
+    switch (settings.vibrate) {
+      case VibrationStrength.off:
+        break;
+      case VibrationStrength.light:
+        HapticFeedback.selectionClick();
+      case VibrationStrength.medium:
+        HapticFeedback.lightImpact();
+      case VibrationStrength.strong:
+        HapticFeedback.mediumImpact();
+    }
+  }
+
+  Widget _buildSliderCard({
+    required IconData icon,
+    required String label,
+    required String valueText,
+    required double value,
+    required double min,
+    required double max,
+    int? divisions,
+    required void Function(double) onChanged,
+    void Function(double)? onChangeEnd,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(14.0, 12.0, 8.0, 4.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(children: [
+            Icon(icon,
+                size: 20.0,
+                color: AppColors.of(context).text.withValues(alpha: .85)),
+            const SizedBox(width: 10.0),
+            Expanded(
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: 15.5,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.of(context).text.withValues(alpha: .9),
+                ),
+              ),
+            ),
+            const SizedBox(width: 8.0),
+            Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 8.0, vertical: 3.0),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.secondaryContainer,
+                borderRadius: BorderRadius.circular(8.0),
+              ),
+              child: Text(
+                valueText,
+                style: TextStyle(
+                  fontSize: 13.0,
+                  fontWeight: FontWeight.w700,
+                  color: Theme.of(context).colorScheme.onSecondaryContainer,
+                ),
+              ),
+            ),
+          ]),
+          SliderTheme(
+            data: SliderTheme.of(context).copyWith(
+              trackHeight: 4.0,
+              overlayShape:
+                  const RoundSliderOverlayShape(overlayRadius: 14.0),
+            ),
+            child: Slider(
+              value: value,
+              min: min,
+              max: max,
+              divisions: divisions,
+              activeColor: Theme.of(context).colorScheme.secondary,
+              thumbColor: Theme.of(context).colorScheme.secondary,
+              onChanged: onChanged,
+              onChangeEnd: onChangeEnd,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     user = Provider.of<UserProvider>(context);
@@ -505,17 +588,6 @@ class SettingsScreenState extends State<SettingsScreen>
 
     if (settings.developerMode) devmodeCountdown = -1;
 
-    final String startPageTitle =
-        SettingsHelper.localizedPageTitles()[settings.startPage] ?? "?";
-    final String languageText =
-        SettingsHelper.langMap[settings.language] ?? "?";
-    final String themeModeText = {
-          ThemeMode.light: "light".i18n,
-          ThemeMode.dark: "dark".i18n,
-          ThemeMode.system: "system".i18n,
-        }[settings.theme] ??
-        "?";
-
     final gradeProvider = Provider.of<GradeProvider>(context);
     _editedSubjects = gradeProvider.grades
         .where((e) => e.teacher.isRenamed || e.subject.isRenamed)
@@ -523,8 +595,7 @@ class SettingsScreenState extends State<SettingsScreen>
         .toList()
       ..sort((a, b) => a.subject.name.compareTo(b.subject.name));
 
-    final allSections =
-        _buildAllSections(context, startPageTitle, languageText, themeModeText);
+    final allSections = _buildAllSections(context);
 
     final bool isSearching = _searchQuery.isNotEmpty;
 
@@ -914,8 +985,7 @@ class SettingsScreenState extends State<SettingsScreen>
     );
   }
 
-  List<_SettingsSection> _buildAllSections(BuildContext context,
-      String startPageTitle, String languageText, String themeModeText) {
+  List<_SettingsSection> _buildAllSections(BuildContext context) {
     return [
       // ── GENERAL ──────────────────────────────────────────────
 
@@ -959,7 +1029,7 @@ class SettingsScreenState extends State<SettingsScreen>
                 ),
                 trailingDivider: true,
                 trailing: Switch(
-                  onChanged: (v) => settings.update(bellDelayEnabled: v),
+                  onChanged: (v) { _haptic(); settings.update(bellDelayEnabled: v); },
                   value: settings.bellDelayEnabled,
                   activeColor: Theme.of(context).colorScheme.secondary,
                 ),
@@ -985,7 +1055,7 @@ class SettingsScreenState extends State<SettingsScreen>
                         .text
                         .withValues(alpha: settings.showBreaks ? .95 : .25)),
                 trailing: Switch(
-                  onChanged: (v) => settings.update(showBreaks: v),
+                  onChanged: (v) { _haptic(); settings.update(showBreaks: v); },
                   value: settings.showBreaks,
                   activeColor: Theme.of(context).colorScheme.secondary,
                 ),
@@ -1042,6 +1112,7 @@ class SettingsScreenState extends State<SettingsScreen>
                             .then((_) => setState(() {}));
                         return;
                       }
+                      _haptic();
                       settings.update(liveActivityEnabled: v);
                       if (!v) {
                         PlatformChannel.endLiveActivity();
@@ -1106,6 +1177,7 @@ class SettingsScreenState extends State<SettingsScreen>
                   ),
                   trailing: Switch(
                     onChanged: (v) {
+                      _haptic();
                       settings.update(androidLiveActivityEnabled: v);
                       if (!v) AndroidLiveActivityHelper.cancel();
                       setState(() {});
@@ -1119,82 +1191,46 @@ class SettingsScreenState extends State<SettingsScreen>
                         settings.androidLiveActivityEnabled ? 4.0 : 12.0),
                   ),
                 ),
-                if (settings.androidLiveActivityEnabled) ...[
+                if (settings.androidLiveActivityEnabled)
                   PanelButton(
-                    onPressed: () => setState(() => _notifTypeExpanded = !_notifTypeExpanded),
-                    title: Text(
-                      "android_notification_type".i18n,
-                      style: TextStyle(
-                          color: AppColors.of(context).text.withValues(alpha: .95)),
-                    ),
-                    leading: Icon(
-                      Icons.smartphone_rounded,
-                      size: 22.0,
-                      color: AppColors.of(context).text.withValues(alpha: .95),
-                    ),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          settings.androidLiveNotificationType == 'hyper_os'
-                              ? 'HyperOS'
-                              : 'native_android'.i18n,
-                          style: const TextStyle(fontSize: 14.0),
+                    leading: Icon(Icons.smartphone_rounded,
+                        size: 22.0,
+                        color: AppColors.of(context).text.withValues(alpha: .95)),
+                    title: Text('android_notification_type'.i18n,
+                        style: TextStyle(
+                            color: AppColors.of(context).text.withValues(alpha: .95))),
+                    trailing: DropdownButtonHideUnderline(
+                      child: DropdownButton<String>(
+                        value: settings.androidLiveNotificationType,
+                        isDense: true,
+                        borderRadius: BorderRadius.circular(12.0),
+                        dropdownColor: Theme.of(context).colorScheme.surface,
+                        style: TextStyle(
+                          fontSize: 14.0,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.of(context).text,
                         ),
-                        const SizedBox(width: 4.0),
-                        Icon(
-                          _notifTypeExpanded ? Icons.expand_less_rounded : Icons.expand_more_rounded,
-                          size: 20.0,
-                          color: AppColors.of(context).text.withValues(alpha: .55),
-                        ),
-                      ],
+                        items: [
+                          DropdownMenuItem(
+                            value: 'native',
+                            child: Text('native_android'.i18n),
+                          ),
+                          const DropdownMenuItem(
+                            value: 'hyper_os',
+                            child: Text('HyperOS'),
+                          ),
+                        ],
+                        onChanged: (v) {
+                          if (v == null) return;
+                          _haptic();
+                          settings.update(androidLiveNotificationType: v);
+                          setState(() {});
+                        },
+                      ),
                     ),
-                    borderRadius: BorderRadius.vertical(
-                      top: const Radius.circular(4.0),
-                      bottom: Radius.circular(_notifTypeExpanded ? 4.0 : 12.0),
-                    ),
+                    borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(4.0), bottom: Radius.circular(12.0)),
                   ),
-                  if (_notifTypeExpanded) ...[
-                    PanelButton(
-                      onPressed: () {
-                        settings.update(androidLiveNotificationType: 'native');
-                        setState(() => _notifTypeExpanded = false);
-                      },
-                      title: Text('native_android'.i18n,
-                          style: TextStyle(
-                              color: AppColors.of(context).text.withValues(alpha: .95))),
-                      leading: Icon(Icons.android_rounded,
-                          size: 22.0,
-                          color: AppColors.of(context).text.withValues(alpha: .95)),
-                      trailing: settings.androidLiveNotificationType == 'native'
-                          ? Icon(Icons.check_rounded,
-                              size: 20.0,
-                              color: Theme.of(context).colorScheme.secondary)
-                          : null,
-                      borderRadius: const BorderRadius.vertical(
-                          top: Radius.circular(4.0), bottom: Radius.circular(4.0)),
-                    ),
-                    PanelButton(
-                      onPressed: () {
-                        settings.update(androidLiveNotificationType: 'hyper_os');
-                        setState(() => _notifTypeExpanded = false);
-                      },
-                      title: Text('HyperOS',
-                          style: TextStyle(
-                              color: AppColors.of(context).text.withValues(alpha: .95))),
-                      leading: Icon(Icons.layers_rounded,
-                          size: 22.0,
-                          color: AppColors.of(context).text.withValues(alpha: .95)),
-                      trailing: settings.androidLiveNotificationType == 'hyper_os'
-                          ? Icon(Icons.check_rounded,
-                              size: 20.0,
-                              color: Theme.of(context).colorScheme.secondary)
-                          : null,
-                      borderRadius: const BorderRadius.vertical(
-                          top: Radius.circular(4.0), bottom: Radius.circular(12.0)),
-                    ),
-                  ],
-                ],
               ],
             ),
           ),
@@ -1223,6 +1259,7 @@ class SettingsScreenState extends State<SettingsScreen>
               PanelButton(
                 padding: const EdgeInsets.only(left: 14.0, right: 6.0),
                 onPressed: () {
+                  _haptic();
                   settings.update(liveCountdownEnabled: !settings.liveCountdownEnabled);
                   setState(() {});
                 },
@@ -1236,6 +1273,7 @@ class SettingsScreenState extends State<SettingsScreen>
                         alpha: settings.liveCountdownEnabled ? .95 : .25)),
                 trailing: Switch(
                   onChanged: (v) {
+                    _haptic();
                     settings.update(liveCountdownEnabled: v);
                     setState(() {});
                   },
@@ -1252,6 +1290,7 @@ class SettingsScreenState extends State<SettingsScreen>
                 PanelButton(
                   padding: const EdgeInsets.only(left: 14.0, right: 6.0),
                   onPressed: () {
+                    _haptic();
                     settings.update(liveCountdownBeforeLesson: !settings.liveCountdownBeforeLesson);
                     setState(() {});
                   },
@@ -1265,6 +1304,7 @@ class SettingsScreenState extends State<SettingsScreen>
                           alpha: settings.liveCountdownBeforeLesson ? .95 : .25)),
                   trailing: Switch(
                     onChanged: (v) {
+                      _haptic();
                       settings.update(liveCountdownBeforeLesson: v);
                       setState(() {});
                     },
@@ -1276,28 +1316,30 @@ class SettingsScreenState extends State<SettingsScreen>
                 ),
                 // Minutes before (shown when before-lesson is enabled)
                 if (settings.liveCountdownBeforeLesson)
-                  PanelButton(
-                    onPressed: () {
-                      SettingsHelper.countdownBeforeMinutes(context);
-                      setState(() {});
-                    },
-                    title: Text('countdown_before_minutes'.i18n,
-                        style: TextStyle(
-                            color: AppColors.of(context).text.withValues(alpha: .95))),
-                    leading: Icon(Icons.access_time_rounded,
-                        size: 22.0,
-                        color: AppColors.of(context).text.withValues(alpha: .95)),
-                    trailing: Text(
-                      'min_before'.i18n.replaceFirst('%s', '${settings.liveCountdownBeforeMinutes}'),
-                      style: const TextStyle(fontSize: 14.0),
+                  _buildSliderCard(
+                    icon: Icons.access_time_rounded,
+                    label: 'countdown_before_minutes'.i18n,
+                    valueText: 'min_before'.i18n.replaceFirst(
+                      '%s',
+                      '${(_tempCountdownMinutes?.toInt() ?? settings.liveCountdownBeforeMinutes)}',
                     ),
-                    borderRadius: const BorderRadius.vertical(
-                        top: Radius.circular(4.0), bottom: Radius.circular(4.0)),
+                    value: _tempCountdownMinutes ??
+                        settings.liveCountdownBeforeMinutes.toDouble(),
+                    min: 1,
+                    max: 90,
+                    divisions: 89,
+                    onChanged: (v) => setState(() => _tempCountdownMinutes = v),
+                    onChangeEnd: (v) {
+                      _haptic();
+                      settings.update(liveCountdownBeforeMinutes: v.toInt());
+                      setState(() => _tempCountdownMinutes = null);
+                    },
                   ),
                 // During lesson toggle
                 PanelButton(
                   padding: const EdgeInsets.only(left: 14.0, right: 6.0),
                   onPressed: () {
+                    _haptic();
                     settings.update(liveCountdownDuringLesson: !settings.liveCountdownDuringLesson);
                     setState(() {});
                   },
@@ -1311,6 +1353,7 @@ class SettingsScreenState extends State<SettingsScreen>
                           alpha: settings.liveCountdownDuringLesson ? .95 : .25)),
                   trailing: Switch(
                     onChanged: (v) {
+                      _haptic();
                       settings.update(liveCountdownDuringLesson: v);
                       setState(() {});
                     },
@@ -1324,6 +1367,7 @@ class SettingsScreenState extends State<SettingsScreen>
                 PanelButton(
                   padding: const EdgeInsets.only(left: 14.0, right: 6.0),
                   onPressed: () {
+                    _haptic();
                     settings.update(liveCountdownDuringBreak: !settings.liveCountdownDuringBreak);
                     setState(() {});
                   },
@@ -1337,6 +1381,7 @@ class SettingsScreenState extends State<SettingsScreen>
                           alpha: settings.liveCountdownDuringBreak ? .95 : .25)),
                   trailing: Switch(
                     onChanged: (v) {
+                      _haptic();
                       settings.update(liveCountdownDuringBreak: v);
                       setState(() {});
                     },
@@ -1352,7 +1397,7 @@ class SettingsScreenState extends State<SettingsScreen>
         ),
       ),
 
-      // Start page (expandable)
+      // Start page (dropdown)
       _SettingsSection(
         category: 'general',
         searchTerms: ['kezdőlap', 'start page', 'kezdőoldal'],
@@ -1363,61 +1408,47 @@ class SettingsScreenState extends State<SettingsScreen>
             isSeparated: false,
             children: [
               PanelButton(
-                onPressed: () => setState(() => _startPageExpanded = !_startPageExpanded),
                 leading: Icon(Icons.play_arrow_rounded,
                     size: 22.0,
                     color: AppColors.of(context).text.withValues(alpha: .95)),
-                title: Text("startpage".i18n,
+                title: Text('startpage'.i18n,
                     style: TextStyle(
                         color: AppColors.of(context).text.withValues(alpha: .95))),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(startPageTitle.capital(), style: const TextStyle(fontSize: 14.0)),
-                    const SizedBox(width: 4.0),
-                    Icon(
-                      _startPageExpanded ? Icons.expand_less_rounded : Icons.expand_more_rounded,
-                      size: 20.0,
-                      color: AppColors.of(context).text.withValues(alpha: .55),
+                trailing: DropdownButtonHideUnderline(
+                  child: DropdownButton<Pages>(
+                    value: settings.startPage,
+                    isDense: true,
+                    borderRadius: BorderRadius.circular(12.0),
+                    dropdownColor: Theme.of(context).colorScheme.surface,
+                    style: TextStyle(
+                      fontSize: 14.0,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.of(context).text,
                     ),
-                  ],
-                ),
-                borderRadius: BorderRadius.vertical(
-                  top: const Radius.circular(12.0),
-                  bottom: Radius.circular(_startPageExpanded ? 4.0 : 12.0),
-                ),
-              ),
-              if (_startPageExpanded)
-                ...SettingsHelper.pageTitle.entries.toList().asMap().entries.map((e) {
-                  final isLast = e.key == SettingsHelper.pageTitle.length - 1;
-                  final page = e.value.key;
-                  return PanelButton(
-                    onPressed: () {
-                      settings.update(startPage: page);
-                      setState(() => _startPageExpanded = false);
+                    items: const [Pages.home, Pages.grades, Pages.timetable]
+                        .map((p) => DropdownMenuItem<Pages>(
+                              value: p,
+                              child: Text(
+                                  SettingsHelper.localizedPageTitles()[p]!
+                                      .capital()),
+                            ))
+                        .toList(),
+                    onChanged: (v) {
+                      if (v == null) return;
+                      _haptic();
+                      settings.update(startPage: v);
+                      setState(() {});
                     },
-                    title: Text(
-                      SettingsHelper.localizedPageTitles()[page]!.capital(),
-                      style: TextStyle(
-                          color: AppColors.of(context).text.withValues(alpha: .95)),
-                    ),
-                    trailing: settings.startPage == page
-                        ? Icon(Icons.check_rounded,
-                            size: 20.0,
-                            color: Theme.of(context).colorScheme.secondary)
-                        : null,
-                    borderRadius: BorderRadius.vertical(
-                      top: const Radius.circular(4.0),
-                      bottom: Radius.circular(isLast ? 12.0 : 4.0),
-                    ),
-                  );
-                }),
+                  ),
+                ),
+                borderRadius: const BorderRadius.all(Radius.circular(12.0)),
+              ),
             ],
           ),
         ),
       ),
 
-      // Language (expandable)
+      // Language (dropdown)
       _SettingsSection(
         category: 'general',
         searchTerms: ['nyelv', 'language', 'Hungarian', 'English'],
@@ -1428,63 +1459,50 @@ class SettingsScreenState extends State<SettingsScreen>
             isSeparated: false,
             children: [
               PanelButton(
-                onPressed: () => setState(() => _languageExpanded = !_languageExpanded),
                 leading: Icon(Icons.language_rounded,
                     size: 22.0,
                     color: AppColors.of(context).text.withValues(alpha: .95)),
-                title: Text("language".i18n,
+                title: Text('language'.i18n,
                     style: TextStyle(
                         color: AppColors.of(context).text.withValues(alpha: .95))),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(languageText, style: const TextStyle(fontSize: 14.0)),
-                    const SizedBox(width: 4.0),
-                    Icon(
-                      _languageExpanded ? Icons.expand_less_rounded : Icons.expand_more_rounded,
-                      size: 20.0,
-                      color: AppColors.of(context).text.withValues(alpha: .55),
+                trailing: DropdownButtonHideUnderline(
+                  child: DropdownButton<String>(
+                    value: settings.language,
+                    isDense: true,
+                    borderRadius: BorderRadius.circular(12.0),
+                    dropdownColor: Theme.of(context).colorScheme.surface,
+                    style: TextStyle(
+                      fontSize: 14.0,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.of(context).text,
                     ),
-                  ],
-                ),
-                borderRadius: BorderRadius.vertical(
-                  top: const Radius.circular(12.0),
-                  bottom: Radius.circular(_languageExpanded ? 4.0 : 12.0),
-                ),
-              ),
-              if (_languageExpanded)
-                ...SettingsHelper.langMap.entries.toList().asMap().entries.map((e) {
-                  final isLast = e.key == SettingsHelper.langMap.length - 1;
-                  final lang = e.value.key;
-                  final display = e.value.value;
-                  return PanelButton(
-                    onPressed: () {
+                    items: SettingsHelper.langMap.entries
+                        .map((e) => DropdownMenuItem<String>(
+                              value: e.key,
+                              child: Text(e.value.trim()),
+                            ))
+                        .toList(),
+                    onChanged: (v) {
+                      if (v == null) return;
+                      _haptic();
                       Provider.of<SettingsProvider>(context, listen: false)
-                          .update(language: lang);
-                      I18n.of(context).locale = Locale(lang, lang.toUpperCase());
-                      if (Platform.isAndroid || Platform.isIOS) setupQuickActions();
-                      setState(() => _languageExpanded = false);
+                          .update(language: v);
+                      I18n.of(context).locale = Locale(v, v.toUpperCase());
+                      if (Platform.isAndroid || Platform.isIOS) {
+                        setupQuickActions();
+                      }
+                      setState(() {});
                     },
-                    title: Text(display,
-                        style: TextStyle(
-                            color: AppColors.of(context).text.withValues(alpha: .95))),
-                    trailing: settings.language == lang
-                        ? Icon(Icons.check_rounded,
-                            size: 20.0,
-                            color: Theme.of(context).colorScheme.secondary)
-                        : null,
-                    borderRadius: BorderRadius.vertical(
-                      top: const Radius.circular(4.0),
-                      bottom: Radius.circular(isLast ? 12.0 : 4.0),
-                    ),
-                  );
-                }),
+                  ),
+                ),
+                borderRadius: const BorderRadius.all(Radius.circular(12.0)),
+              ),
             ],
           ),
         ),
       ),
 
-      // Vibration (expandable)
+      // Vibration (dropdown)
       _SettingsSection(
         category: 'general',
         searchTerms: ['rezgés', 'vibrate', 'vibráció'],
@@ -1495,68 +1513,56 @@ class SettingsScreenState extends State<SettingsScreen>
             isSeparated: false,
             children: [
               PanelButton(
-                onPressed: () => setState(() => _vibrateExpanded = !_vibrateExpanded),
                 leading: Icon(Icons.vibration_rounded,
                     size: 22.0,
                     color: AppColors.of(context).text.withValues(alpha: .95)),
                 title: Text('vibrate'.i18n,
                     style: TextStyle(
                         color: AppColors.of(context).text.withValues(alpha: .95))),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      {
-                        VibrationStrength.off: 'voff',
-                        VibrationStrength.light: 'vlight',
-                        VibrationStrength.medium: 'vmedium',
-                        VibrationStrength.strong: 'vstrong',
-                      }[settings.vibrate]!.i18n,
-                      style: const TextStyle(fontSize: 14.0),
+                trailing: DropdownButtonHideUnderline(
+                  child: DropdownButton<VibrationStrength>(
+                    value: settings.vibrate,
+                    isDense: true,
+                    borderRadius: BorderRadius.circular(12.0),
+                    dropdownColor: Theme.of(context).colorScheme.surface,
+                    style: TextStyle(
+                      fontSize: 14.0,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.of(context).text,
                     ),
-                    const SizedBox(width: 4.0),
-                    Icon(
-                      _vibrateExpanded ? Icons.expand_less_rounded : Icons.expand_more_rounded,
-                      size: 20.0,
-                      color: AppColors.of(context).text.withValues(alpha: .55),
-                    ),
-                  ],
-                ),
-                borderRadius: BorderRadius.vertical(
-                  top: const Radius.circular(12.0),
-                  bottom: Radius.circular(_vibrateExpanded ? 4.0 : 12.0),
-                ),
-              ),
-              if (_vibrateExpanded)
-                for (final entry in [
-                  (VibrationStrength.off, 'voff', Icons.volume_off_rounded),
-                  (VibrationStrength.light, 'vlight', Icons.volume_up_rounded),
-                  (VibrationStrength.medium, 'vmedium', Icons.volume_mute_rounded),
-                  (VibrationStrength.strong, 'vstrong', Icons.volume_down_rounded),
-                ])
-                  PanelButton(
-                    onPressed: () {
-                      settings.update(vibrate: entry.$1);
-                      setState(() => _vibrateExpanded = false);
+                    items: [
+                      VibrationStrength.off,
+                      VibrationStrength.light,
+                      VibrationStrength.medium,
+                      VibrationStrength.strong,
+                    ]
+                        .map((v) => DropdownMenuItem<VibrationStrength>(
+                              value: v,
+                              child: Text(
+                                  SettingsHelper.localizedVibrationTitles()[v] ??
+                                      ''),
+                            ))
+                        .toList(),
+                    onChanged: (v) {
+                      if (v == null) return;
+                      settings.update(vibrate: v);
+                      // play haptic with the newly selected strength
+                      switch (v) {
+                        case VibrationStrength.off:
+                          break;
+                        case VibrationStrength.light:
+                          HapticFeedback.selectionClick();
+                        case VibrationStrength.medium:
+                          HapticFeedback.lightImpact();
+                        case VibrationStrength.strong:
+                          HapticFeedback.mediumImpact();
+                      }
+                      setState(() {});
                     },
-                    leading: Icon(entry.$3,
-                        size: 22.0,
-                        color: AppColors.of(context).text.withValues(alpha: .95)),
-                    title: Text(entry.$2.i18n,
-                        style: TextStyle(
-                            color: AppColors.of(context).text.withValues(alpha: .95))),
-                    trailing: settings.vibrate == entry.$1
-                        ? Icon(Icons.check_rounded,
-                            size: 20.0,
-                            color: Theme.of(context).colorScheme.secondary)
-                        : null,
-                    borderRadius: BorderRadius.vertical(
-                      top: const Radius.circular(4.0),
-                      bottom: Radius.circular(
-                        entry.$1 == VibrationStrength.strong ? 12.0 : 4.0,
-                      ),
-                    ),
                   ),
+                ),
+                borderRadius: const BorderRadius.all(Radius.circular(12.0)),
+              ),
             ],
           ),
         ),
@@ -1564,7 +1570,7 @@ class SettingsScreenState extends State<SettingsScreen>
 
       // ── APPEARANCE ───────────────────────────────────────────
 
-      // Theme (expandable)
+      // Theme (dropdown)
       _SettingsSection(
         category: 'appearance',
         searchTerms: ['téma', 'theme', 'sötét', 'világos', 'dark', 'light'],
@@ -1575,60 +1581,49 @@ class SettingsScreenState extends State<SettingsScreen>
             isSeparated: false,
             children: [
               PanelButton(
-                onPressed: () => setState(() => _themeExpanded = !_themeExpanded),
                 leading: Icon(Icons.wb_sunny_rounded,
                     size: 22.0,
                     color: AppColors.of(context).text.withValues(alpha: .95)),
-                title: Text("theme".i18n,
+                title: Text('theme'.i18n,
                     style: TextStyle(
                         color: AppColors.of(context).text.withValues(alpha: .95))),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(themeModeText, style: const TextStyle(fontSize: 14.0)),
-                    const SizedBox(width: 4.0),
-                    Icon(
-                      _themeExpanded ? Icons.expand_less_rounded : Icons.expand_more_rounded,
-                      size: 20.0,
-                      color: AppColors.of(context).text.withValues(alpha: .55),
+                trailing: DropdownButtonHideUnderline(
+                  child: DropdownButton<ThemeMode>(
+                    value: settings.theme,
+                    isDense: true,
+                    borderRadius: BorderRadius.circular(12.0),
+                    dropdownColor: Theme.of(context).colorScheme.surface,
+                    style: TextStyle(
+                      fontSize: 14.0,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.of(context).text,
                     ),
-                  ],
-                ),
-                borderRadius: BorderRadius.vertical(
-                  top: const Radius.circular(12.0),
-                  bottom: Radius.circular(_themeExpanded ? 4.0 : 12.0),
-                ),
-              ),
-              if (_themeExpanded)
-                ...[
-                  (ThemeMode.light, 'light'),
-                  (ThemeMode.dark, 'dark'),
-                  (ThemeMode.system, 'system'),
-                ].asMap().entries.map((e) {
-                  final isLast = e.key == 2;
-                  final mode = e.value.$1;
-                  final labelKey = e.value.$2;
-                  return PanelButton(
-                    onPressed: () {
-                      settings.update(theme: mode);
+                    items: [
+                      DropdownMenuItem(
+                        value: ThemeMode.light,
+                        child: Text('light'.i18n),
+                      ),
+                      DropdownMenuItem(
+                        value: ThemeMode.dark,
+                        child: Text('dark'.i18n),
+                      ),
+                      DropdownMenuItem(
+                        value: ThemeMode.system,
+                        child: Text('system'.i18n),
+                      ),
+                    ],
+                    onChanged: (v) {
+                      if (v == null) return;
+                      _haptic();
+                      settings.update(theme: v);
                       Provider.of<ThemeModeObserver>(context, listen: false)
-                          .changeTheme(mode);
-                      setState(() => _themeExpanded = false);
+                          .changeTheme(v);
+                      setState(() {});
                     },
-                    title: Text(labelKey.i18n,
-                        style: TextStyle(
-                            color: AppColors.of(context).text.withValues(alpha: .95))),
-                    trailing: settings.theme == mode
-                        ? Icon(Icons.check_rounded,
-                            size: 20.0,
-                            color: Theme.of(context).colorScheme.secondary)
-                        : null,
-                    borderRadius: BorderRadius.vertical(
-                      top: const Radius.circular(4.0),
-                      bottom: Radius.circular(isLast ? 12.0 : 4.0),
-                    ),
-                  );
-                }),
+                  ),
+                ),
+                borderRadius: const BorderRadius.all(Radius.circular(12.0)),
+              ),
             ],
           ),
         ),
@@ -1647,6 +1642,7 @@ class SettingsScreenState extends State<SettingsScreen>
               PanelButton(
                 padding: const EdgeInsets.only(left: 14.0, right: 6.0),
                 onPressed: () {
+                  _haptic();
                   settings.update(shadowEffect: !settings.shadowEffect);
                   setState(() {});
                 },
@@ -1661,6 +1657,7 @@ class SettingsScreenState extends State<SettingsScreen>
                         .withValues(alpha: settings.shadowEffect ? .95 : .25)),
                 trailing: Switch(
                   onChanged: (v) {
+                    _haptic();
                     settings.update(shadowEffect: v);
                     setState(() {});
                   },
@@ -1707,6 +1704,7 @@ class SettingsScreenState extends State<SettingsScreen>
                         alpha: settings.renamedSubjectsEnabled ? .95 : .25)),
                 trailing: Switch(
                   onChanged: (v) async {
+                    _haptic();
                     settings.update(renamedSubjectsEnabled: v);
                     await _convertProviders();
                     setState(() {});
@@ -1732,6 +1730,7 @@ class SettingsScreenState extends State<SettingsScreen>
                         alpha: settings.renamedTeachersEnabled ? .95 : .25)),
                 trailing: Switch(
                   onChanged: (v) async {
+                    _haptic();
                     settings.update(renamedTeachersEnabled: v);
                     await _convertProviders();
                     setState(() {});
@@ -1808,22 +1807,21 @@ class SettingsScreenState extends State<SettingsScreen>
             cardPadding: const EdgeInsets.all(4.0),
             isSeparated: false,
             children: [
-              PanelButton(
-                onPressed: () {
-                  SettingsHelper.rounding(context);
-                  setState(() {});
+              _buildSliderCard(
+                icon: Icons.commit_rounded,
+                label: 'rounding'.i18n,
+                valueText: (_tempRounding ?? settings.rounding / 10)
+                    .toStringAsFixed(1),
+                value: _tempRounding ?? settings.rounding / 10,
+                min: 0.1,
+                max: 0.9,
+                divisions: 8,
+                onChanged: (v) => setState(() => _tempRounding = v),
+                onChangeEnd: (v) {
+                  _haptic();
+                  settings.update(rounding: (v * 10).toInt());
+                  setState(() => _tempRounding = null);
                 },
-                title: Text("rounding".i18n,
-                    style: TextStyle(
-                        color:
-                            AppColors.of(context).text.withValues(alpha: .95))),
-                leading: Icon(Icons.commit_rounded,
-                    size: 22.0,
-                    color: AppColors.of(context).text.withValues(alpha: .95)),
-                trailing: Text((settings.rounding / 10).toStringAsFixed(1),
-                    style: const TextStyle(fontSize: 14.0)),
-                borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(12.0), bottom: Radius.circular(4.0)),
               ),
               PanelButton(
                 padding: const EdgeInsets.only(left: 14.0, right: 6.0),
@@ -1841,7 +1839,7 @@ class SettingsScreenState extends State<SettingsScreen>
                         .text
                         .withValues(alpha: settings.graphClassAvg ? .95 : .25)),
                 trailing: Switch(
-                  onChanged: (v) => settings.update(graphClassAvg: v),
+                  onChanged: (v) { _haptic(); settings.update(graphClassAvg: v); },
                   value: settings.graphClassAvg,
                   activeColor: Theme.of(context).colorScheme.secondary,
                 ),
@@ -1901,6 +1899,7 @@ class SettingsScreenState extends State<SettingsScreen>
                         alpha: settings.gradeOpeningFun ? .95 : .25)),
                 trailing: Switch(
                   onChanged: (v) async {
+                    _haptic();
                     settings.update(gradeOpeningFun: v);
                     setState(() {});
                   },
@@ -2022,6 +2021,7 @@ class SettingsScreenState extends State<SettingsScreen>
               PanelButton(
                 padding: const EdgeInsets.only(left: 14.0, right: 6.0),
                 onPressed: () async {
+                  _haptic();
                   settings.update(presentationMode: !settings.presentationMode);
                   setState(() {});
                 },
@@ -2035,6 +2035,7 @@ class SettingsScreenState extends State<SettingsScreen>
                         alpha: settings.presentationMode ? .95 : .25)),
                 trailing: Switch(
                   onChanged: (v) async {
+                    _haptic();
                     settings.update(presentationMode: v);
                     setState(() {});
                   },
@@ -2111,7 +2112,7 @@ class SettingsScreenState extends State<SettingsScreen>
                           color: AppColors.of(context).text.withValues(
                               alpha: settings.analyticsEnabled ? .5 : .2)),
                     ),
-                    onChanged: (v) => settings.update(analyticsEnabled: v),
+                    onChanged: (v) { _haptic(); settings.update(analyticsEnabled: v); },
                     value: settings.analyticsEnabled,
                     activeColor: Theme.of(context).colorScheme.secondary,
                   ),

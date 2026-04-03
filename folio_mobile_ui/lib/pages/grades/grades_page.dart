@@ -33,6 +33,7 @@ import 'package:folio_mobile_ui/pages/grades/grade_subject_view.dart';
 import 'package:folio_mobile_ui/screens/navigation/navigation_route_handler.dart';
 import 'package:folio_mobile_ui/screens/navigation/navigation_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:folio_mobile_ui/common/haptic.dart';
 import 'package:provider/provider.dart';
 import 'package:folio/helpers/average_helper.dart';
 import 'average_selector.dart';
@@ -207,6 +208,7 @@ class GradesPageState extends State<GradesPage> {
                       average: avg,
                       groupAverage: avgDropValue == 0 ? groupAverage : 0.0,
                       onTap: () {
+                        performHapticFeedback(settingsProvider.vibrate);
                         GradeSubjectView(subject, groupAverage: groupAverage)
                             .push(context, root: true);
                       },
@@ -451,7 +453,10 @@ class GradesPageState extends State<GradesPage> {
                 Padding(
                   padding: const EdgeInsets.only(right: 4.0),
                   child: IconButton(
-                    onPressed: () => showQuickSettings(context),
+                    onPressed: () {
+                      performHapticFeedback(settingsProvider.vibrate);
+                      showQuickSettings(context);
+                    },
                     icon: Icon(
                       Icons.more_horiz_rounded,
                       color: Theme.of(context).colorScheme.onSurface,
@@ -651,8 +656,11 @@ class GradesPageState extends State<GradesPage> {
                           ),
                           const Spacer(),
                           GestureDetector(
-                            onTap: () => _showGradesStatsModal(
-                                context, graphGrades, totalClassAvg),
+                            onTap: () {
+                              performHapticFeedback(settingsProvider.vibrate);
+                              _showGradesStatsModal(
+                                  context, graphGrades, totalClassAvg);
+                            },
                             child: Container(
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 12.0, vertical: 8.0),
@@ -837,6 +845,7 @@ class GradesPageState extends State<GradesPage> {
               ],
             ),
             onTap: () {
+              performHapticFeedback(settingsProvider.vibrate);
               // if (!Provider.of<PlusProvider>(context, listen: false)
               //     .hasScope(PremiumScopes.totalGradeCalculator)) {
               //   PlusLockedFeaturePopup.show(
@@ -870,6 +879,7 @@ class GradesPageState extends State<GradesPage> {
             ),
             trailing: importedViewMode ? const Icon(Icons.close_rounded) : null,
             onTap: () {
+              performHapticFeedback(settingsProvider.vibrate);
               if (importedViewMode) {
                 importedViewMode = false;
 

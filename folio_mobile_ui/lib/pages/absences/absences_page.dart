@@ -21,6 +21,8 @@ import 'package:folio_mobile_ui/common/widgets/miss_tile.dart';
 import 'package:folio_mobile_ui/pages/absences/absence_subject_modal.dart';
 import 'package:folio/ui/filter/sort.dart';
 import 'package:flutter/material.dart';
+import 'package:folio/models/settings.dart';
+import 'package:folio_mobile_ui/common/haptic.dart';
 import 'package:provider/provider.dart';
 import 'absences_page.i18n.dart';
 
@@ -333,6 +335,8 @@ class AbsencesPageState extends State<AbsencesPage>
                             .secondary
                             .withValues(alpha: 0.08),
                       ),
+                      onTap: (_) => performHapticFeedback(
+                          Provider.of<SettingsProvider>(context, listen: false).vibrate),
                       padding: const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 14.0),
                       tabs: [
                         Tab(text: "Absences".i18n),

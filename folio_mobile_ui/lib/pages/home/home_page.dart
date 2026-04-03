@@ -30,6 +30,7 @@ import 'package:folio_mobile_ui/common/widgets/update/update_tile.dart';
 import 'package:folio_mobile_ui/pages/home/live_card/live_card.dart';
 import 'package:folio_mobile_ui/screens/navigation/navigation_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:folio_mobile_ui/common/haptic.dart';
 import 'package:provider/provider.dart';
 import 'home_page.i18n.dart';
 import 'package:folio/ui/filter/widgets.dart';
@@ -309,6 +310,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
                               controller: _tabController,
                               disableFading: true,
                               onTap: (i) async {
+                                performHapticFeedback(settings.vibrate);
                                 int selectedPage =
                                     _pageController.page!.round();
 

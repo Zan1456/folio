@@ -9,6 +9,9 @@ import 'package:flutter/gestures.dart' show kMinFlingVelocity;
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+import 'package:folio/models/settings.dart';
+import 'package:folio_mobile_ui/common/haptic.dart';
+import 'package:provider/provider.dart';
 
 double valueFromPercentageInRange(
     {required final double min, max, percentage}) {
@@ -320,7 +323,10 @@ class _DecoyChildState extends State<_DecoyChild>
     if (widget.controller.value < 0.5) {
       return;
     }
-    HapticFeedback.selectionClick();
+    if (mounted) {
+      performHapticFeedback(
+          Provider.of<SettingsProvider>(context, listen: false).vibrate);
+    }
     _rect.removeListener(_rectListener);
   }
 

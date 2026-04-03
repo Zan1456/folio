@@ -24,6 +24,7 @@ import 'package:folio_mobile_ui/screens/navigation/navigation_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:folio_mobile_ui/common/haptic.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'timetable_page.i18n.dart';
@@ -284,8 +285,10 @@ class TimetablePageState extends State<TimetablePage>
                               GestureDetector(
                                 onTap: _controller.currentWeekId == 0
                                     ? null
-                                    : () => setState(
-                                        () => _controller.previous(context)),
+                                    : () {
+                                        performHapticFeedback(settingsProvider.vibrate);
+                                        setState(() => _controller.previous(context));
+                                      },
                                 child: Padding(
                                   padding: const EdgeInsets.symmetric(
                                       horizontal: 12.0, vertical: 11.0),
@@ -304,19 +307,22 @@ class TimetablePageState extends State<TimetablePage>
                                 ),
                               ),
                               GestureDetector(
-                                onTap: () => setState(() {
-                                  _controller.current();
-                                  if (mounted) {
-                                    _controller.jump(
-                                      _controller.currentWeek,
-                                      context: context,
-                                      loader: _controller.currentWeekId !=
-                                          _controller.previousWeekId,
-                                    );
-                                  }
-                                  _tabController
-                                      .animateTo(_getDayIndex(DateTime.now()));
-                                }),
+                                onTap: () {
+                                  performHapticFeedback(settingsProvider.vibrate);
+                                  setState(() {
+                                    _controller.current();
+                                    if (mounted) {
+                                      _controller.jump(
+                                        _controller.currentWeek,
+                                        context: context,
+                                        loader: _controller.currentWeekId !=
+                                            _controller.previousWeekId,
+                                      );
+                                    }
+                                    _tabController
+                                        .animateTo(_getDayIndex(DateTime.now()));
+                                  });
+                                },
                                 child: AnimatedSwitcher(
                                   duration: const Duration(milliseconds: 250),
                                   transitionBuilder: (Widget child, Animation<double> animation) {
@@ -338,8 +344,10 @@ class TimetablePageState extends State<TimetablePage>
                               GestureDetector(
                                 onTap: _controller.currentWeekId == 51
                                     ? null
-                                    : () => setState(
-                                        () => _controller.next(context)),
+                                    : () {
+                                        performHapticFeedback(settingsProvider.vibrate);
+                                        setState(() => _controller.next(context));
+                                      },
                                 child: Padding(
                                   padding: const EdgeInsets.symmetric(
                                       horizontal: 12.0, vertical: 11.0),
@@ -363,7 +371,10 @@ class TimetablePageState extends State<TimetablePage>
                         // More / settings button
                         IconButton(
                           splashRadius: 24.0,
-                          onPressed: () => showQuickSettings(context),
+                          onPressed: () {
+                            performHapticFeedback(settingsProvider.vibrate);
+                            showQuickSettings(context);
+                          },
                           icon: Icon(Icons.more_horiz_rounded,
                               color: Theme.of(context)
                                   .colorScheme
@@ -405,6 +416,7 @@ class TimetablePageState extends State<TimetablePage>
                             .colorScheme
                             .secondary
                             .withValues(alpha: 0.08)),
+                        onTap: (_) => performHapticFeedback(settingsProvider.vibrate),
                         padding:
                             const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 14.0),
                         tabs: List.generate(_tabController.length, (index) {
@@ -696,6 +708,7 @@ class TimetablePageState extends State<TimetablePage>
               ],
             ),
             onTap: () {
+              performHapticFeedback(settingsProvider.vibrate);
               if (_tabController.length == 0) {
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                   content: Text("empty_timetable".i18n),
@@ -742,6 +755,7 @@ class TimetablePageState extends State<TimetablePage>
             value: Provider.of<SettingsProvider>(context, listen: false)
                 .showBreaks,
             onChanged: (v) {
+              performHapticFeedback(settingsProvider.vibrate);
               Provider.of<SettingsProvider>(context, listen: false)
                   .update(showBreaks: v);
 
@@ -789,6 +803,7 @@ class TimetablePageState extends State<TimetablePage>
             value: Provider.of<SettingsProvider>(context, listen: false)
                 .qTimetableSubTiles,
             onChanged: (v) {
+              performHapticFeedback(settingsProvider.vibrate);
               Provider.of<SettingsProvider>(context, listen: false)
                   .update(qTimetableSubTiles: v);
 
