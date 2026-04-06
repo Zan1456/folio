@@ -321,7 +321,7 @@ class SettingsProvider extends ChangeNotifier {
       startPage: Pages.values[map["start_page"]],
       rounding: map["rounding"],
       theme: ThemeMode.values[map["theme"]],
-      accentColor: AccentColor.values[map["accent_color"]],
+      accentColor: AccentColor.adaptive,
       gradeColors: [
         Color(map["grade_color1"]),
         Color(map["grade_color2"]),
@@ -402,11 +402,13 @@ class SettingsProvider extends ChangeNotifier {
       qTimetableSubTiles: map['q_timetable_sub_tiles'] == 1,
       qSubjectsSubTiles: map['q_subjects_sub_tiles'] == 1,
       androidLiveActivityEnabled: map['android_live_activity_enabled'] == 1,
-      androidLiveNotificationType: map['android_live_notification_type'] ?? 'native',
+      androidLiveNotificationType:
+          map['android_live_notification_type'] ?? 'native',
       liveCountdownEnabled: map['live_countdown_enabled'] == 1,
       liveCountdownBeforeLesson: map['live_countdown_before_lesson'] == 1,
       liveCountdownBeforeMinutes: map['live_countdown_before_minutes'] ?? 5,
-      liveCountdownDuringLesson: (map['live_countdown_during_lesson'] ?? 1) == 1,
+      liveCountdownDuringLesson:
+          (map['live_countdown_during_lesson'] ?? 1) == 1,
       liveCountdownDuringBreak: (map['live_countdown_during_break'] ?? 1) == 1,
       adaptiveSeedColor: map['adaptive_seed_color'] ?? 0,
     );
@@ -819,7 +821,8 @@ class SettingsProvider extends ChangeNotifier {
     if (developerMode != null && developerMode != _developerMode) {
       _developerMode = developerMode;
     }
-    if (devLiveFakeLessons != null && devLiveFakeLessons != _devLiveFakeLessons) {
+    if (devLiveFakeLessons != null &&
+        devLiveFakeLessons != _devLiveFakeLessons) {
       _devLiveFakeLessons = devLiveFakeLessons;
     }
     if (notificationPollInterval != null &&
@@ -970,13 +973,15 @@ class SettingsProvider extends ChangeNotifier {
     if (unseenNewFeatures != null && unseenNewFeatures != _unseenNewFeatures) {
       _unseenNewFeatures = unseenNewFeatures;
     }
-    if (liveActivityEnabled != null && liveActivityEnabled != _liveActivityEnabled) {
+    if (liveActivityEnabled != null &&
+        liveActivityEnabled != _liveActivityEnabled) {
       _liveActivityEnabled = liveActivityEnabled;
       if (!liveActivityEnabled && Platform.isIOS) {
         LiveCardProvider.hasActivitySettingsChanged = true;
       }
     }
-    if (liveActivityConsentAccepted != null && liveActivityConsentAccepted != _liveActivityConsentAccepted) {
+    if (liveActivityConsentAccepted != null &&
+        liveActivityConsentAccepted != _liveActivityConsentAccepted) {
       _liveActivityConsentAccepted = liveActivityConsentAccepted;
     }
     if (cloudSyncEnabled != null && cloudSyncEnabled != _cloudSyncEnabled) {
@@ -996,25 +1001,32 @@ class SettingsProvider extends ChangeNotifier {
     if (qSubjectsSubTiles != null && qSubjectsSubTiles != _qSubjectsSubTiles) {
       _qSubjectsSubTiles = qSubjectsSubTiles;
     }
-    if (androidLiveActivityEnabled != null && androidLiveActivityEnabled != _androidLiveActivityEnabled) {
+    if (androidLiveActivityEnabled != null &&
+        androidLiveActivityEnabled != _androidLiveActivityEnabled) {
       _androidLiveActivityEnabled = androidLiveActivityEnabled;
     }
-    if (androidLiveNotificationType != null && androidLiveNotificationType != _androidLiveNotificationType) {
+    if (androidLiveNotificationType != null &&
+        androidLiveNotificationType != _androidLiveNotificationType) {
       _androidLiveNotificationType = androidLiveNotificationType;
     }
-    if (liveCountdownEnabled != null && liveCountdownEnabled != _liveCountdownEnabled) {
+    if (liveCountdownEnabled != null &&
+        liveCountdownEnabled != _liveCountdownEnabled) {
       _liveCountdownEnabled = liveCountdownEnabled;
     }
-    if (liveCountdownBeforeLesson != null && liveCountdownBeforeLesson != _liveCountdownBeforeLesson) {
+    if (liveCountdownBeforeLesson != null &&
+        liveCountdownBeforeLesson != _liveCountdownBeforeLesson) {
       _liveCountdownBeforeLesson = liveCountdownBeforeLesson;
     }
-    if (liveCountdownBeforeMinutes != null && liveCountdownBeforeMinutes != _liveCountdownBeforeMinutes) {
+    if (liveCountdownBeforeMinutes != null &&
+        liveCountdownBeforeMinutes != _liveCountdownBeforeMinutes) {
       _liveCountdownBeforeMinutes = liveCountdownBeforeMinutes;
     }
-    if (liveCountdownDuringLesson != null && liveCountdownDuringLesson != _liveCountdownDuringLesson) {
+    if (liveCountdownDuringLesson != null &&
+        liveCountdownDuringLesson != _liveCountdownDuringLesson) {
       _liveCountdownDuringLesson = liveCountdownDuringLesson;
     }
-    if (liveCountdownDuringBreak != null && liveCountdownDuringBreak != _liveCountdownDuringBreak) {
+    if (liveCountdownDuringBreak != null &&
+        liveCountdownDuringBreak != _liveCountdownDuringBreak) {
       _liveCountdownDuringBreak = liveCountdownDuringBreak;
     }
     if (adaptiveSeedColor != null && adaptiveSeedColor != _adaptiveSeedColor) {
@@ -1137,4 +1149,3 @@ class SettingsProvider extends ChangeNotifier {
     Clipboard.setData(ClipboardData(text: sets));
   }
 }
-

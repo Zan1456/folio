@@ -7,7 +7,6 @@ import 'package:folio/api/providers/user_provider.dart';
 import 'package:folio/helpers/subject.dart';
 import 'package:folio/models/icon_pack.dart';
 import 'package:folio/models/settings.dart';
-import 'package:folio/theme/colors/accent.dart';
 import 'package:folio/theme/colors/colors.dart';
 import 'package:folio/theme/observer.dart';
 import 'package:folio/utils/format.dart';
@@ -25,7 +24,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:folio_mobile_ui/screens/settings/settings_screen.i18n.dart';
 import 'package:google_fonts/google_fonts.dart';
-
 
 class MenuPersonalizeSettings extends StatelessWidget {
   const MenuPersonalizeSettings({
@@ -336,23 +334,21 @@ class PersonalizeSettingsScreenState extends State<PersonalizeSettingsScreen>
                       ),
                     ],
                   ),
-                  // material you seed color picker (only when adaptive)
-                  if (settingsProvider.accentColor == AccentColor.adaptive)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 9.0),
-                      child: _PersonalizeThemeColorPicker(
-                        selectedColor: settingsProvider.adaptiveSeedColor,
-                        onColorSelected: (color) {
-                          settingsProvider.update(
-                              adaptiveSeedColor: color?.value ?? 0);
-                          Provider.of<ThemeModeObserver>(context,
-                                  listen: false)
-                              .changeTheme(settingsProvider.theme,
-                                  updateNavbarColor: false);
-                          setState(() {});
-                        },
-                      ),
+                  // material you seed color picker
+                  Padding(
+                    padding: const EdgeInsets.only(top: 9.0),
+                    child: _PersonalizeThemeColorPicker(
+                      selectedColor: settingsProvider.adaptiveSeedColor,
+                      onColorSelected: (color) {
+                        settingsProvider.update(
+                            adaptiveSeedColor: color?.value ?? 0);
+                        Provider.of<ThemeModeObserver>(context, listen: false)
+                            .changeTheme(settingsProvider.theme,
+                                updateNavbarColor: false);
+                        setState(() {});
+                      },
                     ),
+                  ),
                   // shadow toggle
                   SplittedPanel(
                     padding: const EdgeInsets.only(top: 9.0),

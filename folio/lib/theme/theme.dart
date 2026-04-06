@@ -54,7 +54,12 @@ class AppTheme {
         const Color(0x00000000);
 
     if (accentColor == AccentColor.adaptive) {
-      if (palette != null) accent = _paletteAccentLight(palette)!;
+      final userSeed = settings.adaptiveSeedColor;
+      if (userSeed != null) {
+        accent = userSeed;
+      } else if (palette != null) {
+        accent = _paletteAccentLight(palette)!;
+      }
     } else {
       palette = null;
     }
@@ -86,7 +91,8 @@ class AppTheme {
     Color primaryContainer = accent.withValues(alpha: 0.15);
     Color onPrimaryContainer = ColorsUtils().darken(accent, amount: 0.35);
     Color secondaryContainer = newSecondary.withValues(alpha: 0.12);
-    Color onSecondaryContainer = ColorsUtils().darken(newSecondary, amount: 0.4);
+    Color onSecondaryContainer =
+        ColorsUtils().darken(newSecondary, amount: 0.4);
     Color tertiaryContainer = newTertiary.withValues(alpha: 0.10);
     Color onTertiaryContainer = ColorsUtils().darken(newTertiary, amount: 0.45);
     Color surfaceContainerHighest =
@@ -181,10 +187,8 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(_buttonRadius),
           ),
-          padding:
-              const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-          textStyle:
-              const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+          textStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
         ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
@@ -192,10 +196,8 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(_buttonRadius),
           ),
-          padding:
-              const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-          textStyle:
-              const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+          textStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
@@ -203,8 +205,7 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(_buttonRadius),
           ),
-          padding:
-              const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
         ),
       ),
       textButtonTheme: TextButtonThemeData(
@@ -257,23 +258,20 @@ class AppTheme {
       ),
       floatingActionButtonTheme: FloatingActionButtonThemeData(
         backgroundColor: accent,
-        foregroundColor: accent.computeLuminance() > 0.5
-            ? Colors.black
-            : Colors.white,
+        foregroundColor:
+            accent.computeLuminance() > 0.5 ? Colors.black : Colors.white,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
         ),
         elevation: 0,
-        extendedPadding:
-            const EdgeInsets.symmetric(horizontal: 24),
+        extendedPadding: const EdgeInsets.symmetric(horizontal: 24),
       ),
       sliderTheme: SliderThemeData(
         inactiveTrackColor: accent.withValues(alpha: .25),
         activeTrackColor: accent,
         thumbColor: accent,
         trackHeight: 6,
-        thumbShape:
-            const RoundSliderThumbShape(enabledThumbRadius: 12),
+        thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 12),
       ),
       progressIndicatorTheme: ProgressIndicatorThemeData(color: accent),
       expansionTileTheme: ExpansionTileThemeData(iconColor: accent),
@@ -281,16 +279,14 @@ class AppTheme {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 20, vertical: 2),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 2),
       ),
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
-        backgroundColor:
-            ColorsUtils().darken(backgroundColor, amount: 0.12),
+        backgroundColor: ColorsUtils().darken(backgroundColor, amount: 0.12),
         contentTextStyle: TextStyle(color: textColor),
       ),
       cardColor: highlightColor,
@@ -315,7 +311,12 @@ class AppTheme {
         const Color(0x00000000);
 
     if (accentColor == AccentColor.adaptive) {
-      if (palette != null) accent = _paletteAccentDark(palette)!;
+      final userSeed = settings.adaptiveSeedColor;
+      if (userSeed != null) {
+        accent = userSeed;
+      } else if (palette != null) {
+        accent = _paletteAccentDark(palette)!;
+      }
     } else {
       palette = null;
     }
@@ -348,9 +349,11 @@ class AppTheme {
     Color primaryContainer = accent.withValues(alpha: 0.20);
     Color onPrimaryContainer = ColorsUtils().lighten(accent, amount: 0.20);
     Color secondaryContainer = newSecondary.withValues(alpha: 0.15);
-    Color onSecondaryContainer = ColorsUtils().lighten(newSecondary, amount: 0.15);
+    Color onSecondaryContainer =
+        ColorsUtils().lighten(newSecondary, amount: 0.15);
     Color tertiaryContainer = newTertiary.withValues(alpha: 0.12);
-    Color onTertiaryContainer = ColorsUtils().lighten(newTertiary, amount: 0.25);
+    Color onTertiaryContainer =
+        ColorsUtils().lighten(newTertiary, amount: 0.25);
     Color surfaceContainerHighest =
         ColorsUtils().lighten(highlightColor, amount: 0.06);
 
@@ -442,10 +445,8 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(_buttonRadius),
           ),
-          padding:
-              const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-          textStyle:
-              const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+          textStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
         ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
@@ -453,10 +454,8 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(_buttonRadius),
           ),
-          padding:
-              const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-          textStyle:
-              const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+          textStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
@@ -464,8 +463,7 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(_buttonRadius),
           ),
-          padding:
-              const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
         ),
       ),
       textButtonTheme: TextButtonThemeData(
@@ -518,23 +516,20 @@ class AppTheme {
       ),
       floatingActionButtonTheme: FloatingActionButtonThemeData(
         backgroundColor: accent,
-        foregroundColor: accent.computeLuminance() > 0.5
-            ? Colors.black
-            : Colors.white,
+        foregroundColor:
+            accent.computeLuminance() > 0.5 ? Colors.black : Colors.white,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
         ),
         elevation: 0,
-        extendedPadding:
-            const EdgeInsets.symmetric(horizontal: 24),
+        extendedPadding: const EdgeInsets.symmetric(horizontal: 24),
       ),
       sliderTheme: SliderThemeData(
         inactiveTrackColor: accent.withValues(alpha: .25),
         activeTrackColor: accent,
         thumbColor: accent,
         trackHeight: 6,
-        thumbShape:
-            const RoundSliderThumbShape(enabledThumbRadius: 12),
+        thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 12),
       ),
       progressIndicatorTheme: ProgressIndicatorThemeData(color: accent),
       expansionTileTheme: ExpansionTileThemeData(iconColor: accent),
@@ -542,8 +537,7 @@ class AppTheme {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 20, vertical: 2),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 2),
       ),
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,

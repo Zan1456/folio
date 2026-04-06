@@ -29,7 +29,6 @@ import 'package:folio/helpers/android_live_activity_helper.dart';
 import 'package:folio/api/providers/live_card_provider.dart';
 import 'package:folio/api/providers/update_provider.dart';
 import 'package:folio/models/settings.dart';
-import 'package:folio/theme/colors/accent.dart';
 import 'package:folio/theme/colors/colors.dart';
 import 'package:folio/theme/observer.dart';
 import 'package:folio/utils/format.dart';
@@ -563,8 +562,7 @@ class SettingsScreenState extends State<SettingsScreen>
           SliderTheme(
             data: SliderTheme.of(context).copyWith(
               trackHeight: 4.0,
-              overlayShape:
-                  const RoundSliderOverlayShape(overlayRadius: 14.0),
+              overlayShape: const RoundSliderOverlayShape(overlayRadius: 14.0),
             ),
             child: Slider(
               value: value,
@@ -899,7 +897,8 @@ class SettingsScreenState extends State<SettingsScreen>
                             ...grouped['grades']!,
                           ],
                           if (grouped['notifications']!.isNotEmpty) ...[
-                            _buildSectionHeader('notifications', 'notifications_section'.i18n),
+                            _buildSectionHeader(
+                                'notifications', 'notifications_section'.i18n),
                             ...grouped['notifications']!,
                           ],
                           if (grouped['other']!.isNotEmpty) ...[
@@ -922,7 +921,8 @@ class SettingsScreenState extends State<SettingsScreen>
                                     duration: const Duration(milliseconds: 200),
                                     content: Text("devmoretaps"
                                         .i18n
-                                        .replaceFirst('%s', '$devmodeCountdown')),
+                                        .replaceFirst(
+                                            '%s', '$devmodeCountdown')),
                                   ));
                                   setState(() => devmodeCountdown--);
                                 } else if (devmodeCountdown == 0) {
@@ -947,8 +947,7 @@ class SettingsScreenState extends State<SettingsScreen>
                                       color: AppColors.of(context)
                                           .text
                                           .withValues(alpha: 0.08),
-                                      borderRadius:
-                                          BorderRadius.circular(20.0),
+                                      borderRadius: BorderRadius.circular(20.0),
                                     ),
                                     child: Text(
                                       version,
@@ -1031,7 +1030,10 @@ class SettingsScreenState extends State<SettingsScreen>
                 ),
                 trailingDivider: true,
                 trailing: Switch(
-                  onChanged: (v) { _haptic(); settings.update(bellDelayEnabled: v); },
+                  onChanged: (v) {
+                    _haptic();
+                    settings.update(bellDelayEnabled: v);
+                  },
                   value: settings.bellDelayEnabled,
                   activeColor: Theme.of(context).colorScheme.secondary,
                 ),
@@ -1057,7 +1059,10 @@ class SettingsScreenState extends State<SettingsScreen>
                         .text
                         .withValues(alpha: settings.showBreaks ? .95 : .25)),
                 trailing: Switch(
-                  onChanged: (v) { _haptic(); settings.update(showBreaks: v); },
+                  onChanged: (v) {
+                    _haptic();
+                    settings.update(showBreaks: v);
+                  },
                   value: settings.showBreaks,
                   activeColor: Theme.of(context).colorScheme.secondary,
                 ),
@@ -1197,10 +1202,13 @@ class SettingsScreenState extends State<SettingsScreen>
                   PanelButton(
                     leading: Icon(Icons.smartphone_rounded,
                         size: 22.0,
-                        color: AppColors.of(context).text.withValues(alpha: .95)),
+                        color:
+                            AppColors.of(context).text.withValues(alpha: .95)),
                     title: Text('android_notification_type'.i18n,
                         style: TextStyle(
-                            color: AppColors.of(context).text.withValues(alpha: .95))),
+                            color: AppColors.of(context)
+                                .text
+                                .withValues(alpha: .95))),
                     trailing: DropdownButtonHideUnderline(
                       child: DropdownButton<String>(
                         value: settings.androidLiveNotificationType,
@@ -1231,7 +1239,8 @@ class SettingsScreenState extends State<SettingsScreen>
                       ),
                     ),
                     borderRadius: const BorderRadius.vertical(
-                        top: Radius.circular(4.0), bottom: Radius.circular(12.0)),
+                        top: Radius.circular(4.0),
+                        bottom: Radius.circular(12.0)),
                   ),
               ],
             ),
@@ -1240,164 +1249,188 @@ class SettingsScreenState extends State<SettingsScreen>
 
       // Countdown settings (only when Android live activity is enabled, or on iOS)
       if (!Platform.isAndroid || settings.androidLiveActivityEnabled)
-      _SettingsSection(
-        category: 'notifications',
-        searchTerms: [
-          'visszaszámlálás',
-          'countdown',
-          'értesítés',
-          'tanóra',
-          'szünet',
-          'perccel',
-          'előtte',
-        ],
-        widget: Padding(
-          padding: const EdgeInsets.only(top: 2.0),
-          child: SplittedPanel(
-            cardPadding: const EdgeInsets.all(4.0),
-            isSeparated: false,
-            children: [
-              // Main toggle
-              PanelButton(
-                padding: const EdgeInsets.only(left: 14.0, right: 6.0),
-                onPressed: () {
-                  _haptic();
-                  settings.update(liveCountdownEnabled: !settings.liveCountdownEnabled);
-                  setState(() {});
-                },
-                title: Text('countdown_enabled'.i18n,
-                    style: TextStyle(
+        _SettingsSection(
+          category: 'notifications',
+          searchTerms: [
+            'visszaszámlálás',
+            'countdown',
+            'értesítés',
+            'tanóra',
+            'szünet',
+            'perccel',
+            'előtte',
+          ],
+          widget: Padding(
+            padding: const EdgeInsets.only(top: 2.0),
+            child: SplittedPanel(
+              cardPadding: const EdgeInsets.all(4.0),
+              isSeparated: false,
+              children: [
+                // Main toggle
+                PanelButton(
+                  padding: const EdgeInsets.only(left: 14.0, right: 6.0),
+                  onPressed: () {
+                    _haptic();
+                    settings.update(
+                        liveCountdownEnabled: !settings.liveCountdownEnabled);
+                    setState(() {});
+                  },
+                  title: Text('countdown_enabled'.i18n,
+                      style: TextStyle(
+                          color: AppColors.of(context).text.withValues(
+                              alpha:
+                                  settings.liveCountdownEnabled ? .95 : .25))),
+                  leading: Icon(Icons.timer_outlined,
+                      size: 22.0,
+                      color: AppColors.of(context).text.withValues(
+                          alpha: settings.liveCountdownEnabled ? .95 : .25)),
+                  trailing: Switch(
+                    onChanged: (v) {
+                      _haptic();
+                      settings.update(liveCountdownEnabled: v);
+                      setState(() {});
+                    },
+                    value: settings.liveCountdownEnabled,
+                    activeColor: Theme.of(context).colorScheme.secondary,
+                  ),
+                  borderRadius: BorderRadius.vertical(
+                    top: const Radius.circular(12.0),
+                    bottom: Radius.circular(
+                        settings.liveCountdownEnabled ? 4.0 : 12.0),
+                  ),
+                ),
+                if (settings.liveCountdownEnabled) ...[
+                  // Before lesson toggle
+                  PanelButton(
+                    padding: const EdgeInsets.only(left: 14.0, right: 6.0),
+                    onPressed: () {
+                      _haptic();
+                      settings.update(
+                          liveCountdownBeforeLesson:
+                              !settings.liveCountdownBeforeLesson);
+                      setState(() {});
+                    },
+                    title: Text('countdown_before_lesson'.i18n,
+                        style: TextStyle(
+                            color: AppColors.of(context).text.withValues(
+                                alpha: settings.liveCountdownBeforeLesson
+                                    ? .95
+                                    : .25))),
+                    leading: Icon(Icons.schedule_rounded,
+                        size: 22.0,
                         color: AppColors.of(context).text.withValues(
-                            alpha: settings.liveCountdownEnabled ? .95 : .25))),
-                leading: Icon(Icons.timer_outlined,
-                    size: 22.0,
-                    color: AppColors.of(context).text.withValues(
-                        alpha: settings.liveCountdownEnabled ? .95 : .25)),
-                trailing: Switch(
-                  onChanged: (v) {
-                    _haptic();
-                    settings.update(liveCountdownEnabled: v);
-                    setState(() {});
-                  },
-                  value: settings.liveCountdownEnabled,
-                  activeColor: Theme.of(context).colorScheme.secondary,
-                ),
-                borderRadius: BorderRadius.vertical(
-                  top: const Radius.circular(12.0),
-                  bottom: Radius.circular(settings.liveCountdownEnabled ? 4.0 : 12.0),
-                ),
-              ),
-              if (settings.liveCountdownEnabled) ...[
-                // Before lesson toggle
-                PanelButton(
-                  padding: const EdgeInsets.only(left: 14.0, right: 6.0),
-                  onPressed: () {
-                    _haptic();
-                    settings.update(liveCountdownBeforeLesson: !settings.liveCountdownBeforeLesson);
-                    setState(() {});
-                  },
-                  title: Text('countdown_before_lesson'.i18n,
-                      style: TextStyle(
-                          color: AppColors.of(context).text.withValues(
-                              alpha: settings.liveCountdownBeforeLesson ? .95 : .25))),
-                  leading: Icon(Icons.schedule_rounded,
-                      size: 22.0,
-                      color: AppColors.of(context).text.withValues(
-                          alpha: settings.liveCountdownBeforeLesson ? .95 : .25)),
-                  trailing: Switch(
-                    onChanged: (v) {
-                      _haptic();
-                      settings.update(liveCountdownBeforeLesson: v);
-                      setState(() {});
-                    },
-                    value: settings.liveCountdownBeforeLesson,
-                    activeColor: Theme.of(context).colorScheme.secondary,
-                  ),
-                  borderRadius: const BorderRadius.vertical(
-                      top: Radius.circular(4.0), bottom: Radius.circular(4.0)),
-                ),
-                // Minutes before (shown when before-lesson is enabled)
-                if (settings.liveCountdownBeforeLesson)
-                  _buildSliderCard(
-                    icon: Icons.access_time_rounded,
-                    label: 'countdown_before_minutes'.i18n,
-                    valueText: 'min_before'.i18n.replaceFirst(
-                      '%s',
-                      '${(_tempCountdownMinutes?.toInt() ?? settings.liveCountdownBeforeMinutes)}',
+                            alpha: settings.liveCountdownBeforeLesson
+                                ? .95
+                                : .25)),
+                    trailing: Switch(
+                      onChanged: (v) {
+                        _haptic();
+                        settings.update(liveCountdownBeforeLesson: v);
+                        setState(() {});
+                      },
+                      value: settings.liveCountdownBeforeLesson,
+                      activeColor: Theme.of(context).colorScheme.secondary,
                     ),
-                    value: _tempCountdownMinutes ??
-                        settings.liveCountdownBeforeMinutes.toDouble(),
-                    min: 1,
-                    max: 90,
-                    divisions: 89,
-                    onChanged: (v) => setState(() => _tempCountdownMinutes = v),
-                    onChangeEnd: (v) {
-                      _haptic();
-                      settings.update(liveCountdownBeforeMinutes: v.toInt());
-                      setState(() => _tempCountdownMinutes = null);
-                    },
+                    borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(4.0),
+                        bottom: Radius.circular(4.0)),
                   ),
-                // During lesson toggle
-                PanelButton(
-                  padding: const EdgeInsets.only(left: 14.0, right: 6.0),
-                  onPressed: () {
-                    _haptic();
-                    settings.update(liveCountdownDuringLesson: !settings.liveCountdownDuringLesson);
-                    setState(() {});
-                  },
-                  title: Text('countdown_during_lesson'.i18n,
-                      style: TextStyle(
-                          color: AppColors.of(context).text.withValues(
-                              alpha: settings.liveCountdownDuringLesson ? .95 : .25))),
-                  leading: Icon(Icons.menu_book_rounded,
-                      size: 22.0,
-                      color: AppColors.of(context).text.withValues(
-                          alpha: settings.liveCountdownDuringLesson ? .95 : .25)),
-                  trailing: Switch(
-                    onChanged: (v) {
+                  // Minutes before (shown when before-lesson is enabled)
+                  if (settings.liveCountdownBeforeLesson)
+                    _buildSliderCard(
+                      icon: Icons.access_time_rounded,
+                      label: 'countdown_before_minutes'.i18n,
+                      valueText: 'min_before'.i18n.replaceFirst(
+                            '%s',
+                            '${(_tempCountdownMinutes?.toInt() ?? settings.liveCountdownBeforeMinutes)}',
+                          ),
+                      value: _tempCountdownMinutes ??
+                          settings.liveCountdownBeforeMinutes.toDouble(),
+                      min: 1,
+                      max: 90,
+                      divisions: 89,
+                      onChanged: (v) =>
+                          setState(() => _tempCountdownMinutes = v),
+                      onChangeEnd: (v) {
+                        _haptic();
+                        settings.update(liveCountdownBeforeMinutes: v.toInt());
+                        setState(() => _tempCountdownMinutes = null);
+                      },
+                    ),
+                  // During lesson toggle
+                  PanelButton(
+                    padding: const EdgeInsets.only(left: 14.0, right: 6.0),
+                    onPressed: () {
                       _haptic();
-                      settings.update(liveCountdownDuringLesson: v);
+                      settings.update(
+                          liveCountdownDuringLesson:
+                              !settings.liveCountdownDuringLesson);
                       setState(() {});
                     },
-                    value: settings.liveCountdownDuringLesson,
-                    activeColor: Theme.of(context).colorScheme.secondary,
+                    title: Text('countdown_during_lesson'.i18n,
+                        style: TextStyle(
+                            color: AppColors.of(context).text.withValues(
+                                alpha: settings.liveCountdownDuringLesson
+                                    ? .95
+                                    : .25))),
+                    leading: Icon(Icons.menu_book_rounded,
+                        size: 22.0,
+                        color: AppColors.of(context).text.withValues(
+                            alpha: settings.liveCountdownDuringLesson
+                                ? .95
+                                : .25)),
+                    trailing: Switch(
+                      onChanged: (v) {
+                        _haptic();
+                        settings.update(liveCountdownDuringLesson: v);
+                        setState(() {});
+                      },
+                      value: settings.liveCountdownDuringLesson,
+                      activeColor: Theme.of(context).colorScheme.secondary,
+                    ),
+                    borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(4.0),
+                        bottom: Radius.circular(4.0)),
                   ),
-                  borderRadius: const BorderRadius.vertical(
-                      top: Radius.circular(4.0), bottom: Radius.circular(4.0)),
-                ),
-                // During break toggle
-                PanelButton(
-                  padding: const EdgeInsets.only(left: 14.0, right: 6.0),
-                  onPressed: () {
-                    _haptic();
-                    settings.update(liveCountdownDuringBreak: !settings.liveCountdownDuringBreak);
-                    setState(() {});
-                  },
-                  title: Text('countdown_during_break'.i18n,
-                      style: TextStyle(
-                          color: AppColors.of(context).text.withValues(
-                              alpha: settings.liveCountdownDuringBreak ? .95 : .25))),
-                  leading: Icon(Icons.free_breakfast_outlined,
-                      size: 22.0,
-                      color: AppColors.of(context).text.withValues(
-                          alpha: settings.liveCountdownDuringBreak ? .95 : .25)),
-                  trailing: Switch(
-                    onChanged: (v) {
+                  // During break toggle
+                  PanelButton(
+                    padding: const EdgeInsets.only(left: 14.0, right: 6.0),
+                    onPressed: () {
                       _haptic();
-                      settings.update(liveCountdownDuringBreak: v);
+                      settings.update(
+                          liveCountdownDuringBreak:
+                              !settings.liveCountdownDuringBreak);
                       setState(() {});
                     },
-                    value: settings.liveCountdownDuringBreak,
-                    activeColor: Theme.of(context).colorScheme.secondary,
+                    title: Text('countdown_during_break'.i18n,
+                        style: TextStyle(
+                            color: AppColors.of(context).text.withValues(
+                                alpha: settings.liveCountdownDuringBreak
+                                    ? .95
+                                    : .25))),
+                    leading: Icon(Icons.free_breakfast_outlined,
+                        size: 22.0,
+                        color: AppColors.of(context).text.withValues(
+                            alpha:
+                                settings.liveCountdownDuringBreak ? .95 : .25)),
+                    trailing: Switch(
+                      onChanged: (v) {
+                        _haptic();
+                        settings.update(liveCountdownDuringBreak: v);
+                        setState(() {});
+                      },
+                      value: settings.liveCountdownDuringBreak,
+                      activeColor: Theme.of(context).colorScheme.secondary,
+                    ),
+                    borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(4.0),
+                        bottom: Radius.circular(12.0)),
                   ),
-                  borderRadius: const BorderRadius.vertical(
-                      top: Radius.circular(4.0), bottom: Radius.circular(12.0)),
-                ),
+                ],
               ],
-            ],
+            ),
           ),
         ),
-      ),
 
       // Start page (dropdown)
       _SettingsSection(
@@ -1415,7 +1448,8 @@ class SettingsScreenState extends State<SettingsScreen>
                     color: AppColors.of(context).text.withValues(alpha: .95)),
                 title: Text('startpage'.i18n,
                     style: TextStyle(
-                        color: AppColors.of(context).text.withValues(alpha: .95))),
+                        color:
+                            AppColors.of(context).text.withValues(alpha: .95))),
                 trailing: DropdownButtonHideUnderline(
                   child: DropdownButton<Pages>(
                     value: settings.startPage,
@@ -1466,7 +1500,8 @@ class SettingsScreenState extends State<SettingsScreen>
                     color: AppColors.of(context).text.withValues(alpha: .95)),
                 title: Text('language'.i18n,
                     style: TextStyle(
-                        color: AppColors.of(context).text.withValues(alpha: .95))),
+                        color:
+                            AppColors.of(context).text.withValues(alpha: .95))),
                 trailing: DropdownButtonHideUnderline(
                   child: DropdownButton<String>(
                     value: settings.language,
@@ -1520,7 +1555,8 @@ class SettingsScreenState extends State<SettingsScreen>
                     color: AppColors.of(context).text.withValues(alpha: .95)),
                 title: Text('vibrate'.i18n,
                     style: TextStyle(
-                        color: AppColors.of(context).text.withValues(alpha: .95))),
+                        color:
+                            AppColors.of(context).text.withValues(alpha: .95))),
                 trailing: DropdownButtonHideUnderline(
                   child: DropdownButton<VibrationStrength>(
                     value: settings.vibrate,
@@ -1540,9 +1576,9 @@ class SettingsScreenState extends State<SettingsScreen>
                     ]
                         .map((v) => DropdownMenuItem<VibrationStrength>(
                               value: v,
-                              child: Text(
-                                  SettingsHelper.localizedVibrationTitles()[v] ??
-                                      ''),
+                              child: Text(SettingsHelper
+                                      .localizedVibrationTitles()[v] ??
+                                  ''),
                             ))
                         .toList(),
                     onChanged: (v) {
@@ -1588,7 +1624,8 @@ class SettingsScreenState extends State<SettingsScreen>
                     color: AppColors.of(context).text.withValues(alpha: .95)),
                 title: Text('theme'.i18n,
                     style: TextStyle(
-                        color: AppColors.of(context).text.withValues(alpha: .95))),
+                        color:
+                            AppColors.of(context).text.withValues(alpha: .95))),
                 trailing: DropdownButtonHideUnderline(
                   child: DropdownButton<ThemeMode>(
                     value: settings.theme,
@@ -1631,35 +1668,34 @@ class SettingsScreenState extends State<SettingsScreen>
         ),
       ),
 
-      // Témaszín – inline expandable color strip (only when adaptive)
-      if (settings.accentColor == AccentColor.adaptive)
-        _SettingsSection(
-          category: 'appearance',
-          searchTerms: [
-            'témaszín',
-            'theme color',
-            'szín',
-            'color',
-            'adaptív',
-            'adaptive',
-            'material you',
-          ],
-          widget: Padding(
-            padding: const EdgeInsets.only(top: 2.0),
-            child: _ThemeColorPicker(
-              isOpen: _themeColorOpen,
-              onToggle: () => setState(() => _themeColorOpen = !_themeColorOpen),
-              selectedColor: settings.adaptiveSeedColor,
-              onColorSelected: (color) {
-                _haptic();
-                settings.update(adaptiveSeedColor: color?.value ?? 0);
-                Provider.of<ThemeModeObserver>(context, listen: false)
-                    .changeTheme(settings.theme, updateNavbarColor: false);
-                setState(() {});
-              },
-            ),
+      // Témaszín
+      _SettingsSection(
+        category: 'appearance',
+        searchTerms: [
+          'témaszín',
+          'theme color',
+          'szín',
+          'color',
+          'adaptív',
+          'adaptive',
+          'material you',
+        ],
+        widget: Padding(
+          padding: const EdgeInsets.only(top: 2.0),
+          child: _ThemeColorPicker(
+            isOpen: _themeColorOpen,
+            onToggle: () => setState(() => _themeColorOpen = !_themeColorOpen),
+            selectedColor: settings.adaptiveSeedColor,
+            onColorSelected: (color) {
+              _haptic();
+              settings.update(adaptiveSeedColor: color?.value ?? 0);
+              Provider.of<ThemeModeObserver>(context, listen: false)
+                  .changeTheme(settings.theme, updateNavbarColor: false);
+              setState(() {});
+            },
           ),
         ),
+      ),
 
       // Shadow effect
       _SettingsSection(
@@ -1871,7 +1907,10 @@ class SettingsScreenState extends State<SettingsScreen>
                         .text
                         .withValues(alpha: settings.graphClassAvg ? .95 : .25)),
                 trailing: Switch(
-                  onChanged: (v) { _haptic(); settings.update(graphClassAvg: v); },
+                  onChanged: (v) {
+                    _haptic();
+                    settings.update(graphClassAvg: v);
+                  },
                   value: settings.graphClassAvg,
                   activeColor: Theme.of(context).colorScheme.secondary,
                 ),
@@ -2032,7 +2071,6 @@ class SettingsScreenState extends State<SettingsScreen>
         ),
       ),
 
-
       // ── OTHER ────────────────────────────────────────────────
 
       // Presentation mode
@@ -2144,7 +2182,10 @@ class SettingsScreenState extends State<SettingsScreen>
                           color: AppColors.of(context).text.withValues(
                               alpha: settings.analyticsEnabled ? .5 : .2)),
                     ),
-                    onChanged: (v) { _haptic(); settings.update(analyticsEnabled: v); },
+                    onChanged: (v) {
+                      _haptic();
+                      settings.update(analyticsEnabled: v);
+                    },
                     value: settings.analyticsEnabled,
                     activeColor: Theme.of(context).colorScheme.secondary,
                   ),
@@ -2331,8 +2372,7 @@ class _ThemeColorPicker extends StatelessWidget {
                         Container(
                           width: 1.5,
                           height: 32.0,
-                          margin:
-                              const EdgeInsets.symmetric(horizontal: 4.0),
+                          margin: const EdgeInsets.symmetric(horizontal: 4.0),
                           decoration: BoxDecoration(
                             color: textColor.withValues(alpha: .15),
                             borderRadius: BorderRadius.circular(1.0),
@@ -2389,9 +2429,8 @@ class _ColorDot extends StatelessWidget {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: color,
-          border: isSelected
-              ? Border.all(color: Colors.white, width: 2.5)
-              : null,
+          border:
+              isSelected ? Border.all(color: Colors.white, width: 2.5) : null,
         ),
         child: isSystem
             ? Icon(Icons.smartphone_rounded,

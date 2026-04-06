@@ -51,8 +51,7 @@ import 'package:folio_mobile_ui/screens/login/login_route.dart' as mobile;
 import 'package:folio_mobile_ui/screens/login/login_screen.dart' as mobile;
 import 'package:folio_mobile_ui/screens/navigation/navigation_screen.dart'
     as mobile;
-import 'package:folio_mobile_ui/screens/settings/settings_route.dart'
-    as mobile;
+import 'package:folio_mobile_ui/screens/settings/settings_route.dart' as mobile;
 import 'package:folio_mobile_ui/screens/settings/settings_screen.dart'
     as mobile;
 
@@ -71,7 +70,7 @@ import 'package:folio/api/providers/update_provider.dart';
 import 'package:folio_mobile_ui/pages/grades/calculator/grade_calculator_provider.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
 
-class App extends StatelessWidget {
+class App extends StatefulWidget {
   final SettingsProvider settings;
   final UserProvider user;
   final DatabaseProvider database;
@@ -83,7 +82,24 @@ class App extends StatelessWidget {
       required this.user});
 
   @override
+  State<App> createState() => _AppState();
+}
+
+class _AppState extends State<App> {
+  late final Future<CorePalette?> _paletteFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _paletteFuture = DynamicColorPlugin.getCorePalette();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final settings = widget.settings;
+    final user = widget.user;
+    final database = widget.database;
+
     mobile.setSystemChrome(context);
 
     // Set high refresh mode #28
@@ -203,7 +219,7 @@ class App extends StatelessWidget {
       child: Consumer<ThemeModeObserver>(
         builder: (context, themeMode, child) {
           return FutureBuilder<CorePalette?>(
-            future: DynamicColorPlugin.getCorePalette(),
+            future: _paletteFuture,
             builder: (context, snapshot) {
               final systemPalette = snapshot.data;
               final seedColor = settings.accentColor == AccentColor.adaptive
