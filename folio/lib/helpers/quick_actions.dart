@@ -1,28 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:quick_actions/quick_actions.dart';
-import 'package:folio_mobile_ui/common/screens.i18n.dart';
 
 const QuickActions quickActions = QuickActions();
 
 void setupQuickActions() {
-  quickActions.setShortcutItems(<ShortcutItem>[
-    ShortcutItem(
-        type: 'action_grades',
-        localizedTitle: 'grades'.i18n,
-        icon: 'ic_grades'),
-    ShortcutItem(
-        type: 'action_timetable',
-        localizedTitle: 'timetable'.i18n,
-        icon: 'ic_timetable'),
-    ShortcutItem(
-        type: 'action_messages',
-        localizedTitle: 'messages'.i18n,
-        icon: 'ic_messages'),
-    ShortcutItem(
-        type: 'action_absences',
-        localizedTitle: 'absences'.i18n,
-        icon: 'ic_absences')
-  ]);
+  quickActions.clearShortcutItems();
 }
 
 void handleQuickActions(BuildContext context, void Function(String) callback) {
