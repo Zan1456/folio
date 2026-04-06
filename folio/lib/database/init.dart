@@ -74,6 +74,8 @@ const settingsDB = DatabaseStruct("settings", {
   "live_countdown_before_minutes": int,
   "live_countdown_during_lesson": int,
   "live_countdown_during_break": int,
+  // material you seed color (0 = system)
+  "adaptive_seed_color": int,
 });
 // DON'T FORGET TO UPDATE DEFAULT VALUES IN `initDB` MIGRATION OR ELSE PARENTS WILL COMPLAIN ABOUT THEIR CHILDREN MISSING
 // YOU'VE BEEN WARNED!!!

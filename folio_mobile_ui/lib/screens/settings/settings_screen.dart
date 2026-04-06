@@ -29,6 +29,7 @@ import 'package:folio/helpers/android_live_activity_helper.dart';
 import 'package:folio/api/providers/live_card_provider.dart';
 import 'package:folio/api/providers/update_provider.dart';
 import 'package:folio/models/settings.dart';
+import 'package:folio/theme/colors/accent.dart';
 import 'package:folio/theme/colors/colors.dart';
 import 'package:folio/theme/observer.dart';
 import 'package:folio/utils/format.dart';
@@ -88,6 +89,7 @@ class SettingsScreenState extends State<SettingsScreen>
   final ScrollController _chipScrollController = ScrollController();
   String _searchQuery = '';
   String? _activeNavCategory;
+  bool _themeColorOpen = false;
 
   final Map<String, GlobalKey> _sectionKeys = {
     'general': GlobalKey(),
@@ -1629,6 +1631,36 @@ class SettingsScreenState extends State<SettingsScreen>
         ),
       ),
 
+      // Témaszín – inline expandable color strip (only when adaptive)
+      if (settings.accentColor == AccentColor.adaptive)
+        _SettingsSection(
+          category: 'appearance',
+          searchTerms: [
+            'témaszín',
+            'theme color',
+            'szín',
+            'color',
+            'adaptív',
+            'adaptive',
+            'material you',
+          ],
+          widget: Padding(
+            padding: const EdgeInsets.only(top: 2.0),
+            child: _ThemeColorPicker(
+              isOpen: _themeColorOpen,
+              onToggle: () => setState(() => _themeColorOpen = !_themeColorOpen),
+              selectedColor: settings.adaptiveSeedColor,
+              onColorSelected: (color) {
+                _haptic();
+                settings.update(adaptiveSeedColor: color?.value ?? 0);
+                Provider.of<ThemeModeObserver>(context, listen: false)
+                    .changeTheme(settings.theme, updateNavbarColor: false);
+                setState(() {});
+              },
+            ),
+          ),
+        ),
+
       // Shadow effect
       _SettingsSection(
         category: 'appearance',
@@ -2190,4 +2222,188 @@ class SettingsScreenState extends State<SettingsScreen>
   }
 
   void _openPrivacy(BuildContext context) => PrivacyView.show(context);
+}
+
+// ── Inline Theme Color Picker ─────────────────────────────────────────────
+
+class _ThemeColorPicker extends StatelessWidget {
+  final bool isOpen;
+  final VoidCallback onToggle;
+  final Color? selectedColor;
+  final void Function(Color?) onColorSelected;
+
+  const _ThemeColorPicker({
+    required this.isOpen,
+    required this.onToggle,
+    required this.selectedColor,
+    required this.onColorSelected,
+  });
+
+  // Colors in hue order (spectrum: red → pink)
+  static const List<Color> _colors = [
+    Color(0xFFEF5350), // red
+    Color(0xFFFF7043), // deep orange
+    Color(0xFFFFA726), // orange
+    Color(0xFFFFCA28), // amber
+    Color(0xFFD4E157), // lime
+    Color(0xFF66BB6A), // green
+    Color(0xFF26A69A), // teal
+    Color(0xFF29B6F6), // light blue
+    Color(0xFF42A5F5), // blue
+    Color(0xFF5C6BC0), // indigo
+    Color(0xFF7E57C2), // deep purple
+    Color(0xFFAB47BC), // purple
+    Color(0xFFEC407A), // pink
+    Color(0xFF8D6E63), // brown
+    Color(0xFF78909C), // blue grey
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final textColor = AppColors.of(context).text;
+    final accentColor = Theme.of(context).colorScheme.secondary;
+    final isSystem = selectedColor == null;
+
+    return SplittedPanel(
+      cardPadding: const EdgeInsets.all(4.0),
+      isSeparated: false,
+      children: [
+        PanelButton(
+          onPressed: onToggle,
+          title: Text(
+            'material_you_color'.i18n,
+            style: TextStyle(color: textColor.withValues(alpha: .95)),
+          ),
+          leading: Icon(Icons.color_lens_outlined,
+              size: 22.0, color: textColor.withValues(alpha: .95)),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 12.0,
+                height: 12.0,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
+              const SizedBox(width: 6.0),
+              AnimatedRotation(
+                turns: isOpen ? 0.5 : 0.0,
+                duration: const Duration(milliseconds: 200),
+                child: Icon(Icons.keyboard_arrow_down_rounded,
+                    size: 20.0, color: textColor.withValues(alpha: .6)),
+              ),
+            ],
+          ),
+          borderRadius: BorderRadius.vertical(
+            top: const Radius.circular(12.0),
+            bottom: Radius.circular(isOpen ? 4.0 : 12.0),
+          ),
+        ),
+        AnimatedSize(
+          duration: const Duration(milliseconds: 220),
+          curve: Curves.easeInOut,
+          child: isOpen
+              ? Container(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surface,
+                    borderRadius: const BorderRadius.vertical(
+                        bottom: Radius.circular(12.0)),
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 12.0, horizontal: 8.0),
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                    child: Row(
+                      children: [
+                        // System (reset) option
+                        _ColorDot(
+                          color: Theme.of(context).colorScheme.primary,
+                          isSelected: isSystem,
+                          isSystem: true,
+                          onTap: () => onColorSelected(null),
+                          accentColor: accentColor,
+                        ),
+                        const SizedBox(width: 8.0),
+                        // Divider
+                        Container(
+                          width: 1.5,
+                          height: 32.0,
+                          margin:
+                              const EdgeInsets.symmetric(horizontal: 4.0),
+                          decoration: BoxDecoration(
+                            color: textColor.withValues(alpha: .15),
+                            borderRadius: BorderRadius.circular(1.0),
+                          ),
+                        ),
+                        const SizedBox(width: 8.0),
+                        // Color circles
+                        for (final c in _colors) ...[
+                          _ColorDot(
+                            color: c,
+                            isSelected: !isSystem &&
+                                selectedColor != null &&
+                                selectedColor!.value == c.value,
+                            isSystem: false,
+                            onTap: () => onColorSelected(c),
+                            accentColor: accentColor,
+                          ),
+                          const SizedBox(width: 8.0),
+                        ],
+                      ],
+                    ),
+                  ),
+                )
+              : const SizedBox.shrink(),
+        ),
+      ],
+    );
+  }
+}
+
+class _ColorDot extends StatelessWidget {
+  final Color color;
+  final bool isSelected;
+  final bool isSystem;
+  final VoidCallback onTap;
+  final Color accentColor;
+
+  const _ColorDot({
+    required this.color,
+    required this.isSelected,
+    required this.isSystem,
+    required this.onTap,
+    required this.accentColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        width: 36.0,
+        height: 36.0,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: color,
+          border: isSelected
+              ? Border.all(color: Colors.white, width: 2.5)
+              : null,
+        ),
+        child: isSystem
+            ? Icon(Icons.smartphone_rounded,
+                size: 18.0,
+                color: color.computeLuminance() > 0.4
+                    ? Colors.black54
+                    : Colors.white70)
+            : isSelected
+                ? const Icon(Icons.check_rounded,
+                    size: 18.0, color: Colors.white)
+                : null,
+      ),
+    );
+  }
 }

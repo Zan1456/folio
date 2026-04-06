@@ -58,6 +58,7 @@ import 'package:folio_mobile_ui/screens/settings/settings_screen.dart'
 
 // Providers
 import 'package:folio/models/settings.dart';
+import 'package:folio/theme/colors/accent.dart';
 import 'package:folio_kreta_api/providers/absence_provider.dart';
 import 'package:folio_kreta_api/providers/event_provider.dart';
 import 'package:folio_kreta_api/providers/exam_provider.dart';
@@ -204,7 +205,13 @@ class App extends StatelessWidget {
           return FutureBuilder<CorePalette?>(
             future: DynamicColorPlugin.getCorePalette(),
             builder: (context, snapshot) {
-              corePalette = snapshot.data;
+              final systemPalette = snapshot.data;
+              final seedColor = settings.accentColor == AccentColor.adaptive
+                  ? settings.adaptiveSeedColor
+                  : null;
+              corePalette = seedColor != null
+                  ? CorePalette.of(seedColor.value)
+                  : systemPalette;
               return MaterialApp(
                 builder: (context, child) {
                   // Limit font size scaling to 1.0

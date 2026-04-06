@@ -128,6 +128,8 @@ class SettingsProvider extends ChangeNotifier {
   int _liveCountdownBeforeMinutes;
   bool _liveCountdownDuringLesson;
   bool _liveCountdownDuringBreak;
+  // material you seed color (0 = use system)
+  int _adaptiveSeedColor;
 
   SettingsProvider({
     DatabaseProvider? database,
@@ -215,6 +217,7 @@ class SettingsProvider extends ChangeNotifier {
     required int liveCountdownBeforeMinutes,
     required bool liveCountdownDuringLesson,
     required bool liveCountdownDuringBreak,
+    int adaptiveSeedColor = 0,
   })  : _database = database,
         _language = language,
         _startPage = startPage,
@@ -299,7 +302,8 @@ class SettingsProvider extends ChangeNotifier {
         _liveCountdownBeforeLesson = liveCountdownBeforeLesson,
         _liveCountdownBeforeMinutes = liveCountdownBeforeMinutes,
         _liveCountdownDuringLesson = liveCountdownDuringLesson,
-        _liveCountdownDuringBreak = liveCountdownDuringBreak;
+        _liveCountdownDuringBreak = liveCountdownDuringBreak,
+        _adaptiveSeedColor = adaptiveSeedColor;
 
   factory SettingsProvider.fromMap(Map map,
       {required DatabaseProvider database}) {
@@ -404,6 +408,7 @@ class SettingsProvider extends ChangeNotifier {
       liveCountdownBeforeMinutes: map['live_countdown_before_minutes'] ?? 5,
       liveCountdownDuringLesson: (map['live_countdown_during_lesson'] ?? 1) == 1,
       liveCountdownDuringBreak: (map['live_countdown_during_break'] ?? 1) == 1,
+      adaptiveSeedColor: map['adaptive_seed_color'] ?? 0,
     );
   }
 
@@ -496,6 +501,7 @@ class SettingsProvider extends ChangeNotifier {
       "live_countdown_before_minutes": _liveCountdownBeforeMinutes,
       "live_countdown_during_lesson": _liveCountdownDuringLesson ? 1 : 0,
       "live_countdown_during_break": _liveCountdownDuringBreak ? 1 : 0,
+      "adaptive_seed_color": _adaptiveSeedColor,
     };
   }
 
@@ -679,6 +685,9 @@ class SettingsProvider extends ChangeNotifier {
   int get liveCountdownBeforeMinutes => _liveCountdownBeforeMinutes;
   bool get liveCountdownDuringLesson => _liveCountdownDuringLesson;
   bool get liveCountdownDuringBreak => _liveCountdownDuringBreak;
+  // null means "use system color"
+  Color? get adaptiveSeedColor =>
+      _adaptiveSeedColor == 0 ? null : Color(_adaptiveSeedColor);
 
   Future<void> update({
     bool store = true,
@@ -762,6 +771,7 @@ class SettingsProvider extends ChangeNotifier {
     int? liveCountdownBeforeMinutes,
     bool? liveCountdownDuringLesson,
     bool? liveCountdownDuringBreak,
+    int? adaptiveSeedColor,
   }) async {
     if (language != null && language != _language) _language = language;
     if (startPage != null && startPage != _startPage) _startPage = startPage;
@@ -1006,6 +1016,9 @@ class SettingsProvider extends ChangeNotifier {
     }
     if (liveCountdownDuringBreak != null && liveCountdownDuringBreak != _liveCountdownDuringBreak) {
       _liveCountdownDuringBreak = liveCountdownDuringBreak;
+    }
+    if (adaptiveSeedColor != null && adaptiveSeedColor != _adaptiveSeedColor) {
+      _adaptiveSeedColor = adaptiveSeedColor;
     }
     // change updated at time
     _updatedAt = DateTime.now();

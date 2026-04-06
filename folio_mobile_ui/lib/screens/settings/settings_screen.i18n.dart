@@ -209,6 +209,8 @@ extension SettingsLocalization on String {
           "countdown_during_break": "Countdown during breaks",
           "min_before": "%s min before",
           "developer_settings": "Developer Settings",
+          "material_you_color": "Theme Color",
+          "material_you_system": "System",
         },
         "hu-HU": {
           "heads_up": "Figyelem!",
@@ -413,6 +415,8 @@ extension SettingsLocalization on String {
           "countdown_during_break": "Visszaszámlálás szünetekben",
           "min_before": "%s perccel előtte",
           "developer_settings": "Fejlesztői beállítások",
+          "material_you_color": "Témaszín",
+          "material_you_system": "Rendszer",
           "success": "Siker!",
           "versiontext": "v%s, módosítva a Firka csapat által",
           "packagetext": "Folio, módosítva a Firka csapat által",
@@ -623,6 +627,8 @@ extension SettingsLocalization on String {
           "countdown_during_break": "Countdown in Pausen",
           "min_before": "%s Min. vorher",
           "developer_settings": "Entwickleroptionen",
+          "material_you_color": "Themenfarbe",
+          "material_you_system": "System",
         },
       };
 

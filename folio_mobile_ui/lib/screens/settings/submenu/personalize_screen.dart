@@ -7,6 +7,7 @@ import 'package:folio/api/providers/user_provider.dart';
 import 'package:folio/helpers/subject.dart';
 import 'package:folio/models/icon_pack.dart';
 import 'package:folio/models/settings.dart';
+import 'package:folio/theme/colors/accent.dart';
 import 'package:folio/theme/colors/colors.dart';
 import 'package:folio/theme/observer.dart';
 import 'package:folio/utils/format.dart';
@@ -335,6 +336,23 @@ class PersonalizeSettingsScreenState extends State<PersonalizeSettingsScreen>
                       ),
                     ],
                   ),
+                  // material you seed color picker (only when adaptive)
+                  if (settingsProvider.accentColor == AccentColor.adaptive)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 9.0),
+                      child: _PersonalizeThemeColorPicker(
+                        selectedColor: settingsProvider.adaptiveSeedColor,
+                        onColorSelected: (color) {
+                          settingsProvider.update(
+                              adaptiveSeedColor: color?.value ?? 0);
+                          Provider.of<ThemeModeObserver>(context,
+                                  listen: false)
+                              .changeTheme(settingsProvider.theme,
+                                  updateNavbarColor: false);
+                          setState(() {});
+                        },
+                      ),
+                    ),
                   // shadow toggle
                   SplittedPanel(
                     padding: const EdgeInsets.only(top: 9.0),
@@ -926,6 +944,189 @@ class PersonalizeSettingsScreenState extends State<PersonalizeSettingsScreen>
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+// ── Inline theme color picker for personalize screen ─────────────────────
+
+class _PersonalizeThemeColorPicker extends StatefulWidget {
+  final Color? selectedColor;
+  final void Function(Color?) onColorSelected;
+
+  const _PersonalizeThemeColorPicker({
+    required this.selectedColor,
+    required this.onColorSelected,
+  });
+
+  @override
+  State<_PersonalizeThemeColorPicker> createState() =>
+      _PersonalizeThemeColorPickerState();
+}
+
+class _PersonalizeThemeColorPickerState
+    extends State<_PersonalizeThemeColorPicker> {
+  bool _open = false;
+
+  static const List<Color> _colors = [
+    Color(0xFFEF5350),
+    Color(0xFFFF7043),
+    Color(0xFFFFA726),
+    Color(0xFFFFCA28),
+    Color(0xFFD4E157),
+    Color(0xFF66BB6A),
+    Color(0xFF26A69A),
+    Color(0xFF29B6F6),
+    Color(0xFF42A5F5),
+    Color(0xFF5C6BC0),
+    Color(0xFF7E57C2),
+    Color(0xFFAB47BC),
+    Color(0xFFEC407A),
+    Color(0xFF8D6E63),
+    Color(0xFF78909C),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final textColor = AppColors.of(context).text;
+    final accentColor = Theme.of(context).colorScheme.secondary;
+    final isSystem = widget.selectedColor == null;
+
+    return SplittedPanel(
+      cardPadding: const EdgeInsets.all(4.0),
+      isSeparated: false,
+      children: [
+        PanelButton(
+          onPressed: () => setState(() => _open = !_open),
+          title: Text(
+            'material_you_color'.i18n,
+            style: TextStyle(color: textColor.withValues(alpha: .95)),
+          ),
+          leading: Icon(Icons.color_lens_outlined,
+              size: 22.0, color: textColor.withValues(alpha: .95)),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 12.0,
+                height: 12.0,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
+              const SizedBox(width: 6.0),
+              AnimatedRotation(
+                turns: _open ? 0.5 : 0.0,
+                duration: const Duration(milliseconds: 200),
+                child: Icon(Icons.keyboard_arrow_down_rounded,
+                    size: 20.0, color: textColor.withValues(alpha: .6)),
+              ),
+            ],
+          ),
+          borderRadius: BorderRadius.vertical(
+            top: const Radius.circular(12.0),
+            bottom: Radius.circular(_open ? 4.0 : 12.0),
+          ),
+        ),
+        AnimatedSize(
+          duration: const Duration(milliseconds: 220),
+          curve: Curves.easeInOut,
+          child: _open
+              ? Container(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surface,
+                    borderRadius: const BorderRadius.vertical(
+                        bottom: Radius.circular(12.0)),
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 12.0, horizontal: 8.0),
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                    child: Row(
+                      children: [
+                        _ColorDot(
+                          color: Theme.of(context).colorScheme.primary,
+                          isSelected: isSystem,
+                          isSystem: true,
+                          onTap: () => widget.onColorSelected(null),
+                          accentColor: accentColor,
+                        ),
+                        const SizedBox(width: 8.0),
+                        Container(
+                          width: 1.5,
+                          height: 32.0,
+                          margin: const EdgeInsets.symmetric(horizontal: 4.0),
+                          decoration: BoxDecoration(
+                            color: textColor.withValues(alpha: .15),
+                            borderRadius: BorderRadius.circular(1.0),
+                          ),
+                        ),
+                        const SizedBox(width: 8.0),
+                        for (final c in _colors) ...[
+                          _ColorDot(
+                            color: c,
+                            isSelected: !isSystem &&
+                                widget.selectedColor != null &&
+                                widget.selectedColor!.value == c.value,
+                            isSystem: false,
+                            onTap: () => widget.onColorSelected(c),
+                            accentColor: accentColor,
+                          ),
+                          const SizedBox(width: 8.0),
+                        ],
+                      ],
+                    ),
+                  ),
+                )
+              : const SizedBox.shrink(),
+        ),
+      ],
+    );
+  }
+}
+
+class _ColorDot extends StatelessWidget {
+  final Color color;
+  final bool isSelected;
+  final bool isSystem;
+  final VoidCallback onTap;
+  final Color accentColor;
+
+  const _ColorDot({
+    required this.color,
+    required this.isSelected,
+    required this.isSystem,
+    required this.onTap,
+    required this.accentColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        width: 36.0,
+        height: 36.0,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: color,
+          border:
+              isSelected ? Border.all(color: Colors.white, width: 2.5) : null,
+        ),
+        child: isSystem
+            ? Icon(Icons.smartphone_rounded,
+                size: 18.0,
+                color: color.computeLuminance() > 0.4
+                    ? Colors.black54
+                    : Colors.white70)
+            : isSelected
+                ? const Icon(Icons.check_rounded,
+                    size: 18.0, color: Colors.white)
+                : null,
       ),
     );
   }
