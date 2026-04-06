@@ -1,945 +1,950 @@
-// ignore_for_file: no_leading_underscores_for_local_identifiers
-
-import 'dart:convert';
-import 'dart:io';
 import 'dart:math';
 
-import 'package:collection/collection.dart';
-import 'package:file_picker/file_picker.dart';
-import 'package:flutter/foundation.dart';
-import 'package:folio/api/providers/update_provider.dart';
+import 'package:flutter/material.dart';
+import 'package:folio/helpers/average_helper.dart';
 import 'package:folio/models/settings.dart';
-import 'package:folio/theme/colors/utils.dart';
 import 'package:folio/ui/widgets/grade/grade_tile.dart';
-import 'package:folio_kreta_api/models/exam.dart';
-import 'package:folio_kreta_api/providers/exam_provider.dart';
-import 'package:folio_kreta_api/providers/grade_provider.dart';
-import 'package:folio/api/providers/user_provider.dart';
+import 'package:folio/utils/format.dart';
 import 'package:folio_kreta_api/models/grade.dart';
-import 'package:folio_kreta_api/models/subject.dart';
 import 'package:folio_kreta_api/models/group_average.dart';
-import 'package:folio_kreta_api/providers/homework_provider.dart';
-import 'package:folio_mobile_ui/common/bottom_sheet_menu/bottom_sheet_menu.dart';
+import 'package:folio_kreta_api/models/subject.dart';
+import 'package:folio_kreta_api/providers/grade_provider.dart';
+import 'package:folio_mobile_ui/common/average_display.dart';
 import 'package:folio_mobile_ui/common/bottom_sheet_menu/rounded_bottom_sheet.dart';
-import 'package:folio_mobile_ui/common/empty.dart';
+import 'package:folio_mobile_ui/common/haptic.dart';
 import 'package:folio_mobile_ui/common/panel/panel.dart';
-import 'package:folio_mobile_ui/common/widgets/exam/exam_viewable.dart';
-import 'package:folio_mobile_ui/common/widgets/grade/grade_subject_tile.dart';
 import 'package:folio_mobile_ui/common/trend_display.dart';
-import 'package:folio_mobile_ui/pages/grades/fail_warning.dart';
-import 'package:folio_mobile_ui/pages/grades/grades_count_item.dart';
+import 'package:folio_mobile_ui/common/widgets/cretification/certification_tile.dart';
+import 'package:folio_mobile_ui/common/widgets/grade/grade_subject_tile.dart';
+import 'package:folio_mobile_ui/common/widgets/grade/grade_viewable.dart';
+import 'package:folio_mobile_ui/pages/grades/calculator/grade_calculator.dart';
+import 'package:folio_mobile_ui/pages/grades/calculator/grade_calculator_provider.dart';
 import 'package:folio_mobile_ui/pages/grades/graph.dart';
-import 'package:folio_mobile_ui/pages/grades/grade_subject_view.dart';
+import 'package:folio_mobile_ui/pages/grades/subject_grades_container.dart';
 import 'package:folio_mobile_ui/screens/navigation/navigation_route_handler.dart';
 import 'package:folio_mobile_ui/screens/navigation/navigation_screen.dart';
-import 'package:flutter/material.dart';
-import 'package:folio_mobile_ui/common/haptic.dart';
 import 'package:provider/provider.dart';
-import 'package:folio/helpers/average_helper.dart';
-import 'average_selector.dart';
-import 'calculator/grade_calculator.dart';
-import 'calculator/grade_calculator_provider.dart';
+
 import 'grades_page.i18n.dart';
 
 class GradesPage extends StatefulWidget {
   const GradesPage({super.key});
 
-  static void jump(BuildContext context, {GradeSubject? subject}) {
-    // Go to timetable page with arguments
+  static void jump(BuildContext context) {
     NavigationScreen.of(context)
         ?.customRoute(navigationPageRoute((context) => const GradesPage()));
-
     NavigationScreen.of(context)?.setPage("grades");
-
-    // Show initial Lesson
-    if (subject != null) {
-      GradeSubjectView(subject, groupAverage: 0.0).push(context, root: true);
-    }
   }
 
   @override
-  GradesPageState createState() => GradesPageState();
+  State<GradesPage> createState() => _GradesPageState();
 }
 
-class GradesPageState extends State<GradesPage> {
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+class _GradesPageState extends State<GradesPage>
+    with TickerProviderStateMixin, WidgetsBindingObserver {
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
+  late TabController _tabController;
 
+  int _periodDays = 0;
+  GradeSubject? _selectedSubject;
+  double _selectedGroupAvg = 0.0;
   PersistentBottomSheetController? _sheetController;
 
-  late UserProvider user;
-  late GradeProvider gradeProvider;
-  late UpdateProvider updateProvider;
-  late GradeCalculatorProvider calculatorProvider;
-  late HomeworkProvider homeworkProvider;
-  late ExamProvider examProvider;
-  late SettingsProvider settingsProvider;
+  static const _periods = [0, 90, 30, 14, 7];
+  static const _periodKeys = [
+    'annual_average',
+    '3_months_average',
+    '30_days_average',
+    '14_days_average',
+    '7_days_average',
+  ];
 
-  late String firstName;
-  List<Widget> subjectTiles = [];
-
-  int avgDropValue = 0;
-  double subjectAvg = 0.0;
-
-  bool gradeCalcMode = false;
-  bool importedViewMode = false;
-
-  List<Grade> jsonGrades = [];
-
-  List<Grade> getSubjectGrades(GradeSubject subject,
-          {int days = 0}) =>
-      !gradeCalcMode
-          ? (importedViewMode ? jsonGrades : gradeProvider.grades)
-              .where((e) =>
-                  e.subject == subject &&
-                  e.type == GradeType.midYear &&
-                  (days == 0 ||
-                      e.date.isBefore(
-                          DateTime.now().subtract(Duration(days: days)))))
-              .toList()
-          : calculatorProvider.grades
-              .where((e) => e.subject == subject)
-              .toList();
-
-  void generateTiles() {
-    List<GradeSubject> subjects =
-        (importedViewMode ? jsonGrades : gradeProvider.grades)
-            .map((e) => GradeSubject(
-                  category: e.subject.category,
-                  id: e.subject.id,
-                  name: e.subject.name,
-                  renamedTo: e.subject.renamedTo,
-                  customRounding: e.subject.customRounding,
-                  teacher: e.teacher,
-                ))
-            .toSet()
-            .toList()
-          ..sort((a, b) => a.name.compareTo(b.name));
-    List<Widget> tiles = [];
-
-    Map<GradeSubject, double> subjectAvgs = {};
-
-    if (!gradeCalcMode) {
-      var i = 0;
-
-      tiles.addAll(subjects.map((subject) {
-        List<Grade> subjectGrades = getSubjectGrades(subject);
-
-        double avg = AverageHelper.averageEvals(subjectGrades);
-        double averageBefore = 0.0;
-
-        if (avgDropValue != 0) {
-          List<Grade> gradesBefore =
-              getSubjectGrades(subject, days: avgDropValue);
-          averageBefore = avgDropValue == 0
-              ? 0.0
-              : AverageHelper.averageEvals(gradesBefore);
-        }
-        var nullavg = GroupAverage(average: 0.0, subject: subject, uid: "0");
-        double groupAverage = gradeProvider.groupAverages
-            .firstWhere((e) => e.subject == subject, orElse: () => nullavg)
-            .average;
-
-        if (avg != 0) subjectAvgs[subject] = avg;
-
-        i++;
-
-        int homeworkCount = homeworkProvider.homework
-            .where((e) =>
-                e.subject.id == subject.id &&
-                e.deadline.isAfter(DateTime.now()))
-            .length;
-        bool hasHomework = homeworkCount > 0;
-
-        List<Exam> allExams = examProvider.exams;
-        try {
-          allExams.sort((a, b) => a.date.compareTo(b.date));
-        } catch (e) {
-          if (kDebugMode) {
-            print('failed to sort exams, reason: flutter');
-          }
-          allExams = [];
-        }
-
-        Exam? nearestExam = allExams.firstWhereOrNull((e) =>
-            e.subject.id == subject.id && e.writeDate.isAfter(DateTime.now()));
-
-        bool hasUnder = (hasHomework || nearestExam != null) &&
-            Provider.of<SettingsProvider>(context, listen: false)
-                .qSubjectsSubTiles;
-
-        return Padding(
-          padding: i > 1 ? const EdgeInsets.only(top: 9.0) : EdgeInsets.zero,
-          child: Column(
-            children: [
-              Container(
-                decoration: BoxDecoration(
-                  boxShadow: [
-                    if (Provider.of<SettingsProvider>(context, listen: false)
-                        .shadowEffect)
-                      BoxShadow(
-                        offset: const Offset(0, 21),
-                        blurRadius: 23.0,
-                        color: Theme.of(context).shadowColor,
-                      )
-                  ],
-                  borderRadius: BorderRadius.only(
-                    topLeft: const Radius.circular(16.0),
-                    topRight: const Radius.circular(16.0),
-                    bottomLeft: hasUnder
-                        ? const Radius.circular(8.0)
-                        : const Radius.circular(16.0),
-                    bottomRight: hasUnder
-                        ? const Radius.circular(8.0)
-                        : const Radius.circular(16.0),
-                  ),
-                  color: Theme.of(context).colorScheme.surface,
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                      vertical: 8.0, horizontal: 6.0),
-                  child: Theme(
-                    data: Theme.of(context).copyWith(
-                      highlightColor: Colors.transparent,
-                      splashColor: Colors.transparent,
-                    ),
-                    child: GradeSubjectTile(
-                      subject,
-                      averageBefore: averageBefore,
-                      average: avg,
-                      groupAverage: avgDropValue == 0 ? groupAverage : 0.0,
-                      onTap: () {
-                        performHapticFeedback(settingsProvider.vibrate);
-                        GradeSubjectView(subject, groupAverage: groupAverage)
-                            .push(context, root: true);
-                      },
-                    ),
-                  ),
-                ),
-              ),
-              if (hasUnder)
-                const SizedBox(
-                  height: 6.0,
-                ),
-              if (hasHomework &&
-                  Provider.of<SettingsProvider>(context, listen: false)
-                      .qSubjectsSubTiles)
-                Container(
-                  decoration: BoxDecoration(
-                    boxShadow: [
-                      if (Provider.of<SettingsProvider>(context, listen: false)
-                          .shadowEffect)
-                        BoxShadow(
-                          offset: const Offset(0, 21),
-                          blurRadius: 23.0,
-                          color: Theme.of(context).shadowColor,
-                        )
-                    ],
-                    borderRadius: BorderRadius.only(
-                      topLeft: const Radius.circular(8.0),
-                      topRight: const Radius.circular(8.0),
-                      bottomLeft: nearestExam != null
-                          ? const Radius.circular(8.0)
-                          : const Radius.circular(16.0),
-                      bottomRight: nearestExam != null
-                          ? const Radius.circular(8.0)
-                          : const Radius.circular(16.0),
-                    ),
-                    color: Theme.of(context).colorScheme.surface,
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.only(
-                      top: 8.0,
-                      bottom: 8.0,
-                      left: 15.0,
-                      right: 8.0,
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'you_have_hw'.i18n.fill([homeworkCount]),
-                          style: const TextStyle(
-                              fontSize: 15.0, fontWeight: FontWeight.w500),
-                        ),
-                        // const Icon(
-                        //   Icons.keyboard_arrow_right_rounded,
-                        //   grade: 0.5,
-                        //   size: 20.0,
-                        // )
-                      ],
-                    ),
-                  ),
-                ),
-              if (hasHomework &&
-                  nearestExam != null &&
-                  Provider.of<SettingsProvider>(context).qSubjectsSubTiles)
-                const SizedBox(
-                  height: 6.0,
-                ),
-              if (nearestExam != null &&
-                  Provider.of<SettingsProvider>(context).qSubjectsSubTiles)
-                Container(
-                  decoration: BoxDecoration(
-                    boxShadow: [
-                      if (Provider.of<SettingsProvider>(context, listen: false)
-                          .shadowEffect)
-                        BoxShadow(
-                          offset: const Offset(0, 21),
-                          blurRadius: 23.0,
-                          color: Theme.of(context).shadowColor,
-                        )
-                    ],
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(8.0),
-                      topRight: Radius.circular(8.0),
-                      bottomLeft: Radius.circular(16.0),
-                      bottomRight: Radius.circular(16.0),
-                    ),
-                    color: Theme.of(context).colorScheme.surface,
-                  ),
-                  child: ExamViewable(
-                    nearestExam,
-                    showSubject: false,
-                    tilePadding: const EdgeInsets.symmetric(horizontal: 6.0),
-                  ),
-                ),
-            ],
-          ),
-        );
-      }));
-    } else {
-      tiles.clear();
-
-      List<Grade> ghostGrades = calculatorProvider.ghosts;
-      ghostGrades.sort((a, b) => -a.date.compareTo(b.date));
-
-      List<GradeTile> _gradeTiles = [];
-      for (Grade grade in ghostGrades) {
-        _gradeTiles.add(GradeTile(
-          grade,
-          viewOverride: true,
-        ));
-      }
-
-      tiles.add(
-        _gradeTiles.isNotEmpty
-            ? Panel(
-                key: ValueKey(gradeCalcMode),
-                title: Text(
-                  "Ghost Grades".i18n,
-                ),
-                child: Column(
-                  children: _gradeTiles,
-                ),
-              )
-            : const SizedBox(),
-      );
-    }
-
-    if (tiles.isNotEmpty || gradeCalcMode) {
-      if (!gradeCalcMode) {
-        tiles.insert(0, FailWarning(subjectAvgs: subjectAvgs));
-
-        // tiles.insert(4, const PanelHeader(padding: EdgeInsets.only(top: 12.0)));
-        // tiles.add(const PanelFooter(padding: EdgeInsets.only(bottom: 12.0)));
-      }
-      tiles.add(Padding(
-        padding: EdgeInsets.only(bottom: !gradeCalcMode ? 24.0 : 250.0),
-      ));
-    } else {
-      tiles.insert(
-        0,
-        Padding(
-          padding: const EdgeInsets.only(top: 24.0),
-          child: Empty(subtitle: "empty".i18n),
-        ),
-      );
-    }
-
-    // print('rounding:');
-    // print(settingsProvider.rounding);
-
-    subjectAvg = subjectAvgs.isNotEmpty
-        ? subjectAvgs.values.fold(
-                0.0,
-                (double a, double b) =>
-                    a.round().toDouble() + b.round().toDouble()) /
-            subjectAvgs.length
-        : 0.0;
-
-
-    // padding
-    tiles.add(const SizedBox(height: 32.0));
-
-    subjectTiles = List.castFrom(tiles);
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+    _tabController.addListener(() {
+      if (mounted) setState(() {});
+    });
+    WidgetsBinding.instance.addObserver(this);
   }
 
   @override
-  Widget build(BuildContext context) {
-    user = Provider.of<UserProvider>(context);
-    gradeProvider = Provider.of<GradeProvider>(context);
-    updateProvider = Provider.of<UpdateProvider>(context);
-    calculatorProvider = Provider.of<GradeCalculatorProvider>(context);
-    homeworkProvider = Provider.of<HomeworkProvider>(context);
-    examProvider = Provider.of<ExamProvider>(context);
-    settingsProvider = Provider.of<SettingsProvider>(context);
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _tabController.dispose();
+    super.dispose();
+  }
 
-    List<String> nameParts = user.displayName?.split(" ") ?? ["?"];
-    firstName = nameParts.length > 1 ? nameParts[1] : nameParts[0];
+  @override
+  Future<bool> didPopRoute() async {
+    if (!mounted) return false;
+    // 1. Close calculator sheet if open
+    if (_sheetController != null) {
+      _sheetController!.close();
+      return true;
+    }
+    // 2. Go back to subjects tab when on subject detail tab
+    if (_tabController.index == 1) {
+      _tabController.animateTo(0);
+      return true;
+    }
+    // 3. Close modal route if on top of inner navigator
+    if (Navigator.canPop(context)) {
+      Navigator.pop(context);
+      return true;
+    }
+    return false;
+  }
 
-    final double totalClassAvg = gradeProvider.groupAverages.isEmpty
-        ? 0.0
-        : gradeProvider.groupAverages
-                .map((e) => e.average)
-                .fold(0.0, (double a, double b) => a + b) /
-            gradeProvider.groupAverages.length;
+  List<Grade> _applyPeriod(List<Grade> grades) {
+    if (_periodDays == 0) return grades;
+    final cutoff = DateTime.now().subtract(Duration(days: _periodDays));
+    return grades.where((g) => g.date.isAfter(cutoff)).toList();
+  }
 
-    final now =
-        (importedViewMode ? jsonGrades : gradeProvider.grades).isNotEmpty
-            ? (importedViewMode ? jsonGrades : gradeProvider.grades)
-                .reduce((v, e) => e.date.isAfter(v.date) ? e : v)
-                .date
-            : DateTime.now();
+  void _openCalculator(BuildContext context) {
+    final calcProvider =
+        Provider.of<GradeCalculatorProvider>(context, listen: false);
+    final gradeProvider = Provider.of<GradeProvider>(context, listen: false);
+    final settings = Provider.of<SettingsProvider>(context, listen: false);
 
-    final currentStudentAvg = AverageHelper.averageEvals(!gradeCalcMode
-        ? (importedViewMode ? jsonGrades : gradeProvider.grades)
-            .where((e) => e.type == GradeType.midYear)
-            .toList()
-        : calculatorProvider.grades);
+    performHapticFeedback(settings.vibrate);
+    calcProvider.clear();
+    calcProvider.addAllGrades(gradeProvider.grades);
 
-    final prevStudentAvg = AverageHelper.averageEvals((importedViewMode
-            ? jsonGrades
-            : gradeProvider.grades)
-        .where((e) => e.type == GradeType.midYear)
-        .where((e) => e.date.isBefore(now.subtract(const Duration(days: 30))))
-        .toList());
+    final subject = _tabController.index == 1 ? _selectedSubject : null;
 
-    List<Grade> graphGrades = !gradeCalcMode
-        ? (importedViewMode ? jsonGrades : gradeProvider.grades)
-            .where((e) =>
-                e.type == GradeType.midYear &&
-                (avgDropValue == 0 ||
-                    e.date.isAfter(
-                        DateTime.now().subtract(Duration(days: avgDropValue)))))
-            .toList()
-        : calculatorProvider.grades
-            .where(((e) =>
-                avgDropValue == 0 ||
-                e.date.isAfter(
-                    DateTime.now().subtract(Duration(days: avgDropValue)))))
-            .toList();
+    _sheetController = _scaffoldKey.currentState?.showBottomSheet(
+      (ctx) => RoundedBottomSheet(
+        borderRadius: 14.0,
+        showHandle: false,
+        child: GradeCalculator(subject),
+      ),
+      backgroundColor: const Color(0x00000000),
+      elevation: 12.0,
+    );
 
-    generateTiles();
+    _sheetController?.closed.then((_) {
+      if (mounted) {
+        calcProvider.clear();
+        setState(() => _sheetController = null);
+      }
+    });
+  }
 
-    return Scaffold(
-      key: _scaffoldKey,
-      body: NestedScrollView(
-        physics: const BouncingScrollPhysics(
-            parent: AlwaysScrollableScrollPhysics()),
-        headerSliverBuilder: (context, innerBoxIsScrolled) => [
-          SliverAppBar(
-            centerTitle: false,
-            pinned: true,
-            floating: false,
-            snap: false,
-            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-            surfaceTintColor: Colors.transparent,
-            scrolledUnderElevation: 0.0,
-            elevation: 0,
-            shadowColor: Colors.transparent,
-            automaticallyImplyLeading: false,
-            actions: [
-              if (!gradeCalcMode)
-                Padding(
-                  padding: const EdgeInsets.only(right: 4.0),
-                  child: IconButton(
-                    onPressed: () {
-                      performHapticFeedback(settingsProvider.vibrate);
-                      showQuickSettings(context);
-                    },
-                    icon: Icon(
-                      Icons.more_horiz_rounded,
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
-                  ),
-                ),
-            ],
-            title: Row(
-              children: [
-                const SizedBox(width: 8.0),
-                Text(
-                  "page_title_grades".i18n,
+  void _showPeriodModal(BuildContext context) {
+    final settings = Provider.of<SettingsProvider>(context, listen: false);
+    performHapticFeedback(settings.vibrate);
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: _periods.asMap().entries.map((entry) {
+              final isSelected = _periodDays == entry.value;
+              return ListTile(
+                title: Text(
+                  _periodKeys[entry.key].i18n,
                   style: TextStyle(
-                    color: Theme.of(context).colorScheme.onSurface,
-                    fontSize: 28.0,
-                    fontWeight: FontWeight.w800,
+                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                   ),
                 ),
-                if (currentStudentAvg > 0)
-                  AnimatedOpacity(
-                    opacity: innerBoxIsScrolled ? 1.0 : 0.0,
-                    duration: const Duration(milliseconds: 200),
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 10.0),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 10.0, vertical: 4.0),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.primaryContainer,
-                          borderRadius: BorderRadius.circular(12.0),
-                        ),
-                        child: Text(
-                          currentStudentAvg.toStringAsFixed(2),
-                          style: TextStyle(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .onPrimaryContainer,
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-          // Hero avg card — scrolls away
-          if (currentStudentAvg > 0)
-            SliverToBoxAdapter(
-              child: Padding(
-                padding:
-                    const EdgeInsets.fromLTRB(16.0, 0, 16.0, 12.0),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color:
-                        Theme.of(context).colorScheme.primaryContainer,
-                    borderRadius: BorderRadius.circular(28.0),
-                  ),
-                  padding: const EdgeInsets.fromLTRB(24.0, 20.0, 24.0, 20.0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                "page_title_grades".i18n,
-                                style: TextStyle(
-                                  fontSize: 13.0,
-                                  fontWeight: FontWeight.w600,
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .onPrimaryContainer
-                                      .withValues(alpha: 0.7),
-                                ),
-                              ),
-                              const SizedBox(height: 2.0),
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  Text(
-                                    currentStudentAvg.toStringAsFixed(2),
-                                    style: TextStyle(
-                                      fontSize: 58.0,
-                                      fontWeight: FontWeight.w800,
-                                      height: 1.0,
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onPrimaryContainer,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 10.0),
-                                  Padding(
-                                    padding:
-                                        const EdgeInsets.only(bottom: 8.0),
-                                    child: TrendDisplay(
-                                      previous: prevStudentAvg,
-                                      current: currentStudentAvg,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                          const Spacer(),
-                          if (subjectAvg > 0) ...[
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 14.0, vertical: 10.0),
-                              decoration: BoxDecoration(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onPrimaryContainer
-                                    .withValues(alpha: 0.12),
-                                borderRadius: BorderRadius.circular(20.0),
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    Icons.menu_book_rounded,
-                                    size: 14.0,
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onPrimaryContainer
-                                        .withValues(alpha: 0.65),
-                                  ),
-                                  const SizedBox(height: 2.0),
-                                  Text(
-                                    subjectAvg.toStringAsFixed(2),
-                                    style: TextStyle(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onPrimaryContainer,
-                                      fontSize: 22.0,
-                                      fontWeight: FontWeight.w700,
-                                      height: 1.0,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(width: 8.0),
-                          ],
-                          if (totalClassAvg >= 1.0)
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 14.0, vertical: 10.0),
-                              decoration: BoxDecoration(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onPrimaryContainer
-                                    .withValues(alpha: 0.12),
-                                borderRadius: BorderRadius.circular(20.0),
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    Icons.group_rounded,
-                                    size: 14.0,
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onPrimaryContainer
-                                        .withValues(alpha: 0.65),
-                                  ),
-                                  const SizedBox(height: 2.0),
-                                  Text(
-                                    totalClassAvg.toStringAsFixed(2),
-                                    style: TextStyle(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onPrimaryContainer,
-                                      fontSize: 22.0,
-                                      fontWeight: FontWeight.w700,
-                                      height: 1.0,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                        ],
-                      ),
-                      const SizedBox(height: 14.0),
-                      Row(
-                        children: [
-                          AverageSelector(
-                            value: avgDropValue,
-                            onChanged: (v) => setState(() {
-                              avgDropValue = v ?? 0;
-                              generateTiles();
-                            }),
-                          ),
-                          const Spacer(),
-                          GestureDetector(
-                            onTap: () {
-                              performHapticFeedback(settingsProvider.vibrate);
-                              _showGradesStatsModal(
-                                  context, graphGrades, totalClassAvg);
-                            },
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 12.0, vertical: 8.0),
-                              decoration: BoxDecoration(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onPrimaryContainer
-                                    .withValues(alpha: 0.12),
-                                borderRadius: BorderRadius.circular(14.0),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    Icons.bar_chart_rounded,
-                                    size: 16.0,
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onPrimaryContainer
-                                        .withValues(alpha: 0.8),
-                                  ),
-                                  const SizedBox(width: 4.0),
-                                  Text(
-                                    "stats".i18n,
-                                    style: TextStyle(
-                                      fontSize: 13.0,
-                                      fontWeight: FontWeight.w600,
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onPrimaryContainer
-                                          .withValues(alpha: 0.8),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-        ],
-        body: RefreshIndicator(
-          onRefresh: () => gradeProvider.fetch(),
-          color: Theme.of(context).colorScheme.secondary,
-          child: ListView.builder(
-            padding: EdgeInsets.zero,
-            physics: const BouncingScrollPhysics(),
-            itemCount: max(subjectTiles.length, 1),
-            itemBuilder: (context, index) {
-              if (subjectTiles.isNotEmpty) {
-                EdgeInsetsGeometry panelPadding =
-                    const EdgeInsets.symmetric(horizontal: 24.0);
-
-                if (subjectTiles[index].runtimeType == GradeSubjectTile) {
-                  return Padding(
-                      padding: panelPadding,
-                      child: PanelBody(
-                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                        child: subjectTiles[index],
-                      ));
-                } else {
-                  return Padding(
-                      padding: panelPadding, child: subjectTiles[index]);
-                }
-              } else {
-                return Container();
-              }
-            },
+                trailing: isSelected
+                    ? Icon(Icons.check_rounded,
+                        color: Theme.of(ctx).colorScheme.secondary)
+                    : null,
+                onTap: () {
+                  setState(() => _periodDays = entry.value);
+                  Navigator.pop(ctx);
+                },
+              );
+            }).toList(),
           ),
         ),
       ),
     );
   }
 
-  void _showGradesStatsModal(BuildContext context, List<Grade> grades, double classAvg) {
-    List<int> counts = List.generate(
-        5, (i) => grades.where((e) => e.value.value == i + 1).length);
-    int total = counts.reduce((a, b) => a + b);
-    double maxCount =
-        counts.reduce((a, b) => a > b ? a : b) + counts.reduce((a, b) => a > b ? a : b) / 5;
+  void _showStatsModal(
+      BuildContext context, List<Grade> grades, double classAvg) {
+    final settings = Provider.of<SettingsProvider>(context, listen: false);
+    performHapticFeedback(settings.vibrate);
+    final counts = List.generate(
+        5, (i) => grades.where((g) => g.value.value == i + 1).length);
+    final total = counts.fold(0, (a, b) => a + b);
+    final maxCount = counts.isNotEmpty ? counts.reduce(max).toDouble() : 1.0;
 
     showModalBottomSheet(
       context: context,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24.0)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (ctx) => SafeArea(
         child: Padding(
-        padding: const EdgeInsets.fromLTRB(24.0, 24.0, 24.0, 16.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
+          padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'grades_cnt'.i18n.fill([total.toString()]),
+                style:
+                    const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+              ),
+              if (grades.length >= 2) ...[
+                const SizedBox(height: 16),
+                Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: GradeGraph(grades, classAvg: classAvg),
+                ),
+              ],
+              const SizedBox(height: 16),
+              ...counts.reversed.toList().asMap().entries.map((e) {
+                final value = 5 - e.key;
+                final count = e.value;
+                final color = gradeColor(context: ctx, value: value.toDouble());
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 30,
+                        height: 30,
+                        decoration: BoxDecoration(
+                          color: color.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Center(
+                          child: Text(
+                            value.toString(),
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                              color: color,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(6),
+                          child: LinearProgressIndicator(
+                            value: maxCount > 0 ? count / maxCount : 0,
+                            backgroundColor: Theme.of(ctx)
+                                .colorScheme
+                                .surfaceContainerHighest,
+                            valueColor: AlwaysStoppedAnimation(
+                                color.withValues(alpha: 0.75)),
+                            minHeight: 10,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      SizedBox(
+                        width: 24,
+                        child: Text(
+                          count.toString(),
+                          textAlign: TextAlign.right,
+                          style: const TextStyle(
+                              fontSize: 14, fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final gradeProvider = Provider.of<GradeProvider>(context);
+    final calcProvider = Provider.of<GradeCalculatorProvider>(context);
+    final settings = Provider.of<SettingsProvider>(context);
+
+    final isCalcMode = calcProvider.ghosts.isNotEmpty;
+    final rawGrades = isCalcMode ? calcProvider.grades : gradeProvider.grades;
+    final allMidYear = rawGrades
+        .where((g) =>
+            g.type == GradeType.midYear ||
+            (isCalcMode && g.type == GradeType.ghost))
+        .toList();
+    final filtered = _applyPeriod(allMidYear);
+
+    final subjects = rawGrades
+        .map((g) => GradeSubject(
+              id: g.subject.id,
+              name: g.subject.name,
+              category: g.subject.category,
+              renamedTo: g.subject.renamedTo,
+              customRounding: g.subject.customRounding,
+              teacher: g.teacher,
+            ))
+        .toSet()
+        .toList()
+      ..sort((a, b) => a.name.compareTo(b.name));
+
+    final subjectAvgMap = <GradeSubject, double>{};
+    for (final s in subjects) {
+      final avg = AverageHelper.averageEvals(
+          filtered.where((g) => g.subject == s).toList());
+      if (avg > 0) subjectAvgMap[s] = avg;
+    }
+
+    final currentAvg = AverageHelper.averageEvals(filtered);
+    final prevAvg = AverageHelper.averageEvals(allMidYear
+        .where((g) =>
+            g.date.isBefore(DateTime.now().subtract(const Duration(days: 30))))
+        .toList());
+
+    final totalClassAvg = gradeProvider.groupAverages.isEmpty
+        ? 0.0
+        : gradeProvider.groupAverages
+                .map((e) => e.average)
+                .fold(0.0, (a, b) => a + b) /
+            gradeProvider.groupAverages.length;
+
+    final subjectAvg = subjectAvgMap.isEmpty
+        ? 0.0
+        : subjectAvgMap.values.fold(0.0, (a, b) => a + b) /
+            subjectAvgMap.length;
+
+    final currentPeriodKey = _periodKeys[_periods.indexOf(_periodDays)];
+
+    return Scaffold(
+      key: _scaffoldKey,
+      appBar: AppBar(
+        centerTitle: false,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        surfaceTintColor: Colors.transparent,
+        scrolledUnderElevation: 0,
+        elevation: 0,
+        automaticallyImplyLeading: false,
+        title: Row(
           children: [
+            const SizedBox(width: 8),
             Text(
-              'grades_cnt'.i18n.fill([total.toString()]),
-              style: const TextStyle(
-                fontSize: 18.0,
-                fontWeight: FontWeight.w700,
+              'page_title_grades'.i18n,
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.w800,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
-            const SizedBox(height: 12.0),
-            Container(
-              padding: const EdgeInsets.only(top: 12.0, right: 12.0),
-              child: GradeGraph(grades, dayThreshold: 2, classAvg: classAvg),
-            ),
-            const SizedBox(height: 8.0),
-            ...counts.reversed
-                .toList()
-                .asMap()
-                .entries
-                .map((entry) {
-              final value = 5 - entry.key;
-              final count = entry.value;
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 10.0),
-                child: GradesCountItem(
-                  count: count,
-                  value: value,
-                  total: maxCount,
+            if (currentAvg > 0) ...[
+              const Spacer(),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primaryContainer,
+                  borderRadius: BorderRadius.circular(12),
                 ),
-              );
-            }),
+                child: Text(
+                  currentAvg.toStringAsFixed(2),
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: Theme.of(context).colorScheme.onPrimaryContainer,
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+        actions: [
+          if (_sheetController == null &&
+              _tabController.index == 1 &&
+              !isCalcMode)
+            Padding(
+              padding: const EdgeInsets.only(right: 4),
+              child: IconButton(
+                icon: Icon(
+                  isCalcMode
+                      ? Icons.calculate_rounded
+                      : Icons.calculate_outlined,
+                  color: isCalcMode
+                      ? Theme.of(context).colorScheme.secondary
+                      : Theme.of(context).colorScheme.onSurface,
+                ),
+                onPressed: () => _openCalculator(context),
+              ),
+            ),
+        ],
+        bottom: TabBar(
+          controller: _tabController,
+          tabs: [
+            Tab(text: 'subjects_tab'.i18n),
+            Tab(text: 'grades_tab'.i18n),
           ],
         ),
       ),
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          _SubjectsTab(
+            gradeProvider: gradeProvider,
+            settings: settings,
+            subjects: subjects,
+            subjectAvgMap: subjectAvgMap,
+            currentAvg: currentAvg,
+            prevAvg: prevAvg,
+            totalClassAvg: totalClassAvg,
+            subjectAvg: subjectAvg,
+            filteredGrades: filtered,
+            periodDays: _periodDays,
+            currentPeriodKey: currentPeriodKey,
+            onPeriodTap: () => _showPeriodModal(context),
+            onSubjectTap: (subject, groupAvg) {
+              setState(() {
+                _selectedSubject = subject;
+                _selectedGroupAvg = groupAvg;
+              });
+              _tabController.animateTo(1);
+            },
+            onShowStats: (grades) =>
+                _showStatsModal(context, grades, totalClassAvg),
+          ),
+          _selectedSubject != null
+              ? _SubjectGradesView(
+                  key: ValueKey(_selectedSubject),
+                  subject: _selectedSubject!,
+                  groupAverage: _selectedGroupAvg,
+                )
+              : Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.school_outlined,
+                        size: 52,
+                        color: Theme.of(context)
+                            .colorScheme
+                            .onSurface
+                            .withValues(alpha: 0.2),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'select_subject'.i18n,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w500,
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSurface
+                              .withValues(alpha: 0.4),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+        ],
       ),
     );
   }
+}
+// ─── Tab 0: Tantárgyak ───────────────────────────────────────────────────────
 
-  void gradeCalcTotal(BuildContext context) {
-    calculatorProvider.clear();
-    calculatorProvider
-        .addAllGrades((importedViewMode ? jsonGrades : gradeProvider.grades));
+class _SubjectsTab extends StatelessWidget {
+  const _SubjectsTab({
+    required this.gradeProvider,
+    required this.settings,
+    required this.subjects,
+    required this.subjectAvgMap,
+    required this.currentAvg,
+    required this.prevAvg,
+    required this.totalClassAvg,
+    required this.subjectAvg,
+    required this.filteredGrades,
+    required this.periodDays,
+    required this.currentPeriodKey,
+    required this.onPeriodTap,
+    required this.onSubjectTap,
+    required this.onShowStats,
+  });
 
-    _sheetController = _scaffoldKey.currentState?.showBottomSheet(
-      (context) => const RoundedBottomSheet(
-          borderRadius: 14.0,
-          showHandle: false,
-          child: GradeCalculator(null)),
-      backgroundColor: const Color(0x00000000),
-      elevation: 12.0,
+  final GradeProvider gradeProvider;
+  final SettingsProvider settings;
+  final List<GradeSubject> subjects;
+  final Map<GradeSubject, double> subjectAvgMap;
+  final double currentAvg, prevAvg, totalClassAvg, subjectAvg;
+  final List<Grade> filteredGrades;
+  final int periodDays;
+  final String currentPeriodKey;
+  final VoidCallback onPeriodTap;
+  final void Function(GradeSubject, double) onSubjectTap;
+  final ValueChanged<List<Grade>> onShowStats;
+
+  @override
+  Widget build(BuildContext context) {
+    return RefreshIndicator(
+      onRefresh: () => gradeProvider.fetch(),
+      color: Theme.of(context).colorScheme.secondary,
+      child: ListView(
+        padding:
+            EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom + 72),
+        physics: const BouncingScrollPhysics(
+            parent: AlwaysScrollableScrollPhysics()),
+        children: [
+          if (currentAvg > 0)
+            _HeroCard(
+              currentAvg: currentAvg,
+              prevAvg: prevAvg,
+              totalClassAvg: totalClassAvg,
+              subjectAvg: subjectAvg,
+              currentPeriodKey: currentPeriodKey,
+              onPeriodTap: onPeriodTap,
+              onShowStats: () => onShowStats(filteredGrades),
+            ),
+          const SizedBox(height: 8),
+          if (subjects.isEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 48),
+              child: Center(
+                child: Text(
+                  'empty'.i18n,
+                  style: TextStyle(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onSurface
+                        .withValues(alpha: 0.4),
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            )
+          else
+            ...subjects.map((subject) {
+              final avg = subjectAvgMap[subject] ?? 0.0;
+              final nullAvg =
+                  GroupAverage(average: 0.0, subject: subject, uid: '0');
+              final groupAvg = gradeProvider.groupAverages
+                  .firstWhere((ga) => ga.subject == subject,
+                      orElse: () => nullAvg)
+                  .average;
+
+              return Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surface,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: settings.shadowEffect
+                        ? [
+                            BoxShadow(
+                              offset: const Offset(0, 4),
+                              blurRadius: 10,
+                              color: Theme.of(context).shadowColor,
+                            )
+                          ]
+                        : null,
+                  ),
+                  child: Padding(
+                    padding:
+                        const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
+                    child: GradeSubjectTile(
+                      subject,
+                      average: avg,
+                      groupAverage: periodDays == 0 ? groupAvg : 0.0,
+                      onTap: () {
+                        performHapticFeedback(settings.vibrate);
+                        onSubjectTap(subject, groupAvg);
+                      },
+                    ),
+                  ),
+                ),
+              );
+            }),
+          const SizedBox(height: 32),
+        ],
+      ),
     );
+  }
+}
 
-    // Hide the fab and grades
-    setState(() {
-      gradeCalcMode = true;
-    });
+// ─── Hero card ───────────────────────────────────────────────────────────────
 
-    _sheetController!.closed.then((value) {
-      // Show fab and grades
-      if (mounted) {
-        setState(() {
-          gradeCalcMode = false;
-        });
-      }
-    });
+class _HeroCard extends StatelessWidget {
+  const _HeroCard({
+    required this.currentAvg,
+    required this.prevAvg,
+    required this.totalClassAvg,
+    required this.subjectAvg,
+    required this.currentPeriodKey,
+    required this.onPeriodTap,
+    required this.onShowStats,
+  });
+
+  final double currentAvg, prevAvg, totalClassAvg, subjectAvg;
+  final String currentPeriodKey;
+  final VoidCallback onPeriodTap;
+  final VoidCallback onShowStats;
+
+  @override
+  Widget build(BuildContext context) {
+    final onColor = Theme.of(context).colorScheme.onPrimaryContainer;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.primaryContainer,
+          borderRadius: BorderRadius.circular(28),
+        ),
+        padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // ── Main row: avg + badges ──
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // Label + avg
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'page_title_grades'.i18n,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: onColor.withValues(alpha: 0.6),
+                      ),
+                    ),
+                    const SizedBox(height: 1),
+                    Text(
+                      currentAvg.toStringAsFixed(2),
+                      style: TextStyle(
+                        fontSize: 36,
+                        fontWeight: FontWeight.w800,
+                        height: 1.1,
+                        color: onColor,
+                      ),
+                    ),
+                  ],
+                ),
+                const Spacer(),
+                // Right side: TrendDisplay + badges
+                if (prevAvg > 0 && currentAvg != prevAvg) ...[
+                  TrendDisplay(previous: prevAvg, current: currentAvg),
+                  const SizedBox(width: 4),
+                ],
+                if (subjectAvg > 0) ...[
+                  _Badge(
+                      icon: Icons.menu_book_rounded,
+                      value: subjectAvg,
+                      onColor: onColor),
+                  const SizedBox(width: 8),
+                ],
+                if (totalClassAvg >= 1.0)
+                  _Badge(
+                      icon: Icons.group_rounded,
+                      value: totalClassAvg,
+                      onColor: onColor),
+              ],
+            ),
+            const SizedBox(height: 14),
+            // ── Bottom row: period chip + stats ──
+            Row(
+              children: [
+                GestureDetector(
+                  onTap: onPeriodTap,
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                    decoration: BoxDecoration(
+                      color: onColor.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.tune_rounded,
+                            size: 14, color: onColor.withValues(alpha: 0.75)),
+                        const SizedBox(width: 5),
+                        Text(
+                          currentPeriodKey.i18n,
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: onColor.withValues(alpha: 0.8),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const Spacer(),
+                GestureDetector(
+                  onTap: onShowStats,
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+                    decoration: BoxDecoration(
+                      color: onColor.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.bar_chart_rounded,
+                            size: 15, color: onColor.withValues(alpha: 0.8)),
+                        const SizedBox(width: 5),
+                        Text(
+                          'stats'.i18n,
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: onColor.withValues(alpha: 0.8),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _Badge extends StatelessWidget {
+  const _Badge(
+      {required this.icon, required this.value, required this.onColor});
+  final IconData icon;
+  final double value;
+  final Color onColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: onColor.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 12, color: onColor.withValues(alpha: 0.55)),
+          const SizedBox(height: 3),
+          Text(
+            value.toStringAsFixed(2),
+            style: TextStyle(
+              fontSize: 17,
+              fontWeight: FontWeight.w700,
+              height: 1.0,
+              color: onColor,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Tab 1: Jegyek (subject detail) ──────────────────────────────────────────
+
+class _SubjectGradesView extends StatelessWidget {
+  const _SubjectGradesView({
+    super.key,
+    required this.subject,
+    required this.groupAverage,
+  });
+
+  final GradeSubject subject;
+  final double groupAverage;
+
+  bool _canShowGraph(List<Grade> grades) {
+    final mid = grades.where((g) => g.type == GradeType.midYear).toList();
+    if (mid.length < 2) return false;
+    final ms = mid.map((g) => g.date.millisecondsSinceEpoch);
+    return ms.reduce(max) - ms.reduce(min) >=
+        const Duration(days: 5).inMilliseconds;
   }
 
-  void showQuickSettings(BuildContext context) {
-    showRoundedModalBottomSheet(
-      context,
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      child: BottomSheetMenu(items: [
-        Container(
-          decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12.0),
-              color: Theme.of(context).colorScheme.surface),
-          child: ListTile(
-            title: Row(
+  @override
+  Widget build(BuildContext context) {
+    final gradeProvider = Provider.of<GradeProvider>(context);
+    final calcProvider = Provider.of<GradeCalculatorProvider>(context);
+    final settings = Provider.of<SettingsProvider>(context);
+
+    final isCalcMode = calcProvider.ghosts.isNotEmpty;
+    final raw = isCalcMode ? calcProvider.grades : gradeProvider.grades;
+    final subjectGrades = raw.where((g) => g.subject == subject).toList()
+      ..sort((a, b) => -a.date.compareTo(b.date));
+
+    final midYear = subjectGrades
+        .where((g) =>
+            g.type == GradeType.midYear ||
+            (isCalcMode && g.type == GradeType.ghost))
+        .toList();
+    final average = AverageHelper.averageEvals(midYear);
+
+    final latestDate = subjectGrades.isNotEmpty
+        ? subjectGrades
+            .map((g) => g.date)
+            .reduce((a, b) => a.isAfter(b) ? a : b)
+        : DateTime.now();
+    final prevAvg = AverageHelper.averageEvals(midYear
+        .where((g) =>
+            g.date.isBefore(latestDate.subtract(const Duration(days: 30))))
+        .toList());
+
+    // Separate ghost grades from regular grades
+    final ghostTiles = <Widget>[];
+    final regularTiles = <Widget>[];
+    for (final grade in subjectGrades) {
+      if (grade.type == GradeType.ghost) {
+        ghostTiles.add(GradeTile(grade, viewOverride: true));
+      } else if (grade.type == GradeType.midYear) {
+        regularTiles.add(GradeViewable(grade));
+      } else {
+        regularTiles.add(CertificationTile(
+          grade,
+          padding: EdgeInsets.only(
+            bottom: 8,
+            top: subjectGrades.first.id == grade.id ? 0 : 8,
+          ),
+          newStyle: true,
+        ));
+      }
+    }
+
+    return SubjectGradesContainer(
+      child: ListView(
+        padding: EdgeInsets.only(
+          left: 16,
+          right: 16,
+          bottom: MediaQuery.of(context).padding.bottom + 72,
+        ),
+        physics: const BouncingScrollPhysics(),
+        children: [
+          const SizedBox(height: 8),
+
+          // ── Header ──
+          Panel(
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(Icons.add_circle_outline_rounded),
-                const SizedBox(
-                  width: 10.0,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        subject.renamedTo ?? subject.name.capital(),
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w700,
+                          height: 1.2,
+                          fontStyle: settings.renamedSubjectsItalics &&
+                                  subject.isRenamed
+                              ? FontStyle.italic
+                              : null,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        ((subject.teacher?.isRenamed ?? false) &&
+                                    settings.renamedTeachersEnabled
+                                ? subject.teacher?.renamedTo
+                                : subject.teacher?.name.capital()) ??
+                            '',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSurface
+                              .withValues(alpha: 0.55),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                Text('grade_calc'.i18n),
+                const SizedBox(width: 12),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        if (groupAverage > 0) ...[
+                          AverageDisplay(average: groupAverage, border: true),
+                          const SizedBox(width: 6),
+                        ],
+                        if (average > 0 &&
+                            prevAvg > 0 &&
+                            average != prevAvg) ...[
+                          TrendDisplay(current: average, previous: prevAvg),
+                          const SizedBox(width: 6),
+                        ],
+                        if (average > 0) AverageDisplay(average: average),
+                      ],
+                    ),
+                  ],
+                ),
               ],
             ),
-            onTap: () {
-              performHapticFeedback(settingsProvider.vibrate);
-              // if (!Provider.of<PlusProvider>(context, listen: false)
-              //     .hasScope(PremiumScopes.totalGradeCalculator)) {
-              //   PlusLockedFeaturePopup.show(
-              //       context: context, feature: PremiumFeature.gradeCalculation);
-              //   return;
-              // }
-
-              // SoonAlert.show(context: context);
-              gradeCalcTotal(context);
-
-              Navigator.of(context, rootNavigator: true).pop();
-            },
           ),
-        ),
-        const SizedBox(
-          height: 10.0,
-        ),
-        Container(
-          decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12.0),
-              color: Theme.of(context).colorScheme.surface),
-          child: ListTile(
-            title: Row(
-              children: [
-                const Icon(Icons.toll_rounded),
-                const SizedBox(
-                  width: 10.0,
-                ),
-                Text('import_grades'.i18n),
-              ],
+
+          // ── Graph ──
+          if (_canShowGraph(subjectGrades)) ...[
+            const SizedBox(height: 12),
+            Panel(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(4, 12, 12, 4),
+                child: GradeGraph(subjectGrades, classAvg: groupAverage),
+              ),
             ),
-            trailing: importedViewMode ? const Icon(Icons.close_rounded) : null,
-            onTap: () {
-              performHapticFeedback(settingsProvider.vibrate);
-              if (importedViewMode) {
-                importedViewMode = false;
+          ],
 
-                generateTiles();
-                setState(() {});
-
-                Navigator.of(context, rootNavigator: true).pop();
-                return;
-              }
-
-              // show file picker
-              FilePicker.platform.pickFiles(
-                type: FileType.custom,
-                allowedExtensions: ['json'],
-              ).then((value) {
-                if (value != null) {
-                  final File file = File(value.files.single.path!);
-                  final String content = file.readAsStringSync();
-                  final List<dynamic> json = jsonDecode(content);
-
-                  jsonGrades = json.map((e) => Grade.fromJson(e)).toList();
-                  importedViewMode = true;
-
-                  generateTiles();
-                  setState(() {});
-                }
-              });
-
-              Navigator.of(context, rootNavigator: true).pop();
-            },
-          ),
-        ),
-        const SizedBox(
-          height: 10.0,
-        ),
-        Container(
-          decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12.0),
-              color: Theme.of(context).colorScheme.surface),
-          child: SwitchListTile(
-            title: Row(
-              children: [
-                const Icon(Icons.edit_document),
-                const SizedBox(
-                  width: 10.0,
-                ),
-                Text('show_exams_homework'.i18n),
-              ],
+          // ── Ghost grade tiles (above regular) ──
+          if (ghostTiles.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Panel(
+              child: Column(children: [
+                const SizedBox(height: 4),
+                ...ghostTiles,
+                const SizedBox(height: 4),
+              ]),
             ),
-            value: Provider.of<SettingsProvider>(context, listen: false)
-                .qSubjectsSubTiles,
-            onChanged: (v) {
-              Provider.of<SettingsProvider>(context, listen: false)
-                  .update(qSubjectsSubTiles: v);
+          ],
 
-              Navigator.of(context, rootNavigator: true).pop();
-            },
-          ),
-        ),
-      ]),
+          // ── Regular grade tiles ──
+          if (regularTiles.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Panel(
+              child: Column(children: [
+                const SizedBox(height: 4),
+                ...regularTiles,
+                const SizedBox(height: 4),
+              ]),
+            ),
+          ],
+
+          SizedBox(height: isCalcMode ? 269 : 0),
+        ],
+      ),
     );
   }
 }

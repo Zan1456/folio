@@ -21,7 +21,6 @@ import 'package:folio_mobile_ui/screens/navigation/status_bar.dart';
 import 'package:folio_mobile_ui/screens/news/news_view.dart';
 import 'package:folio_mobile_ui/screens/settings/live_activity_consent_dialog.dart';
 import 'package:folio_mobile_ui/common/widgets/update/update_dialog.dart';
-import 'package:folio_mobile_ui/pages/grades/goal_planner/goal_complete_modal.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -203,11 +202,6 @@ class NavigationScreenState extends State<NavigationScreen>
             .then((value) => newsProvider.release());
         newsProvider.lock();
       }
-
-      if (goalProvider.hasDoneGoals) {
-        GoalCompleteModal.show(goalProvider.doneSubject!, context: context);
-        goalProvider.lock();
-      }
     });
 
     handleQuickActions(context, (page) {
@@ -222,9 +216,6 @@ class NavigationScreenState extends State<NavigationScreen>
       onWillPop: () async {
         if (_navigatorState.currentState?.canPop() ?? false) {
           _navigatorState.currentState?.pop();
-          if (!kDebugMode) {
-            return true;
-          }
           return false;
         }
 
@@ -243,126 +234,115 @@ class NavigationScreenState extends State<NavigationScreen>
             Navigator(
               key: _navigatorState,
               initialRoute: selected.name,
-              onGenerateRoute: (settings) =>
-                  navigationRouteHandler(settings),
+              onGenerateRoute: (settings) => navigationRouteHandler(settings),
             ),
           ],
         ),
         bottomNavigationBar: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-                // Status bar
-                const StatusBar(),
+            // Status bar
+            const StatusBar(),
 
-                // Floating Bottom Navigation Bar
-                Navbar(
-                        selectedIndex: selected.index,
-                        onSelected: onPageSelected,
-                        items: [
-                          NavItem(
-                            title: "home".i18n,
-                            icon: Stack(
-                              alignment: AlignmentDirectional.center,
-                              children: [
-                                SvgPicture.asset(
-                                  'assets/svg/menu_icons/today.svg',
-                                  color:
-                                      Theme.of(context).colorScheme.secondary,
-                                  height: 24,
-                                ),
-                                Transform.translate(
-                                  offset: const Offset(0, 1.6),
-                                  child: Text(
-                                    DateTime.now().day.toString(),
-                                    style: TextStyle(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .secondary,
-                                      fontWeight: FontWeight.w600,
-                                      fontSize:
-                                          DateTime.now().day > 9 ? 12.1 : null,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            activeIcon: Stack(
-                              alignment: AlignmentDirectional.center,
-                              children: [
-                                SvgPicture.asset(
-                                  'assets/svg/menu_icons/today_selected.svg',
-                                  color:
-                                      Theme.of(context).colorScheme.secondary,
-                                  height: 24,
-                                ),
-                                Transform.translate(
-                                  offset: const Offset(0, 1.8),
-                                  child: Text(
-                                    DateTime.now().day.toString(),
-                                    style: TextStyle(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .background,
-                                      fontWeight: FontWeight.w500,
-                                      fontSize:
-                                          DateTime.now().day > 9 ? 12.1 : null,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          NavItem(
-                            title: "grades".i18n,
-                            icon: SvgPicture.asset(
-                              'assets/svg/menu_icons/grades.svg',
-                              color: Theme.of(context).colorScheme.secondary,
-                              height: 22,
-                            ),
-                            activeIcon: SvgPicture.asset(
-                              'assets/svg/menu_icons/grades_selected.svg',
-                              color: Theme.of(context).colorScheme.secondary,
-                              height: 22,
-                            ),
-                          ),
-                          NavItem(
-                            title: "timetable".i18n,
-                            icon: SvgPicture.asset(
-                              'assets/svg/menu_icons/timetable.svg',
-                              color: Theme.of(context).colorScheme.secondary,
-                              height: 22,
-                            ),
-                            activeIcon: SvgPicture.asset(
-                              'assets/svg/menu_icons/timetable_selected.svg',
-                              color: Theme.of(context).colorScheme.secondary,
-                              height: 22,
-                            ),
-                          ),
-                          NavItem(
-                            title: "more".i18n,
-                            icon: ProfileImage(
-                              name: navFirstName,
-                              backgroundColor:
-                                  Theme.of(context).colorScheme.tertiary,
-                              badge: navUpdateProvider.available,
-                              role: user.role,
-                              profilePictureString: user.picture,
-                              gradeStreak: (user.gradeStreak ?? 0) > 1,
-                              radius: 14.0,
-                            ),
-                            activeIcon: ProfileImage(
-                              name: navFirstName,
-                              backgroundColor:
-                                  Theme.of(context).colorScheme.tertiary,
-                              badge: navUpdateProvider.available,
-                              role: user.role,
-                              profilePictureString: user.picture,
-                              gradeStreak: (user.gradeStreak ?? 0) > 1,
-                              radius: 14.0,
-                            ),
-                          ),
-                        ],
+            // Floating Bottom Navigation Bar
+            Navbar(
+              selectedIndex: selected.index,
+              onSelected: onPageSelected,
+              items: [
+                NavItem(
+                  title: "home".i18n,
+                  icon: Stack(
+                    alignment: AlignmentDirectional.center,
+                    children: [
+                      SvgPicture.asset(
+                        'assets/svg/menu_icons/today.svg',
+                        color: Theme.of(context).colorScheme.secondary,
+                        height: 24,
                       ),
+                      Transform.translate(
+                        offset: const Offset(0, 1.6),
+                        child: Text(
+                          DateTime.now().day.toString(),
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.secondary,
+                            fontWeight: FontWeight.w600,
+                            fontSize: DateTime.now().day > 9 ? 12.1 : null,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  activeIcon: Stack(
+                    alignment: AlignmentDirectional.center,
+                    children: [
+                      SvgPicture.asset(
+                        'assets/svg/menu_icons/today_selected.svg',
+                        color: Theme.of(context).colorScheme.secondary,
+                        height: 24,
+                      ),
+                      Transform.translate(
+                        offset: const Offset(0, 1.8),
+                        child: Text(
+                          DateTime.now().day.toString(),
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.background,
+                            fontWeight: FontWeight.w500,
+                            fontSize: DateTime.now().day > 9 ? 12.1 : null,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                NavItem(
+                  title: "grades".i18n,
+                  icon: SvgPicture.asset(
+                    'assets/svg/menu_icons/grades.svg',
+                    color: Theme.of(context).colorScheme.secondary,
+                    height: 22,
+                  ),
+                  activeIcon: SvgPicture.asset(
+                    'assets/svg/menu_icons/grades_selected.svg',
+                    color: Theme.of(context).colorScheme.secondary,
+                    height: 22,
+                  ),
+                ),
+                NavItem(
+                  title: "timetable".i18n,
+                  icon: SvgPicture.asset(
+                    'assets/svg/menu_icons/timetable.svg',
+                    color: Theme.of(context).colorScheme.secondary,
+                    height: 22,
+                  ),
+                  activeIcon: SvgPicture.asset(
+                    'assets/svg/menu_icons/timetable_selected.svg',
+                    color: Theme.of(context).colorScheme.secondary,
+                    height: 22,
+                  ),
+                ),
+                NavItem(
+                  title: "more".i18n,
+                  icon: ProfileImage(
+                    name: navFirstName,
+                    backgroundColor: Theme.of(context).colorScheme.tertiary,
+                    badge: navUpdateProvider.available,
+                    role: user.role,
+                    profilePictureString: user.picture,
+                    gradeStreak: (user.gradeStreak ?? 0) > 1,
+                    radius: 14.0,
+                  ),
+                  activeIcon: ProfileImage(
+                    name: navFirstName,
+                    backgroundColor: Theme.of(context).colorScheme.tertiary,
+                    badge: navUpdateProvider.available,
+                    role: user.role,
+                    profilePictureString: user.picture,
+                    gradeStreak: (user.gradeStreak ?? 0) > 1,
+                    radius: 14.0,
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
       ),
