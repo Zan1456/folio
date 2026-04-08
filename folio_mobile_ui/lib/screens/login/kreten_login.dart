@@ -89,88 +89,92 @@ class _KretenLoginWidgetState extends State<KretenLoginWidget>
 
     controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setUserAgent('Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1')
-      ..setNavigationDelegate(NavigationDelegate(
-        onNavigationRequest: (n) async {
-          final Uri? uri = Uri.tryParse(n.url);
-          if (uri != null && _isRedirectUri(uri)) {
-            final String? code = uri.queryParameters['code'];
-            if (code != null && code.isNotEmpty) {
-              _timeoutTimer?.cancel();
-              widget.onLogin(code);
-              return NavigationDecision.prevent;
+      ..setUserAgent(
+        'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1',
+      )
+      ..setNavigationDelegate(
+        NavigationDelegate(
+          onNavigationRequest: (n) async {
+            final Uri? uri = Uri.tryParse(n.url);
+            if (uri != null && _isRedirectUri(uri)) {
+              final String? code = uri.queryParameters['code'];
+              if (code != null && code.isNotEmpty) {
+                _timeoutTimer?.cancel();
+                widget.onLogin(code);
+                return NavigationDecision.prevent;
+              }
             }
-          }
 
-          return NavigationDecision.navigate;
-        },
-        onPageStarted: (url) async {
-          if (!mounted) return;
+            return NavigationDecision.navigate;
+          },
+          onPageStarted: (url) async {
+            if (!mounted) return;
 
-          setState(() {
-            currentUrl = url;
-            _hasError = false;
+            setState(() {
+              currentUrl = url;
+              _hasError = false;
 
-            _hasTimedOut = false;
+              _hasTimedOut = false;
 
-            if (!_initialPageLoaded) {
-              loadingPercentage = 0;
-            }
-          });
-        },
-        onProgress: (progress) {
-          if (!mounted) return;
-
-          setState(() {
-            loadingPercentage = progress;
-          });
-        },
-        onPageFinished: (url) {
-          _timeoutTimer?.cancel();
-
-          if (!mounted) return;
-
-          _autoRetryCount = 0;
-          _hasLoadedOnce = true;
-          setState(() {
-            currentUrl = url;
-            _initialPageLoaded = true;
-            _hasError = false;
-            _hasTimedOut = false;
-            loadingPercentage = 100;
-          });
-        },
-        onWebResourceError: (error) {
-          if (_shouldIgnoreError(error)) {
-            return;
-          }
-
-          _timeoutTimer?.cancel();
-
-          if (!mounted) return;
-
-          // Auto-retry on first errors before showing the error UI,
-          // to handle transient network issues on initial load.
-          if (!_hasLoadedOnce && _autoRetryCount < _maxAutoRetries) {
-            _autoRetryCount++;
-            Future.delayed(Duration(seconds: _autoRetryCount), () {
-              if (mounted) _retryLoad();
+              if (!_initialPageLoaded) {
+                loadingPercentage = 0;
+              }
             });
-            return;
-          }
+          },
+          onProgress: (progress) {
+            if (!mounted) return;
 
-          // If demo mode is available, auto-launch it instead of
-          // showing an error UI (e.g. when outside Hungary).
-          if (widget.onDemoMode != null) {
-            widget.onDemoMode!();
-            return;
-          }
+            setState(() {
+              loadingPercentage = progress;
+            });
+          },
+          onPageFinished: (url) {
+            _timeoutTimer?.cancel();
 
-          setState(() {
-            _hasError = true;
-          });
-        },
-      ))
+            if (!mounted) return;
+
+            _autoRetryCount = 0;
+            _hasLoadedOnce = true;
+            setState(() {
+              currentUrl = url;
+              _initialPageLoaded = true;
+              _hasError = false;
+              _hasTimedOut = false;
+              loadingPercentage = 100;
+            });
+          },
+          onWebResourceError: (error) {
+            if (_shouldIgnoreError(error)) {
+              return;
+            }
+
+            _timeoutTimer?.cancel();
+
+            if (!mounted) return;
+
+            // Auto-retry on first errors before showing the error UI,
+            // to handle transient network issues on initial load.
+            if (!_hasLoadedOnce && _autoRetryCount < _maxAutoRetries) {
+              _autoRetryCount++;
+              Future.delayed(Duration(seconds: _autoRetryCount), () {
+                if (mounted) _retryLoad();
+              });
+              return;
+            }
+
+            // If demo mode is available, auto-launch it instead of
+            // showing an error UI (e.g. when outside Hungary).
+            if (widget.onDemoMode != null) {
+              widget.onDemoMode!();
+              return;
+            }
+
+            setState(() {
+              _hasError = true;
+            });
+          },
+        ),
+      )
       ..loadRequest(
         Uri.parse(_loginUrl), // &institute_code=${widget.selectedSchool}
       );
@@ -233,7 +237,6 @@ class _KretenLoginWidgetState extends State<KretenLoginWidget>
     _animationController.dispose();
     super.dispose();
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -310,9 +313,7 @@ class _KretenLoginWidgetState extends State<KretenLoginWidget>
                 curve: Curves.easeIn,
               ),
             ),
-            child: WebViewWidget(
-              controller: controller,
-            ),
+            child: WebViewWidget(controller: controller),
           ),
         ),
         if (!_initialPageLoaded)
@@ -321,8 +322,10 @@ class _KretenLoginWidgetState extends State<KretenLoginWidget>
               color: Theme.of(context).colorScheme.surface,
               child: Center(
                 child: TweenAnimationBuilder(
-                  tween:
-                      Tween<double>(begin: 0, end: loadingPercentage / 100.0),
+                  tween: Tween<double>(
+                    begin: 0,
+                    end: loadingPercentage / 100.0,
+                  ),
                   duration: const Duration(milliseconds: 300),
                   builder: (context, double value, child) {
                     return Column(
@@ -352,15 +355,21 @@ class KretaBgLoginWidget extends StatefulWidget {
     this.rememberbrowserCookie,
     required this.onLogin,
     this.onError,
+    this.onTwoFactorRequired,
   });
 
   final String instituteCode;
   final String username;
   final String password;
   final String? rememberbrowserCookie;
-  final void Function(String code, String? idpApplication,
-      String? idpRememberBrowser) onLogin;
+  final void Function(
+    String code,
+    String? idpApplication,
+    String? idpRememberBrowser,
+  )
+  onLogin;
   final void Function(LoginState)? onError;
+  final Future<String?> Function()? onTwoFactorRequired;
 
   @override
   State<KretaBgLoginWidget> createState() => _KretaBgLoginWidgetState();
@@ -370,6 +379,8 @@ class _KretaBgLoginWidgetState extends State<KretaBgLoginWidget> {
   late final WebViewController controller;
   bool _credentialsInjected = false;
   bool _loginCompleted = false;
+  bool _awaitingTwoFactor = false;
+  bool _clickContinueOnNextLoad = false;
   Timer? _loginTimer;
   String? _savedIdpApplication;
   String? _savedIdpRememberBrowser;
@@ -393,65 +404,134 @@ class _KretaBgLoginWidgetState extends State<KretaBgLoginWidget> {
     controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setUserAgent(
-          'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1')
-      ..setNavigationDelegate(NavigationDelegate(
-        onNavigationRequest: (n) async {
-          final Uri? uri = Uri.tryParse(n.url);
-          if (uri != null && _isRedirectUri(uri)) {
-            final String? code = uri.queryParameters['code'];
-            if (code != null && code.isNotEmpty && !_loginCompleted) {
-              _loginCompleted = true;
-              _loginTimer?.cancel();
-              if (mounted) {
-                widget.onLogin(
-                    code, _savedIdpApplication, _savedIdpRememberBrowser);
+        'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1',
+      )
+      ..setNavigationDelegate(
+        NavigationDelegate(
+          onNavigationRequest: (n) async {
+            final Uri? uri = Uri.tryParse(n.url);
+            if (uri != null && _isRedirectUri(uri)) {
+              final String? code = uri.queryParameters['code'];
+              if (code != null && code.isNotEmpty && !_loginCompleted) {
+                _loginCompleted = true;
+                _loginTimer?.cancel();
+                if (mounted) {
+                  widget.onLogin(
+                    code,
+                    _savedIdpApplication,
+                    _savedIdpRememberBrowser,
+                  );
+                }
+                return NavigationDecision.prevent;
               }
-              return NavigationDecision.prevent;
             }
-          }
-          return NavigationDecision.navigate;
-        },
-        onPageFinished: (url) async {
-          if (!mounted || _loginCompleted) return;
-          if (url.contains('idp.e-kreta.hu')) {
-            if (!_credentialsInjected) {
-              await _tryInjectCredentials();
-            } else {
-              await Future.delayed(const Duration(milliseconds: 300));
+            return NavigationDecision.navigate;
+          },
+          onPageFinished: (url) async {
+            if (!mounted || _loginCompleted) return;
+
+            // After 2FA code was submitted: click "Tovább az alkalmazásba"
+            if (_clickContinueOnNextLoad) {
+              _clickContinueOnNextLoad = false;
+              await Future.delayed(const Duration(milliseconds: 500));
               if (!mounted || _loginCompleted) return;
               try {
-                // Check for "Tovább az alkalmazásba" continue button
-                final hasContinueBtn =
-                    await controller.runJavaScriptReturningResult(
-                        "document.querySelector('a.btn-kreta') !== null");
-                if (hasContinueBtn.toString() == 'true') {
-                  // Save cookies before navigating away
-                  await _saveCookies();
-                  await controller
-                      .runJavaScript("document.querySelector('a.btn-kreta').click();");
-                  return;
-                }
-                // Login form reappeared → wrong credentials
-                final hasLoginForm =
-                    await controller.runJavaScriptReturningResult(
-                        "document.getElementById('UserName') !== null");
-                if (hasLoginForm.toString() == 'true') {
-                  _loginTimer?.cancel();
-                  if (mounted) widget.onError?.call(LoginState.invalidGrant);
-                }
+                await _saveCookies();
+                await controller.runJavaScript(
+                  "var b=document.querySelector('a.btn-kreta');if(b)b.click();",
+                );
               } catch (_) {}
+              return;
             }
-          }
-        },
-        onWebResourceError: (error) {
-          if (!mounted || _loginCompleted) return;
-          if (error.isForMainFrame == false) return;
-          if (!_credentialsInjected) {
-            widget.onError?.call(LoginState.failed);
-          }
-        },
-      ));
+
+            // 2FA page detected
+            if (url.contains('/account/loginwithtwofactor')) {
+              if (_awaitingTwoFactor) return;
+              _awaitingTwoFactor = true;
+              _loginTimer?.cancel();
+              await _saveCookies();
+              String? code;
+              if (widget.onTwoFactorRequired != null &&
+                  mounted &&
+                  !_loginCompleted) {
+                code = await widget.onTwoFactorRequired!();
+              }
+              _awaitingTwoFactor = false;
+              if (code != null && mounted && !_loginCompleted) {
+                _clickContinueOnNextLoad = true;
+                await _injectTwoFactorCode(code);
+                _loginTimer = Timer(const Duration(seconds: 30), () {
+                  if (mounted && !_loginCompleted) {
+                    widget.onError?.call(LoginState.failed);
+                  }
+                });
+              } else if (mounted && !_loginCompleted) {
+                widget.onError?.call(LoginState.failed);
+              }
+              return;
+            }
+
+            if (url.contains('idp.e-kreta.hu')) {
+              if (!_credentialsInjected) {
+                await _tryInjectCredentials();
+              } else {
+                await Future.delayed(const Duration(milliseconds: 300));
+                if (!mounted || _loginCompleted) return;
+                try {
+                  // Check for "Tovább az alkalmazásba" continue button
+                  final hasContinueBtn = await controller
+                      .runJavaScriptReturningResult(
+                        "document.querySelector('a.btn-kreta') !== null",
+                      );
+                  if (hasContinueBtn.toString() == 'true') {
+                    // Save cookies before navigating away
+                    await _saveCookies();
+                    await controller.runJavaScript(
+                      "document.querySelector('a.btn-kreta').click();",
+                    );
+                    return;
+                  }
+                  // Login form reappeared → wrong credentials
+                  final hasLoginForm = await controller
+                      .runJavaScriptReturningResult(
+                        "document.getElementById('UserName') !== null",
+                      );
+                  if (hasLoginForm.toString() == 'true') {
+                    _loginTimer?.cancel();
+                    if (mounted) widget.onError?.call(LoginState.invalidGrant);
+                  }
+                } catch (_) {}
+              }
+            }
+          },
+          onWebResourceError: (error) {
+            if (!mounted || _loginCompleted) return;
+            if (error.isForMainFrame == false) return;
+            if (!_credentialsInjected) {
+              widget.onError?.call(LoginState.failed);
+            }
+          },
+        ),
+      );
     _loadWithCookie();
+  }
+
+  Future<void> _injectTwoFactorCode(String code) async {
+    try {
+      await Future.delayed(const Duration(milliseconds: 300));
+      if (!mounted || _loginCompleted) return;
+      final sb = StringBuffer('(function(){');
+      for (int i = 0; i < code.length && i < 6; i++) {
+        sb.write(
+          "var f=document.getElementById('VerificationValue_$i');if(f)f.value='${code[i]}';",
+        );
+      }
+      sb.write(
+        "var b=document.querySelector('[type=\"submit\"]');if(b)b.click();",
+      );
+      sb.write('})();');
+      await controller.runJavaScript(sb.toString());
+    } catch (_) {}
   }
 
   Future<void> _saveCookies() async {
@@ -469,12 +549,14 @@ class _KretaBgLoginWidgetState extends State<KretaBgLoginWidget> {
     if (widget.rememberbrowserCookie != null &&
         widget.rememberbrowserCookie!.isNotEmpty) {
       try {
-        await WebViewCookieManager().setCookie(WebViewCookie(
-          name: 'idp.rememberbrowser',
-          value: widget.rememberbrowserCookie!,
-          domain: 'idp.e-kreta.hu',
-          path: '/',
-        ));
+        await WebViewCookieManager().setCookie(
+          WebViewCookie(
+            name: 'idp.rememberbrowser',
+            value: widget.rememberbrowserCookie!,
+            domain: 'idp.e-kreta.hu',
+            path: '/',
+          ),
+        );
       } catch (_) {}
     }
     controller.loadRequest(Uri.parse(_loginUrl));
@@ -483,7 +565,8 @@ class _KretaBgLoginWidgetState extends State<KretaBgLoginWidget> {
   Future<void> _tryInjectCredentials() async {
     try {
       final hasForm = await controller.runJavaScriptReturningResult(
-          "document.getElementById('UserName') !== null && document.getElementById('Password') !== null");
+        "document.getElementById('UserName') !== null && document.getElementById('Password') !== null",
+      );
       if (hasForm.toString() == 'true') {
         _credentialsInjected = true;
         final usernameJson = jsonEncode(widget.username);
@@ -514,11 +597,12 @@ class _KretaBgLoginWidgetState extends State<KretaBgLoginWidget> {
     try {
       if (Platform.isAndroid) {
         return await const MethodChannel(
-                'app.zan1456.folio/android_live_activity')
-            .invokeMethod<String>('getCookies', {'url': url});
+          'app.zan1456.folio/android_live_activity',
+        ).invokeMethod<String>('getCookies', {'url': url});
       } else if (Platform.isIOS) {
-        return await const MethodChannel('app.zan1456.folio/liveactivity')
-            .invokeMethod<String>('getCookies', {'url': url});
+        return await const MethodChannel(
+          'app.zan1456.folio/liveactivity',
+        ).invokeMethod<String>('getCookies', {'url': url});
       }
     } catch (_) {}
     return null;

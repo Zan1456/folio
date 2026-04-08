@@ -686,12 +686,28 @@ class _CredentialsSheetState extends State<_CredentialsSheet> {
   bool _isLoading = false;
   LoginState _sheetError = LoginState.normal;
 
+  // 2FA state
+  bool _showTwoFactor = false;
+  int _twoFactorAttempt = 0;
+  Completer<String?>? _twoFactorCompleter;
+  final List<TextEditingController> _otpControllers =
+      List.generate(6, (_) => TextEditingController());
+  final List<FocusNode> _otpFocusNodes =
+      List.generate(6, (_) => FocusNode());
+
   @override
   void dispose() {
     _usernameController.dispose();
     _passwordController.dispose();
     _usernameFocus.dispose();
     _passwordFocus.dispose();
+    for (final c in _otpControllers) {
+      c.dispose();
+    }
+    for (final f in _otpFocusNodes) {
+      f.dispose();
+    }
+    _twoFactorCompleter?.complete(null);
     super.dispose();
   }
 
@@ -706,6 +722,28 @@ class _CredentialsSheetState extends State<_CredentialsSheet> {
       _isLoading = true;
       _sheetError = LoginState.normal;
     });
+  }
+
+  Future<String?> _onTwoFactorRequired() async {
+    if (!mounted) return null;
+    _twoFactorAttempt++;
+    _twoFactorCompleter = Completer<String?>();
+    for (final c in _otpControllers) {
+      c.clear();
+    }
+    setState(() => _showTwoFactor = true);
+    final result = await _twoFactorCompleter!.future;
+    if (mounted) setState(() => _showTwoFactor = false);
+    return result;
+  }
+
+  void _submitTwoFactor() {
+    final code = _otpControllers.map((c) => c.text).join();
+    if (code.length == 6 &&
+        _twoFactorCompleter != null &&
+        !_twoFactorCompleter!.isCompleted) {
+      _twoFactorCompleter!.complete(code);
+    }
   }
 
   @override
@@ -744,63 +782,232 @@ class _CredentialsSheetState extends State<_CredentialsSheet> {
   }
 
   Widget _buildLoading(ColorScheme cs, TextTheme tt, double bottomPad) {
-    return SizedBox(
-      height: 220.0 + bottomPad,
-      child: Stack(
-        children: [
-          Positioned(
-            left: 0,
-            top: 0,
-            width: 1,
-            height: 1,
-            child: KretaBgLoginWidget(
-              instituteCode: widget.school.instituteCode,
-              username: _usernameController.text.trim(),
-              password: _passwordController.text,
-              rememberbrowserCookie: null,
-              onLogin: (code, app, rem) {
-                if (!mounted) return;
-                widget.onLogin(_LoginSheetResult(
-                  code: code,
-                  idpApplication: app,
-                  idpRememberBrowser: rem,
-                ));
-              },
-              onError: (state) {
-                if (!mounted) return;
-                setState(() {
-                  _isLoading = false;
-                  _sheetError = state;
-                });
-              },
+    return Stack(
+      children: [
+        Positioned(
+          left: 0,
+          top: 0,
+          width: 1,
+          height: 1,
+          child: KretaBgLoginWidget(
+            instituteCode: widget.school.instituteCode,
+            username: _usernameController.text.trim(),
+            password: _passwordController.text,
+            rememberbrowserCookie: null,
+            onLogin: (code, app, rem) {
+              if (!mounted) return;
+              widget.onLogin(_LoginSheetResult(
+                code: code,
+                idpApplication: app,
+                idpRememberBrowser: rem,
+              ));
+            },
+            onError: (state) {
+              if (!mounted) return;
+              setState(() {
+                _isLoading = false;
+                _sheetError = state;
+              });
+            },
+            onTwoFactorRequired: _onTwoFactorRequired,
+          ),
+        ),
+        if (_showTwoFactor)
+          _buildTwoFactor(cs, tt, bottomPad)
+        else
+          SizedBox(
+            height: 220.0 + bottomPad,
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox(
+                    width: 44.0,
+                    height: 44.0,
+                    child: CircularProgressIndicator(
+                        color: cs.primary, strokeWidth: 3.0),
+                  ),
+                  const SizedBox(height: 20.0),
+                  Text(
+                    'Bejelentkezés folyamatban',
+                    style: tt.titleSmall!.copyWith(
+                        fontWeight: FontWeight.w600, color: cs.onSurface),
+                  ),
+                  const SizedBox(height: 4.0),
+                  Text(
+                    'Kérjük, várj...',
+                    style: tt.bodySmall!
+                        .copyWith(color: cs.onSurface.withValues(alpha: 0.45)),
+                  ),
+                ],
+              ),
             ),
           ),
-          Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                SizedBox(
-                  width: 44.0,
-                  height: 44.0,
-                  child: CircularProgressIndicator(
-                      color: cs.primary, strokeWidth: 3.0),
+      ],
+    );
+  }
+
+  Widget _buildTwoFactor(ColorScheme cs, TextTheme tt, double bottomPad) {
+    final isRetry = _twoFactorAttempt > 1;
+    return Padding(
+      padding: EdgeInsets.fromLTRB(24.0, 0, 24.0, bottomPad + 16.0),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Kétlépéses azonosítás',
+            style: tt.titleLarge!.copyWith(
+              fontWeight: FontWeight.w700,
+              color: cs.onSurface,
+              letterSpacing: -0.3,
+            ),
+          ),
+          const SizedBox(height: 8.0),
+          Text(
+            'Add meg a hitelesítő alkalmazásban megjelenő 6 jegyű kódot.',
+            style: tt.bodyMedium!.copyWith(
+              color: cs.onSurface.withValues(alpha: 0.55),
+            ),
+          ),
+          if (isRetry) ...[
+            const SizedBox(height: 12.0),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 14.0, vertical: 10.0),
+              decoration: BoxDecoration(
+                color: cs.errorContainer,
+                borderRadius: BorderRadius.circular(12.0),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.error_outline_rounded,
+                      size: 15.0, color: cs.onErrorContainer),
+                  const SizedBox(width: 8.0),
+                  Expanded(
+                    child: Text(
+                      'Hibás kód. Kérjük, próbáld újra.',
+                      style: tt.bodySmall!.copyWith(
+                        color: cs.onErrorContainer,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+          const SizedBox(height: 24.0),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ...[0, 1, 2].map((i) => _buildOtpBox(i, cs, tt)),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 6.0),
+                child: Text(
+                  '—',
+                  style: TextStyle(
+                    color: cs.onSurface.withValues(alpha: 0.3),
+                    fontSize: 18,
+                  ),
                 ),
-                const SizedBox(height: 20.0),
-                Text(
-                  'Bejelentkezés folyamatban',
-                  style: tt.titleSmall!.copyWith(
-                      fontWeight: FontWeight.w600, color: cs.onSurface),
+              ),
+              ...[3, 4, 5].map((i) => _buildOtpBox(i, cs, tt)),
+            ],
+          ),
+          const SizedBox(height: 24.0),
+          SizedBox(
+            width: double.infinity,
+            height: 52.0,
+            child: FilledButton(
+              style: FilledButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16.0),
                 ),
-                const SizedBox(height: 4.0),
-                Text(
-                  'Kérjük, várj...',
-                  style: tt.bodySmall!
-                      .copyWith(color: cs.onSurface.withValues(alpha: 0.45)),
-                ),
-              ],
+                elevation: 0,
+              ),
+              onPressed: _submitTwoFactor,
+              child: const Text(
+                'Megerősítés',
+                style:
+                    TextStyle(fontSize: 15.0, fontWeight: FontWeight.w600),
+              ),
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  void _handleOtpPaste(String digits) {
+    final clean = digits.replaceAll(RegExp(r'[^0-9]'), '');
+    for (int i = 0; i < 6 && i < clean.length; i++) {
+      _otpControllers[i].text = clean[i];
+    }
+    if (clean.length >= 6) {
+      _otpFocusNodes[5].unfocus();
+      setState(() {});
+      _submitTwoFactor();
+    } else {
+      final next = clean.length.clamp(0, 5);
+      _otpFocusNodes[next].requestFocus();
+      setState(() {});
+    }
+  }
+
+  Widget _buildOtpBox(int index, ColorScheme cs, TextTheme tt) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+      child: SizedBox(
+        width: 42.0,
+        child: TextField(
+          controller: _otpControllers[index],
+          focusNode: _otpFocusNodes[index],
+          textAlign: TextAlign.center,
+          keyboardType: TextInputType.number,
+          inputFormatters: [
+            FilteringTextInputFormatter.digitsOnly,
+            _OtpPasteFormatter(_handleOtpPaste),
+          ],
+          onChanged: (value) {
+            if (value.isNotEmpty) {
+              if (index < 5) {
+                _otpFocusNodes[index + 1].requestFocus();
+              } else {
+                _otpFocusNodes[index].unfocus();
+              }
+              if (_otpControllers.every((c) => c.text.isNotEmpty)) {
+                _submitTwoFactor();
+              }
+            } else if (index > 0) {
+              _otpFocusNodes[index - 1].requestFocus();
+            }
+          },
+          style: tt.titleLarge!.copyWith(
+            fontWeight: FontWeight.w700,
+            color: cs.onSurface,
+          ),
+          cursorColor: cs.primary,
+          decoration: InputDecoration(
+            isDense: true,
+            contentPadding:
+                const EdgeInsets.symmetric(vertical: 14.0),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12.0),
+              borderSide: BorderSide(
+                color: cs.onSurface.withValues(alpha: 0.2),
+                width: 1.5,
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12.0),
+              borderSide: BorderSide(color: cs.primary, width: 2.0),
+            ),
+            filled: true,
+            fillColor: cs.surfaceContainerHigh,
+          ),
+        ),
       ),
     );
   }
@@ -1038,5 +1245,31 @@ class _FieldLabel extends StatelessWidget {
             ),
       ),
     );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// OTP paste formatter – distributes pasted multi-digit input across all boxes
+// ---------------------------------------------------------------------------
+
+class _OtpPasteFormatter extends TextInputFormatter {
+  final void Function(String digits) onPaste;
+  _OtpPasteFormatter(this.onPaste);
+
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    if (newValue.text.length > 1) {
+      Future.microtask(() => onPaste(newValue.text));
+      // Clear this box; onPaste will fill all boxes
+      return const TextEditingValue();
+    }
+    // Limit to a single digit
+    if (newValue.text.length == 1) {
+      return newValue;
+    }
+    return newValue;
   }
 }
