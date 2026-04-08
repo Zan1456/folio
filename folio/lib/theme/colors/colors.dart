@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:folio/theme/colors/dark_mobile.dart';
 import 'package:folio/theme/colors/light_mobile.dart';
 import 'package:flutter/material.dart';
@@ -9,26 +7,11 @@ class AppColors {
       fromBrightness(Theme.of(context).brightness);
 
   static ThemeAppColors fromBrightness(Brightness brightness) {
-    if (Platform.isAndroid || Platform.isIOS) {
-      switch (brightness) {
-        case Brightness.light:
-          return LightMobileAppColors();
-        case Brightness.dark:
-          return DarkMobileAppColors();
-      }
-    } else {
-      switch (brightness) {
-        case Brightness.light:
-          return LightMobileAppColors();
-        case Brightness.dark:
-          return DarkMobileAppColors();
-      }
-      // switch (brightness) {
-      //   case Brightness.light:
-      //     return LightDesktopAppColors();
-      //   case Brightness.dark:
-      //     return DarkDesktopAppColors();
-      // }
+    switch (brightness) {
+      case Brightness.light:
+        return LightMobileAppColors();
+      case Brightness.dark:
+        return DarkMobileAppColors();
     }
   }
 }
@@ -48,16 +31,10 @@ abstract class ThemeAppColors {
   final Color indigo = const Color(0x00000000);
   final Color purple = const Color(0x00000000);
   final Color pink = const Color(0x00000000);
-  // new default grade colors
+  // grade colors
   final Color gradeFive = const Color(0x00000000);
   final Color gradeFour = const Color(0x00000000);
   final Color gradeThree = const Color(0x00000000);
   final Color gradeTwo = const Color(0x00000000);
   final Color gradeOne = const Color(0x00000000);
-  // v5 ui login
-  final loginPrimary = const Color(0x00000000);
-  final loginSecondary = const Color(0x00000000);
-  final inputBorder = const Color(0x00000000);
-  final loginBackground = const Color(0x00000000);
-  final buttonBackground = const Color(0x00000000);
 }
