@@ -7,7 +7,6 @@ import 'package:folio/ui/date_widget.dart';
 import 'package:folio_kreta_api/models/absence.dart';
 import 'package:folio_kreta_api/models/lesson.dart';
 import 'package:folio_kreta_api/models/subject.dart';
-import 'package:folio_kreta_api/models/week.dart';
 import 'package:folio_kreta_api/providers/absence_provider.dart';
 import 'package:folio_kreta_api/providers/note_provider.dart';
 import 'package:folio/api/providers/user_provider.dart';
@@ -64,7 +63,7 @@ class AbsencesPageState extends State<AbsencesPage>
     timetableProvider = Provider.of<TimetableProvider>(context, listen: false);
 
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
-      for (final lesson in timetableProvider.getWeek(Week.current()) ?? []) {
+      for (final lesson in timetableProvider.lessons.values.expand((e) => e)) {
         if (!lesson.isEmpty &&
             lesson.subject.id != '' &&
             lesson.lessonYearIndex != null) {
