@@ -80,6 +80,10 @@ class NotesPageState extends State<NotesPage> with TickerProviderStateMixin {
   List<Widget> noteTiles = [];
   List<TodoItem> todoItems = [];
 
+  bool _generatingTiles = false;
+  SelfNoteProvider? _selfNoteListenerRef;
+  HomeworkProvider? _hwListenerRef;
+
   final TextEditingController _taskName = TextEditingController();
   final TextEditingController _taskContent = TextEditingController();
 
@@ -87,8 +91,20 @@ class NotesPageState extends State<NotesPage> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      _selfNoteListenerRef =
+          Provider.of<SelfNoteProvider>(context, listen: false);
+      _hwListenerRef = Provider.of<HomeworkProvider>(context, listen: false);
+      _selfNoteListenerRef!.addListener(generateTiles);
+      _hwListenerRef!.addListener(generateTiles);
       generateTiles();
     });
+  }
+
+@override
+  void dispose() {
+    _selfNoteListenerRef?.removeListener(generateTiles);
+    _hwListenerRef?.removeListener(generateTiles);
+    super.dispose();
   }
 
 Future<void> deleteTodoItem(TodoItem item) async {
@@ -103,6 +119,8 @@ Future<void> deleteTodoItem(TodoItem item) async {
 
   Future<void> generateTiles() async {
     if (!mounted) return;
+    if (_generatingTiles) return;
+    _generatingTiles = true;
 
     user = Provider.of<UserProvider>(context, listen: false);
     databaseProvider = Provider.of<DatabaseProvider>(context, listen: false);
@@ -263,23 +281,22 @@ if (selfNoteProvider.todos.isNotEmpty) {
 
     noteTiles = List.castFrom(tiles);
 
-    setState(() {});
+    _generatingTiles = false;
+    if (mounted) setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
-    user = Provider.of<UserProvider>(context);
-    databaseProvider = Provider.of<DatabaseProvider>(context);
-    updateProvider = Provider.of<UpdateProvider>(context);
-    selfNoteProvider = Provider.of<SelfNoteProvider>(context);
+    user = Provider.of<UserProvider>(context, listen: false);
+    databaseProvider = Provider.of<DatabaseProvider>(context, listen: false);
+    updateProvider = Provider.of<UpdateProvider>(context, listen: false);
+    selfNoteProvider = Provider.of<SelfNoteProvider>(context, listen: false);
 
     final colorScheme = Theme.of(context).colorScheme;
     final settings = Provider.of<SettingsProvider>(context);
 
     List<String> nameParts = user.displayName?.split(" ") ?? ["?"];
     firstName = nameParts.length > 1 ? nameParts[1] : nameParts[0];
-
-    generateTiles();
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -366,13 +383,12 @@ if (selfNoteProvider.todos.isNotEmpty) {
           ),
           Expanded(
             child: RefreshIndicator(
-              onRefresh: () {
-                var state = Provider.of<HomeworkProvider>(context, listen: false)
+              onRefresh: () async {
+                await Provider.of<HomeworkProvider>(context, listen: false)
                     .fetch(from: DateTime.now().subtract(const Duration(days: 30)));
-                Provider.of<SelfNoteProvider>(context, listen: false).restore();
-                Provider.of<SelfNoteProvider>(context, listen: false).restoreTodo();
-                generateTiles();
-                return state;
+                await Provider.of<SelfNoteProvider>(context, listen: false).restore();
+                await Provider.of<SelfNoteProvider>(context, listen: false).restoreTodo();
+                await generateTiles();
               },
               color: colorScheme.primary,
               child: CustomScrollView(
