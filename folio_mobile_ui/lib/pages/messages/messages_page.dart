@@ -322,12 +322,7 @@ class MessagesPageState extends State<MessagesPage>
       }
     }
 
-    _scaffoldKey.currentState?.showBottomSheet(
-      (context) =>
-          RoundedBottomSheet(borderRadius: 14.0, child: SendMessageSheet(rs)),
-      backgroundColor: const Color(0x00000000),
-      elevation: 12.0,
-    );
+    SendMessageSheet.show(context, rs);
   }
 }
 
