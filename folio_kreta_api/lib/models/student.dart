@@ -5,28 +5,42 @@ class Student {
   Map? json;
   String id;
   String name;
+  String? birthName;
+  String? birthPlace;
   School school;
   DateTime birth;
   String yearId;
   String? address;
   String? groupId;
+  String? mothersName;
   List<String> parents;
   int gradeDelay;
-  String? bankAccount;
-  // List<String> parentsPhone;
+  String? bankAccountNumber;
+  String? bankAccountOwnerName;
+  int? bankAccountOwnerTypeId;
+  bool bankAccountReadOnly;
+  String? email;
+  String? phone;
   String? className;
 
   Student({
     required this.id,
     required this.name,
+    this.birthName,
+    this.birthPlace,
     required this.school,
     required this.birth,
     required this.yearId,
     this.address,
+    this.mothersName,
     required this.parents,
     required this.gradeDelay,
-    this.bankAccount,
-    // required this.parentsPhone,
+    this.bankAccountNumber,
+    this.bankAccountOwnerName,
+    this.bankAccountOwnerTypeId,
+    this.bankAccountReadOnly = false,
+    this.email,
+    this.phone,
     this.json,
   });
 
@@ -43,9 +57,17 @@ class Student {
     parents = parents.map((e) => e.capitalize()).toList(); // fix name casing
     parents = parents.toSet().toList(); // remove duplicates
 
+    final bankszamla = json["Bankszamla"];
+
     return Student(
       id: json["Uid"] ?? "",
       name: (json["Nev"] ?? json["SzuletesiNev"] ?? "").trim(),
+      birthName: json["SzuletesiNev"] != null
+          ? (json["SzuletesiNev"] as String).trim()
+          : null,
+      birthPlace: json["SzuletesiHely"] != null
+          ? (json["SzuletesiHely"] as String).trim()
+          : null,
       school: School(
         instituteCode: json["IntezmenyAzonosito"] ?? "",
         name: json["IntezmenyNev"] ?? "",
@@ -56,15 +78,24 @@ class Student {
           : DateTime(0),
       yearId: json["TanevUid"] ?? "",
       address: json["Cimek"] != null
-          ? json["Cimek"].length > 0
-              ? json["Cimek"][0]
+          ? (json["Cimek"] as List).isNotEmpty
+              ? json["Cimek"][0] as String
               : null
           : null,
+      mothersName: json["AnyjaNeve"] != null
+          ? (json["AnyjaNeve"] as String).trim().capitalize()
+          : null,
       parents: parents,
-      gradeDelay: json["Intezmeny"]["TestreszabasBeallitasok"]
-              ["ErtekelesekMegjelenitesenekKesleltetesenekMerteke"] ??
+      gradeDelay: json["Intezmeny"]?["TestreszabasBeallitasok"]
+              ?["ErtekelesekMegjelenitesenekKesleltetesenekMerteke"] ??
           0,
-      bankAccount: json["Bankszamla"]["BankszamlaSzam"],
+      bankAccountNumber: bankszamla?["BankszamlaSzam"] as String?,
+      bankAccountOwnerName: bankszamla?["BankszamlaTulajdonosNeve"] as String?,
+      bankAccountOwnerTypeId:
+          bankszamla?["BankszamlaTulajdonosTipusId"] as int?,
+      bankAccountReadOnly: bankszamla?["IsReadOnly"] as bool? ?? false,
+      email: json["EmailCim"] as String?,
+      phone: json["Telefonszam"] as String?,
       json: json,
     );
   }

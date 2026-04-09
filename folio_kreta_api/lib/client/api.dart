@@ -47,6 +47,14 @@ class KretaAPI {
       KretaApiEndpoints.downloadHomeworkAttachments(uid, type);
   static String subjects(String iss, String uid) =>
       "${BaseKreta.kreta(iss)}${KretaApiEndpoints.subjects}?oktatasiNevelesiFeladatUid=$uid";
+  static String contact(String iss) =>
+      BaseKreta.kreta(iss) + KretaApiEndpoints.contact;
+  static String bankAccount(String iss) =>
+      BaseKreta.kreta(iss) + KretaApiEndpoints.bankAccount;
+  static String digitalCertifications(String iss) =>
+      BaseKreta.kreta(iss) + KretaApiEndpoints.digitalCertifications;
+  static String digitalCertificationFile(String iss, int id) =>
+      "${BaseKreta.kreta(iss)}${KretaApiEndpoints.digitalCertificationFile(id)}";
   // Structure:
   // {
   //   "Uid": 000,
@@ -112,7 +120,8 @@ class KretaApiEndpoints {
   static const groups = "/ellenorzo/V3/Sajat/OsztalyCsoportok";
   static const groupAverages =
       "/ellenorzo/V3/Sajat/Ertekelesek/Atlagok/OsztalyAtlagok";
-  static const averages = "/ellenorzo/V3/idk";
+  static const averages =
+      "/ellenorzo/V3/Sajat/Ertekelesek/Atlagok/TantargyiAtlagok";
   static const timetable = "/ellenorzo/V3/Sajat/OrarendElemek";
   static const exams = "/ellenorzo/V3/Sajat/BejelentettSzamonkeresek";
   static const homework = "/ellenorzo/V3/Sajat/HaziFeladatok";
@@ -122,6 +131,12 @@ class KretaApiEndpoints {
       "/ellenorzo/V3/Sajat/Csatolmany/$uid";
   static const subjects =
       "/ellenorzo/V3/Sajat/Ertekelesek/Atlagok/TantargyiAtlagok";
+  static const contact = "/ellenorzo/V3/Sajat/Elerhetoseg";
+  static const bankAccount = "/ellenorzo/V3/Sajat/Bankszamla";
+  static const digitalCertifications =
+      "/ellenorzo/V3/documents/digitalisbizonyitvanyok";
+  static String digitalCertificationFile(int id) =>
+      "/ellenorzo/V3/documents/digitalisbizonyitvanyok/$id/file";
 }
 
 class KretaAdminEndpoints {

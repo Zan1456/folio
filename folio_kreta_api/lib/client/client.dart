@@ -85,6 +85,10 @@ class KretaClient {
               idpApplicationCookie!.isNotEmpty) {
             headerMap["cookie"] = "idp.application=$idpApplicationCookie";
           }
+          if (!headerMap.containsKey("apiKey") &&
+              !url.contains("idp.e-kreta.hu")) {
+            headerMap["apiKey"] = "21ff6c25-d1da-4a68-a811-c881a6057463";
+          }
         }
 
         res = await client.get(Uri.parse(url), headers: headerMap);
@@ -161,6 +165,10 @@ class KretaClient {
           if (!headerMap.containsKey("content-type")) {
             headerMap["content-type"] = "application/json";
           }
+          if (!headerMap.containsKey("apiKey") &&
+              !url.contains("idp.e-kreta.hu")) {
+            headerMap["apiKey"] = "21ff6c25-d1da-4a68-a811-c881a6057463";
+          }
           if (url.contains('kommunikacio/uzenetek')) {
             headerMap["X-Uzenet-Lokalizacio"] = "hu-HU";
           }
@@ -191,6 +199,118 @@ class KretaClient {
           "ERROR: KretaClient.postAPI ($url) ClientException: ${error.message}");
     } catch (error) {
       print("ERROR: KretaClient.postAPI ($url) ${error.runtimeType}: $error");
+    }
+  }
+
+  Future<dynamic> deleteAPI(
+    String url, {
+    Map<String, String>? headers,
+    bool autoHeader = true,
+  }) async {
+    Map<String, String> headerMap = headers ?? {};
+
+    if (accessToken == null || accessToken == '') {
+      accessToken = _user.user?.accessToken;
+    }
+
+    try {
+      http.Response? res;
+
+      for (int i = 0; i < 2; i++) {
+        if (autoHeader) {
+          if (!headerMap.containsKey("authorization") && accessToken != null) {
+            headerMap["authorization"] = "Bearer $accessToken";
+          }
+          if (!headerMap.containsKey("user-agent") && userAgent != null) {
+            headerMap["user-agent"] = "$userAgent";
+          }
+          if (!headerMap.containsKey("apiKey") &&
+              !url.contains("idp.e-kreta.hu")) {
+            headerMap["apiKey"] = "21ff6c25-d1da-4a68-a811-c881a6057463";
+          }
+        }
+
+        res = await client.delete(Uri.parse(url), headers: headerMap);
+        _status.triggerRequest(res);
+
+        if (res.statusCode == 401) {
+          headerMap.remove("authorization");
+        } else {
+          break;
+        }
+
+        await Future.delayed(const Duration(milliseconds: 1500));
+      }
+
+      if (res == null) throw "Login error";
+      return res.statusCode;
+    } on http.ClientException catch (error) {
+      print(
+          "ERROR: KretaClient.deleteAPI ($url) ClientException: ${error.message}");
+    } catch (error) {
+      print(
+          "ERROR: KretaClient.deleteAPI ($url) ${error.runtimeType}: $error");
+    }
+  }
+
+  Future<dynamic> postFormAPI(
+    String url, {
+    Map<String, String>? headers,
+    bool autoHeader = true,
+    Map<String, String>? formFields,
+  }) async {
+    Map<String, String> headerMap = headers ?? {};
+
+    if (accessToken == null || accessToken == '') {
+      accessToken = _user.user?.accessToken;
+    }
+
+    try {
+      http.Response? res;
+
+      for (int i = 0; i < 2; i++) {
+        if (autoHeader) {
+          if (!headerMap.containsKey("authorization") && accessToken != null) {
+            headerMap["authorization"] = "Bearer $accessToken";
+          }
+          if (!headerMap.containsKey("user-agent") && userAgent != null) {
+            headerMap["user-agent"] = "$userAgent";
+          }
+          headerMap["content-type"] =
+              "application/x-www-form-urlencoded; charset=UTF-8";
+          if (!headerMap.containsKey("apiKey") &&
+              !url.contains("idp.e-kreta.hu")) {
+            headerMap["apiKey"] = "21ff6c25-d1da-4a68-a811-c881a6057463";
+          }
+        }
+
+        final encoded = (formFields ?? {})
+            .entries
+            .map((e) =>
+                "${Uri.encodeQueryComponent(e.key)}=${Uri.encodeQueryComponent(e.value)}")
+            .join("&");
+
+        res = await client.post(Uri.parse(url),
+            headers: headerMap, body: encoded);
+        _status.triggerRequest(res);
+
+        if (res.statusCode == 401) {
+          headerMap.remove("authorization");
+        } else {
+          break;
+        }
+
+        await Future.delayed(const Duration(milliseconds: 1500));
+      }
+
+      if (res == null) throw "Login error";
+      return res.statusCode;
+    } on http.ClientException catch (error) {
+      print(
+          "ERROR: KretaClient.postFormAPI ($url) ClientException: ${error.message}");
+    } catch (error) {
+      print(
+          "ERROR: KretaClient.postFormAPI ($url) ${error.runtimeType}: $error");
     }
   }
 
@@ -225,6 +345,10 @@ class KretaClient {
           }
           if (!headerMap.containsKey("content-type")) {
             headerMap["content-type"] = "multipart/form-data";
+          }
+          if (!headerMap.containsKey("apiKey") &&
+              !url.contains("idp.e-kreta.hu")) {
+            headerMap["apiKey"] = "21ff6c25-d1da-4a68-a811-c881a6057463";
           }
           if (url.contains('kommunikacio/uzenetek')) {
             headerMap["X-Uzenet-Lokalizacio"] = "hu-HU";

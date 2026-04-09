@@ -16,7 +16,10 @@ import 'package:folio/api/providers/user_provider.dart';
 import 'package:folio/models/settings.dart';
 import 'package:folio/models/user.dart';
 import 'package:folio/theme/colors/colors.dart';
+import 'package:folio_kreta_api/client/api.dart';
 import 'package:folio_kreta_api/client/client.dart';
+import 'package:folio_kreta_api/models/digital_certification.dart';
+import 'package:folio_kreta_api/models/student.dart';
 import 'package:folio_kreta_api/providers/absence_provider.dart';
 import 'package:folio_kreta_api/providers/event_provider.dart';
 import 'package:folio_kreta_api/providers/exam_provider.dart';
@@ -48,14 +51,96 @@ class ProfileScreenState extends State<ProfileScreen>
   late KretaClient kretaClient;
   late TabController _tabController;
 
+  // Loaded async data
+  Map<String, dynamic>? _contactData;
+  List<DigitalCertification>? _certifications;
+  bool _contactLoading = false;
+  bool _certsLoading = false;
+  String? _contactError;
+  String? _certsError;
+
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    _tabController.addListener(_onTabChanged);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Trigger lazy load once providers are available
+    if (_contactData == null && !_contactLoading) {
+      _loadContactAndCerts();
+    }
+  }
+
+  void _onTabChanged() {
+    if (_tabController.index == 1 &&
+        _contactData == null &&
+        !_contactLoading) {
+      _loadContactAndCerts();
+    }
+  }
+
+  Future<void> _loadContactAndCerts() async {
+    final kreta = Provider.of<KretaClient>(context, listen: false);
+    final userProv = Provider.of<UserProvider>(context, listen: false);
+    final iss = userProv.instituteCode;
+    if (iss == null) return;
+
+    setState(() {
+      _contactLoading = true;
+      _certsLoading = true;
+      _contactError = null;
+      _certsError = null;
+    });
+
+    // Contact
+    try {
+      final res = await kreta.getAPI(KretaAPI.contact(iss));
+      if (mounted) {
+        setState(() {
+          _contactData = res != null ? Map<String, dynamic>.from(res) : {};
+          _contactLoading = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _contactError = "error_loading".i18n;
+          _contactLoading = false;
+        });
+      }
+    }
+
+    // Digital certifications
+    try {
+      final res = await kreta.getAPI(KretaAPI.digitalCertifications(iss));
+      if (mounted) {
+        setState(() {
+          _certifications = res != null
+              ? (res as List)
+                  .cast<Map>()
+                  .map((e) => DigitalCertification.fromJson(e))
+                  .toList()
+              : [];
+          _certsLoading = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _certsError = "error_loading".i18n;
+          _certsLoading = false;
+        });
+      }
+    }
   }
 
   @override
   void dispose() {
+    _tabController.removeListener(_onTabChanged);
     _tabController.dispose();
     super.dispose();
   }
@@ -86,6 +171,75 @@ class ProfileScreenState extends State<ProfileScreen>
     showRoundedModalBottomSheet(
       context,
       child: _ProfilePicBottomSheet(u: u),
+    );
+  }
+
+  void _editContact() {
+    showRoundedModalBottomSheet(
+      context,
+      child: _ContactBottomSheet(
+        initialEmail: _contactData?["Email"] as String? ??
+            user.student?.email ??
+            "",
+        initialPhone: _contactData?["Telefonszam"] as String? ??
+            user.student?.phone ??
+            "",
+        onSave: (email, phone) async {
+          final iss = user.instituteCode;
+          if (iss == null) return;
+          await kretaClient.postFormAPI(
+            KretaAPI.contact(iss),
+            formFields: {
+              "email": email,
+              "telefonszam": phone,
+            },
+          );
+          await _loadContactAndCerts();
+        },
+      ),
+    );
+  }
+
+  void _editBankAccount() {
+    final student = user.student;
+    showRoundedModalBottomSheet(
+      context,
+      child: _BankAccountBottomSheet(
+        initialNumber: student?.bankAccountNumber ?? "",
+        initialOwner: student?.bankAccountOwnerName ?? "",
+        initialTypeId: student?.bankAccountOwnerTypeId ?? 1,
+        isReadOnly: student?.bankAccountReadOnly ?? false,
+        onSave: (number, owner, typeId) async {
+          final iss = user.instituteCode;
+          if (iss == null) return;
+          await kretaClient.postAPI(
+            KretaAPI.bankAccount(iss),
+            body: jsonEncode({
+              "BankszamlaSzam": number,
+              "BankszamlaTulajdonosNeve": owner,
+              "BankszamlaTulajdonosTipusId": typeId,
+            }),
+          );
+          // Refresh student data
+          if (user.user != null && iss.isNotEmpty) {
+            final studentJson =
+                await kretaClient.getAPI(KretaAPI.student(iss));
+            if (studentJson != null) {
+              user.user!.student =
+                  Student.fromJson(Map.from(studentJson as Map));
+              Provider.of<DatabaseProvider>(context, listen: false)
+                  .store
+                  .storeUser(user.user!);
+              user.refresh();
+            }
+          }
+        },
+        onDelete: () async {
+          final iss = user.instituteCode;
+          if (iss == null) return;
+          await kretaClient.deleteAPI(KretaAPI.bankAccount(iss));
+        },
+      ),
     );
   }
 
@@ -472,12 +626,31 @@ class ProfileScreenState extends State<ProfileScreen>
       );
     }
 
-    final List<_InfoItem> items = [
+    // ── Personal info items ──
+    final List<_InfoItem> personalItems = [
+      if (student.birthName != null && student.birthName != student.name)
+        _InfoItem(
+          icon: Icons.badge_rounded,
+          label: "birth_name".i18n,
+          value: student.birthName!,
+        ),
       _InfoItem(
         icon: Icons.cake_rounded,
         label: "birthdate".i18n,
         value: DateFormat("yyyy. MM. dd.").format(student.birth),
       ),
+      if (student.birthPlace != null)
+        _InfoItem(
+          icon: Icons.place_rounded,
+          label: "birth_place".i18n,
+          value: student.birthPlace!,
+        ),
+      if (student.mothersName != null)
+        _InfoItem(
+          icon: Icons.family_restroom_rounded,
+          label: "mothers_name".i18n,
+          value: student.mothersName!,
+        ),
       _InfoItem(
         icon: Icons.school_rounded,
         label: "school".i18n,
@@ -516,29 +689,216 @@ class ProfileScreenState extends State<ProfileScreen>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 8.0),
+
+          // ── Personal info ──
           _sectionHeader(context, "personal_info".i18n),
           SplittedPanel(
             padding: const EdgeInsets.only(
                 bottom: 0.0, left: 24.0, right: 24.0),
             cardPadding: const EdgeInsets.all(4.0),
             children: [
-              for (int i = 0; i < items.length; i++)
-                _buildInfoButton(context, items[i], i, items.length),
+              for (int i = 0; i < personalItems.length; i++)
+                _buildInfoButton(context, personalItems[i], i,
+                    personalItems.length),
             ],
           ),
+
+          const SizedBox(height: 4.0),
+
+          // ── Contact (email, phone) ──
+          _sectionHeaderWithAction(
+            context,
+            "contact_info".i18n,
+            actionLabel: "edit".i18n,
+            onAction: _editContact,
+          ),
+          _buildContactSection(context, colorScheme),
+
+          const SizedBox(height: 4.0),
+
+          // ── Bank account ──
+          _sectionHeaderWithAction(
+            context,
+            "bank_account".i18n,
+            actionLabel: "edit".i18n,
+            onAction: student.bankAccountReadOnly == true
+                ? null
+                : _editBankAccount,
+          ),
+          _buildBankAccountSection(context, colorScheme, student),
+
+          const SizedBox(height: 4.0),
+
+          // ── Digital certifications ──
+          _sectionHeader(context, "certifications".i18n),
+          _buildCertificationsSection(context, colorScheme),
+
           SizedBox(height: MediaQuery.of(context).padding.bottom + 24.0),
         ],
       ),
     );
   }
 
-  Widget _buildInfoButton(
-      BuildContext context, _InfoItem item, int index, int total) {
+  Widget _buildContactSection(
+      BuildContext context, ColorScheme colorScheme) {
+    if (_contactLoading) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
+        child: Text("loading".i18n,
+            style: TextStyle(
+                color: colorScheme.onSurface.withValues(alpha: 0.4),
+                fontSize: 13.0)),
+      );
+    }
+
+    final String email = _contactData?["Email"] as String? ??
+        user.student?.email ??
+        "";
+    final bool emailVerified =
+        _contactData?["IsEmailMegerositve"] as bool? ?? false;
+    final String phone = _contactData?["Telefonszam"] as String? ??
+        user.student?.phone ??
+        "";
+
+    final List<_InfoItem> items = [
+      if (email.isNotEmpty)
+        _InfoItem(
+          icon: Icons.email_rounded,
+          label: "email".i18n,
+          value: email,
+          subtitle: emailVerified ? null : "email_not_verified".i18n,
+        ),
+      if (phone.isNotEmpty)
+        _InfoItem(
+          icon: Icons.phone_rounded,
+          label: "phone".i18n,
+          value: phone,
+        ),
+    ];
+
+    if (items.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
+        child: Text("—",
+            style: TextStyle(
+                color: colorScheme.onSurface.withValues(alpha: 0.35),
+                fontSize: 15.0)),
+      );
+    }
+
+    return SplittedPanel(
+      padding:
+          const EdgeInsets.only(bottom: 0.0, left: 24.0, right: 24.0),
+      cardPadding: const EdgeInsets.all(4.0),
+      children: [
+        for (int i = 0; i < items.length; i++)
+          _buildInfoButton(context, items[i], i, items.length),
+      ],
+    );
+  }
+
+  Widget _buildBankAccountSection(
+      BuildContext context, ColorScheme colorScheme, dynamic student) {
+    final String? accountNum = student.bankAccountNumber as String?;
+    final String? ownerName = student.bankAccountOwnerName as String?;
+    final bool readOnly = student.bankAccountReadOnly as bool? ?? false;
+
+    if (accountNum == null || accountNum.isEmpty) {
+      return Padding(
+        padding:
+            const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
+        child: Text("no_bank_account".i18n,
+            style: TextStyle(
+                color: colorScheme.onSurface.withValues(alpha: 0.35),
+                fontSize: 15.0)),
+      );
+    }
+
+    final List<_InfoItem> items = [
+      _InfoItem(
+        icon: Icons.account_balance_rounded,
+        label: "bank_account_number".i18n,
+        value: accountNum,
+        subtitle: readOnly ? "bank_account_readonly".i18n : null,
+      ),
+      if (ownerName != null && ownerName.isNotEmpty)
+        _InfoItem(
+          icon: Icons.person_rounded,
+          label: "bank_account_owner".i18n,
+          value: ownerName,
+        ),
+    ];
+
+    return SplittedPanel(
+      padding:
+          const EdgeInsets.only(bottom: 0.0, left: 24.0, right: 24.0),
+      cardPadding: const EdgeInsets.all(4.0),
+      children: [
+        for (int i = 0; i < items.length; i++)
+          _buildInfoButton(context, items[i], i, items.length),
+      ],
+    );
+  }
+
+  Widget _buildCertificationsSection(
+      BuildContext context, ColorScheme colorScheme) {
+    if (_certsLoading) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
+        child: Text("loading".i18n,
+            style: TextStyle(
+                color: colorScheme.onSurface.withValues(alpha: 0.4),
+                fontSize: 13.0)),
+      );
+    }
+
+    if (_certsError != null) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
+        child: Text(_certsError!,
+            style: TextStyle(
+                color: colorScheme.error.withValues(alpha: 0.7),
+                fontSize: 13.0)),
+      );
+    }
+
+    final certs = _certifications ?? [];
+    if (certs.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
+        child: Text("no_certifications".i18n,
+            style: TextStyle(
+                color: colorScheme.onSurface.withValues(alpha: 0.35),
+                fontSize: 15.0)),
+      );
+    }
+
+    return SplittedPanel(
+      padding:
+          const EdgeInsets.only(bottom: 0.0, left: 24.0, right: 24.0),
+      cardPadding: const EdgeInsets.all(4.0),
+      children: [
+        for (int i = 0; i < certs.length; i++)
+          _buildCertButton(context, certs[i], i, certs.length),
+      ],
+    );
+  }
+
+  Widget _buildCertButton(BuildContext context, DigitalCertification cert,
+      int index, int total) {
+    final String title =
+        cert.name ?? cert.schoolYear ?? "cert_issued".i18n;
+    final String subtitle = [
+      if (cert.typeName != null) cert.typeName!,
+      if (cert.schoolYear != null && cert.name != null) cert.schoolYear!,
+      DateFormat("yyyy. MM. dd.").format(cert.issuedAt),
+    ].join(" • ");
+
     return PanelButton(
-      padding: const EdgeInsets.only(left: 14.0, right: 14.0),
-      onPressed: null,
+      padding: const EdgeInsets.only(left: 14.0, right: 6.0),
+      onPressed: () => _downloadCertification(cert),
       leading: Icon(
-        item.icon,
+        Icons.workspace_premium_rounded,
         size: 22.0,
         color: AppColors.of(context).text.withValues(alpha: 0.65),
       ),
@@ -547,7 +907,7 @@ class ProfileScreenState extends State<ProfileScreen>
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            item.label,
+            title,
             style: TextStyle(
               fontSize: 11.5,
               fontWeight: FontWeight.w500,
@@ -555,7 +915,7 @@ class ProfileScreenState extends State<ProfileScreen>
             ),
           ),
           Text(
-            item.value,
+            subtitle,
             style: TextStyle(
               fontSize: 15.0,
               fontWeight: FontWeight.w600,
@@ -564,7 +924,26 @@ class ProfileScreenState extends State<ProfileScreen>
           ),
         ],
       ),
+      trailing: Icon(
+        Icons.download_rounded,
+        size: 20.0,
+        color: AppColors.of(context).text.withValues(alpha: 0.3),
+      ),
       borderRadius: _itemRadius(index, total),
+    );
+  }
+
+  Future<void> _downloadCertification(DigitalCertification cert) async {
+    final iss = user.instituteCode;
+    if (iss == null) return;
+    final bytes = await kretaClient.getAPI(
+      KretaAPI.digitalCertificationFile(iss, cert.id),
+      rawResponse: true,
+    );
+    if (bytes == null) return;
+    // TODO: open/save PDF via share_plus or open_file
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("cert_issued".i18n)),
     );
   }
 
@@ -777,6 +1156,102 @@ class ProfileScreenState extends State<ProfileScreen>
     );
   }
 
+  Widget _sectionHeaderWithAction(
+    BuildContext context,
+    String label, {
+    required String actionLabel,
+    VoidCallback? onAction,
+  }) {
+    return Padding(
+      padding:
+          const EdgeInsets.only(top: 10.0, bottom: 6.0, left: 28.0, right: 28.0),
+      child: Row(
+        children: [
+          Container(
+            width: 3.5,
+            height: 18.0,
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.primary,
+              borderRadius: BorderRadius.circular(2.0),
+            ),
+          ),
+          const SizedBox(width: 10.0),
+          Expanded(
+            child: Text(
+              label.toUpperCase(),
+              style: TextStyle(
+                fontSize: 13.0,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 1.2,
+                color: Theme.of(context)
+                    .colorScheme
+                    .primary
+                    .withValues(alpha: 0.8),
+              ),
+            ),
+          ),
+          if (onAction != null)
+            GestureDetector(
+              onTap: onAction,
+              child: Text(
+                actionLabel,
+                style: TextStyle(
+                  fontSize: 13.0,
+                  fontWeight: FontWeight.w600,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoButton(
+      BuildContext context, _InfoItem item, int index, int total) {
+    return PanelButton(
+      padding: const EdgeInsets.only(left: 14.0, right: 14.0),
+      onPressed: null,
+      leading: Icon(
+        item.icon,
+        size: 22.0,
+        color: AppColors.of(context).text.withValues(alpha: 0.65),
+      ),
+      title: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            item.label,
+            style: TextStyle(
+              fontSize: 11.5,
+              fontWeight: FontWeight.w500,
+              color: AppColors.of(context).text.withValues(alpha: 0.5),
+            ),
+          ),
+          Text(
+            item.value,
+            style: TextStyle(
+              fontSize: 15.0,
+              fontWeight: FontWeight.w600,
+              color: AppColors.of(context).text,
+            ),
+          ),
+          if (item.subtitle != null)
+            Text(
+              item.subtitle!,
+              style: TextStyle(
+                fontSize: 11.0,
+                fontWeight: FontWeight.w500,
+                color: Theme.of(context).colorScheme.error.withValues(alpha: 0.8),
+              ),
+            ),
+        ],
+      ),
+      borderRadius: _itemRadius(index, total),
+    );
+  }
+
   BorderRadius _itemRadius(int index, int total) {
     if (total == 1) return BorderRadius.circular(12.0);
     if (index == 0) {
@@ -797,8 +1272,12 @@ class _InfoItem {
   final IconData icon;
   final String label;
   final String value;
+  final String? subtitle;
   const _InfoItem(
-      {required this.icon, required this.label, required this.value});
+      {required this.icon,
+      required this.label,
+      required this.value,
+      this.subtitle});
 }
 
 // ── Nickname bottom sheet ─────────────────────────────────────────────────────
@@ -897,6 +1376,288 @@ class _NicknameBottomSheetState extends State<_NicknameBottomSheet> {
   }
 }
 
+// ── Contact bottom sheet ──────────────────────────────────────────────────────
+
+class _ContactBottomSheet extends StatefulWidget {
+  const _ContactBottomSheet({
+    required this.initialEmail,
+    required this.initialPhone,
+    required this.onSave,
+  });
+  final String initialEmail;
+  final String initialPhone;
+  final Future<void> Function(String email, String phone) onSave;
+
+  @override
+  State<_ContactBottomSheet> createState() => _ContactBottomSheetState();
+}
+
+class _ContactBottomSheetState extends State<_ContactBottomSheet> {
+  late final TextEditingController _emailCtrl;
+  late final TextEditingController _phoneCtrl;
+  bool _saving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _emailCtrl = TextEditingController(text: widget.initialEmail);
+    _phoneCtrl = TextEditingController(text: widget.initialPhone);
+  }
+
+  @override
+  void dispose() {
+    _emailCtrl.dispose();
+    _phoneCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(
+        left: 20.0,
+        right: 20.0,
+        top: 4.0,
+        bottom: MediaQuery.of(context).viewInsets.bottom + 20.0,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(bottom: 16.0),
+            child: Text(
+              "edit_contact".i18n,
+              style: const TextStyle(
+                  fontSize: 17.0, fontWeight: FontWeight.w700),
+            ),
+          ),
+          TextField(
+            controller: _emailCtrl,
+            keyboardType: TextInputType.emailAddress,
+            decoration: InputDecoration(
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12.0),
+                borderSide: BorderSide.none,
+              ),
+              filled: true,
+              fillColor:
+                  Theme.of(context).colorScheme.surfaceContainerHigh,
+              labelText: "email".i18n,
+            ),
+          ),
+          const SizedBox(height: 10.0),
+          TextField(
+            controller: _phoneCtrl,
+            keyboardType: TextInputType.phone,
+            decoration: InputDecoration(
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12.0),
+                borderSide: BorderSide.none,
+              ),
+              filled: true,
+              fillColor:
+                  Theme.of(context).colorScheme.surfaceContainerHigh,
+              labelText: "phone".i18n,
+            ),
+          ),
+          const SizedBox(height: 12.0),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              TextButton(
+                child: Text("cancel".i18n,
+                    style:
+                        const TextStyle(fontWeight: FontWeight.w500)),
+                onPressed: () => Navigator.of(context).maybePop(),
+              ),
+              const SizedBox(width: 8.0),
+              FilledButton(
+                onPressed: _saving
+                    ? null
+                    : () async {
+                        setState(() => _saving = true);
+                        await widget.onSave(
+                          _emailCtrl.text.trim(),
+                          _phoneCtrl.text.trim(),
+                        );
+                        if (context.mounted) {
+                          Navigator.of(context).pop(true);
+                        }
+                      },
+                child: _saving
+                    ? const SizedBox(
+                        width: 16.0,
+                        height: 16.0,
+                        child: CircularProgressIndicator(strokeWidth: 2.0),
+                      )
+                    : Text("save".i18n),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Bank account bottom sheet ─────────────────────────────────────────────────
+
+class _BankAccountBottomSheet extends StatefulWidget {
+  const _BankAccountBottomSheet({
+    required this.initialNumber,
+    required this.initialOwner,
+    required this.initialTypeId,
+    required this.isReadOnly,
+    required this.onSave,
+    required this.onDelete,
+  });
+  final String initialNumber;
+  final String initialOwner;
+  final int initialTypeId;
+  final bool isReadOnly;
+  final Future<void> Function(String number, String owner, int typeId) onSave;
+  final Future<void> Function() onDelete;
+
+  @override
+  State<_BankAccountBottomSheet> createState() =>
+      _BankAccountBottomSheetState();
+}
+
+class _BankAccountBottomSheetState
+    extends State<_BankAccountBottomSheet> {
+  late final TextEditingController _numberCtrl;
+  late final TextEditingController _ownerCtrl;
+  bool _saving = false;
+  bool _deleting = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _numberCtrl = TextEditingController(text: widget.initialNumber);
+    _ownerCtrl = TextEditingController(text: widget.initialOwner);
+  }
+
+  @override
+  void dispose() {
+    _numberCtrl.dispose();
+    _ownerCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Padding(
+      padding: EdgeInsets.only(
+        left: 20.0,
+        right: 20.0,
+        top: 4.0,
+        bottom: MediaQuery.of(context).viewInsets.bottom + 20.0,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(bottom: 16.0),
+            child: Text(
+              "edit_bank_account".i18n,
+              style: const TextStyle(
+                  fontSize: 17.0, fontWeight: FontWeight.w700),
+            ),
+          ),
+          TextField(
+            controller: _numberCtrl,
+            keyboardType: TextInputType.number,
+            inputFormatters: [
+              FilteringTextInputFormatter.allow(RegExp(r'[\d-]')),
+            ],
+            decoration: InputDecoration(
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12.0),
+                borderSide: BorderSide.none,
+              ),
+              filled: true,
+              fillColor: colorScheme.surfaceContainerHigh,
+              labelText: "bank_account_number".i18n,
+              hintText: "00000000-00000000-00000000",
+            ),
+          ),
+          const SizedBox(height: 10.0),
+          TextField(
+            controller: _ownerCtrl,
+            decoration: InputDecoration(
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12.0),
+                borderSide: BorderSide.none,
+              ),
+              filled: true,
+              fillColor: colorScheme.surfaceContainerHigh,
+              labelText: "bank_account_owner".i18n,
+            ),
+          ),
+          const SizedBox(height: 12.0),
+          Row(
+            children: [
+              // Delete button
+              if (widget.initialNumber.isNotEmpty)
+                TextButton.icon(
+                  onPressed: _deleting
+                      ? null
+                      : () async {
+                          setState(() => _deleting = true);
+                          await widget.onDelete();
+                          if (context.mounted) {
+                            Navigator.of(context).pop(true);
+                          }
+                        },
+                  icon: Icon(Icons.delete_outline_rounded,
+                      size: 18.0, color: colorScheme.error),
+                  label: Text(
+                    "delete_bank_account".i18n,
+                    style: TextStyle(color: colorScheme.error),
+                  ),
+                ),
+              const Spacer(),
+              TextButton(
+                child: Text("cancel".i18n,
+                    style:
+                        const TextStyle(fontWeight: FontWeight.w500)),
+                onPressed: () => Navigator.of(context).maybePop(),
+              ),
+              const SizedBox(width: 8.0),
+              FilledButton(
+                onPressed: _saving
+                    ? null
+                    : () async {
+                        setState(() => _saving = true);
+                        await widget.onSave(
+                          _numberCtrl.text.trim(),
+                          _ownerCtrl.text.trim(),
+                          widget.initialTypeId,
+                        );
+                        if (context.mounted) {
+                          Navigator.of(context).pop(true);
+                        }
+                      },
+                child: _saving
+                    ? const SizedBox(
+                        width: 16.0,
+                        height: 16.0,
+                        child: CircularProgressIndicator(strokeWidth: 2.0),
+                      )
+                    : Text("save".i18n),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 // ── Profile picture bottom sheet ──────────────────────────────────────────────
 
 class _ProfilePicBottomSheet extends StatefulWidget {
@@ -944,34 +1705,38 @@ class _ProfilePicBottomSheetState extends State<_ProfilePicBottomSheet> {
       file: _file!,
       preferredSize: (2000 / scale).round(),
     );
-    final file = await ImageCrop.cropImage(file: sample, area: area);
-    sample.delete();
-    _lastCropped?.delete();
-    _lastCropped = file;
 
-    final bytes = await _lastCropped!.readAsBytes();
+    final cropped = await ImageCrop.cropImage(
+      file: sample,
+      area: area,
+    );
+
+    _lastCropped?.delete();
+    _sample?.delete();
+
+    setState(() {
+      _sample = sample;
+      _lastCropped = cropped;
+    });
+
+    final bytes = await cropped.readAsBytes();
     widget.u.picture = base64Encode(bytes);
-    if (!mounted) return;
     Provider.of<DatabaseProvider>(context, listen: false)
         .store
         .storeUser(widget.u);
     Provider.of<UserProvider>(context, listen: false).refresh();
-  }
-
-  @override
-  void dispose() {
-    _file?.delete();
-    _sample?.delete();
-    _lastCropped?.delete();
-    super.dispose();
+    Navigator.of(context).pop(true);
   }
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20.0, 4.0, 20.0, 20.0),
+      padding: EdgeInsets.only(
+        left: 20.0,
+        right: 20.0,
+        top: 4.0,
+        bottom: MediaQuery.of(context).viewInsets.bottom + 20.0,
+      ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -979,70 +1744,70 @@ class _ProfilePicBottomSheetState extends State<_ProfilePicBottomSheet> {
           Padding(
             padding: const EdgeInsets.only(bottom: 16.0),
             child: Text(
-              "edit_profile_picture".i18n,
+              "select_profile_picture".i18n,
               style: const TextStyle(
                   fontSize: 17.0, fontWeight: FontWeight.w700),
             ),
           ),
-
-          // Crop or pick
-          if (_sample != null)
+          if (_sample != null) ...[
             SizedBox(
               height: 280.0,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(14.0),
-                child: Crop.file(
-                  _sample!,
-                  key: cropKey,
-                  aspectRatio: 1.0,
-                ),
+              child: Crop(
+                key: cropKey,
+                image: FileImage(_sample!),
+                aspectRatio: 1.0,
               ),
-            )
-          else
+            ),
+          ] else ...[
             GestureDetector(
               onTap: _pickImage,
               child: Container(
-                decoration: BoxDecoration(
-                  color: colorScheme.surfaceContainerHigh,
-                  borderRadius: BorderRadius.circular(14.0),
-                ),
+                height: 240.0,
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(
-                    vertical: 32.0, horizontal: 8.0),
+                decoration: BoxDecoration(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .surfaceContainerHigh,
+                  borderRadius: BorderRadius.circular(16.0),
+                ),
                 child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.add_photo_alternate_rounded,
-                        size: 36.0,
-                        color: colorScheme.onSurface
-                            .withValues(alpha: 0.5)),
-                    const SizedBox(height: 8.0),
+                    Icon(
+                      Icons.add_photo_alternate_rounded,
+                      size: 48.0,
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onSurface
+                          .withValues(alpha: 0.3),
+                    ),
+                    const SizedBox(height: 12.0),
                     Text(
                       "select_profile_picture".i18n,
                       style: TextStyle(
-                        fontSize: 14.0,
+                        fontSize: 15.0,
                         fontWeight: FontWeight.w500,
-                        color: colorScheme.onSurface
-                            .withValues(alpha: 0.6),
+                        color: Theme.of(context)
+                            .colorScheme
+                            .onSurface
+                            .withValues(alpha: 0.45),
                       ),
                     ),
                   ],
                 ),
               ),
             ),
-
+          ],
           const SizedBox(height: 12.0),
-
           Row(
+            mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              // Remove picture
               if (widget.u.picture.isNotEmpty)
                 TextButton(
-                  child: Text(
-                    "remove_profile_picture".i18n,
-                    style: TextStyle(
-                        fontWeight: FontWeight.w500,
-                        color: colorScheme.error),
-                  ),
+                  child: Text("remove_profile_picture".i18n,
+                      style: TextStyle(
+                          color: Theme.of(context).colorScheme.error,
+                          fontWeight: FontWeight.w500)),
                   onPressed: () {
                     widget.u.picture = "";
                     Provider.of<DatabaseProvider>(context, listen: false)
@@ -1061,13 +1826,16 @@ class _ProfilePicBottomSheetState extends State<_ProfilePicBottomSheet> {
                 onPressed: () => Navigator.of(context).maybePop(),
               ),
               const SizedBox(width: 8.0),
-              FilledButton(
-                child: Text("done".i18n),
-                onPressed: () async {
-                  if (_sample != null) await _cropAndSave();
-                  if (mounted) Navigator.of(context).pop(true);
-                },
-              ),
+              if (_sample == null)
+                FilledButton(
+                  onPressed: _pickImage,
+                  child: Text("select_profile_picture".i18n),
+                )
+              else
+                FilledButton(
+                  onPressed: _cropAndSave,
+                  child: Text("done".i18n),
+                ),
             ],
           ),
         ],
