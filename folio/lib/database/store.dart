@@ -19,6 +19,7 @@ import 'package:folio_kreta_api/models/note.dart';
 import 'package:folio_kreta_api/models/event.dart';
 import 'package:folio_kreta_api/models/absence.dart';
 import 'package:folio_kreta_api/models/group_average.dart';
+import 'package:folio_kreta_api/models/subject_average.dart';
 
 class DatabaseStore {
   DatabaseStore({required this.db});
@@ -120,6 +121,14 @@ class UserDatabaseStore {
     String groupAveragesJson =
         jsonEncode(groupAverages.map((e) => e.json).toList());
     await db.update("user_data", {"group_averages": groupAveragesJson},
+        where: "id = ?", whereArgs: [userId]);
+  }
+
+  Future<void> storeSubjectAverages(List<SubjectAverage> subjectAverages,
+      {required String userId}) async {
+    String subjectAveragesJson =
+        jsonEncode(subjectAverages.map((e) => e.json).toList());
+    await db.update("user_data", {"subject_averages": subjectAveragesJson},
         where: "id = ?", whereArgs: [userId]);
   }
 

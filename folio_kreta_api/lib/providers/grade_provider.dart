@@ -8,6 +8,7 @@ import 'package:folio_kreta_api/client/client.dart';
 import 'package:folio_kreta_api/demo/demo_data.dart';
 import 'package:folio_kreta_api/models/grade.dart';
 import 'package:folio_kreta_api/models/group_average.dart';
+import 'package:folio_kreta_api/models/subject_average.dart';
 import 'package:folio_kreta_api/providers/grade_provider.i18n.dart';
 import 'package:flutter/material.dart';
 
@@ -17,6 +18,7 @@ class GradeProvider with ChangeNotifier {
   late DateTime _lastSeen;
   late String _groups;
   List<GroupAverage> _groupAvg = [];
+  List<SubjectAverage> _subjectAvg = [];
   late final SettingsProvider _settings;
   late final UserProvider _user;
   late final DatabaseProvider _database;
@@ -28,6 +30,7 @@ class GradeProvider with ChangeNotifier {
       _settings.gradeOpeningFun ? _lastSeen : DateTime(3000);
   String get groups => _groups;
   List<GroupAverage> get groupAverages => _groupAvg;
+  List<SubjectAverage> get subjectAverages => _subjectAvg;
 
   GradeProvider({
     List<Grade> initialGrades = const [],
@@ -77,7 +80,12 @@ Future<void> unseenAll() async {
       _grades = await userQuery.getGrades(userId: userId);
       await convertBySettings();
       await getGradeStreak();
-      _groupAvg = await userQuery.getGroupAverages(userId: userId);
+      final restored = await Future.wait([
+        userQuery.getGroupAverages(userId: userId),
+        userQuery.getSubjectAverages(userId: userId),
+      ]);
+      _groupAvg = restored[0] as List<GroupAverage>;
+      _subjectAvg = restored[1] as List<SubjectAverage>;
       notifyListeners();
       DateTime lastSeenDB = await userQuery.lastSeen(
           userId: userId, category: LastSeenCategory.surprisegrade);
@@ -194,14 +202,26 @@ Future<void> unseenAll() async {
     }
     _groups = (groupsJson[0]["OktatasNevelesiFeladat"] ?? {})["Uid"] ?? "";
 
-    List? groupAvgJson =
-        await _kreta.getAPI(KretaAPI.groupAverages(iss, _groups));
+    // Fetch class averages and personal subject averages in parallel.
+    final avgFetched = await Future.wait([
+      _kreta.getAPI(KretaAPI.groupAverages(iss, _groups)),
+      _kreta.getAPI(KretaAPI.averages(iss, _groups)),
+    ]);
+
+    final List? groupAvgJson = avgFetched[0];
     if (groupAvgJson == null) {
       throw "Cannot fetch Class Averages for User ${user.id}";
     }
     final groupAvgs =
         groupAvgJson.map((e) => GroupAverage.fromJson(e)).toList();
     await storeGroupAvg(groupAvgs);
+
+    final List? subjectAvgJson = avgFetched[1];
+    if (subjectAvgJson != null) {
+      final subjectAvgs =
+          subjectAvgJson.map((e) => SubjectAverage.fromJson(e)).toList();
+      await storeSubjectAvg(subjectAvgs);
+    }
   }
 
   // Stores Grades in the database
@@ -223,6 +243,16 @@ Future<void> unseenAll() async {
     if (user == null) throw "Cannot store Grades for User null";
     String userId = user.id;
     await _database.userStore.storeGroupAverages(groupAvgs, userId: userId);
+    notifyListeners();
+  }
+
+  Future<void> storeSubjectAvg(List<SubjectAverage> subjectAvgs) async {
+    _subjectAvg = subjectAvgs;
+
+    User? user = _user.user;
+    if (user == null) throw "Cannot store Subject Averages for User null";
+    String userId = user.id;
+    await _database.userStore.storeSubjectAverages(subjectAvgs, userId: userId);
     notifyListeners();
   }
 }

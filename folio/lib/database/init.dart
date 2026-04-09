@@ -94,6 +94,7 @@ const userDataDB = DatabaseStruct("user_data", {
   "id": String, "grades": String, "timetable": String, "exams": String,
   "homework": String, "messages": String, "recipients": String, "notes": String,
   "events": String, "absences": String, "group_averages": String,
+  "subject_averages": String,
   // renamed subjects // non kreta data
   "renamed_subjects": String,
   // renamed teachers // non kreta data
@@ -175,6 +176,7 @@ Future<Database> initDB(DatabaseProvider database) async {
       "messages": "[]", "recipients": "[]", "notes": "[]", "events": "[]",
       "absences": "[]",
       "group_averages": "[]",
+      "subject_averages": "[]",
       // renamed subjects // non kreta data
       "renamed_subjects": "{}",
       // renamed teachers // non kreta data

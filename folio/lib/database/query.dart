@@ -21,6 +21,7 @@ import 'package:folio_kreta_api/models/note.dart';
 import 'package:folio_kreta_api/models/event.dart';
 import 'package:folio_kreta_api/models/absence.dart';
 import 'package:folio_kreta_api/models/group_average.dart';
+import 'package:folio_kreta_api/models/subject_average.dart';
 
 class DatabaseQuery {
   DatabaseQuery({required this.db});
@@ -199,6 +200,21 @@ class UserDatabaseQuery {
         .map((e) => GroupAverage.fromJson(e))
         .toList();
     return groupAverages;
+  }
+
+  Future<List<SubjectAverage>> getSubjectAverages(
+      {required String userId}) async {
+    List<Map> userData =
+        await db.query("user_data", where: "id = ?", whereArgs: [userId]);
+    if (userData.isEmpty) return [];
+    String? subjectAveragesJson =
+        userData.elementAt(0)["subject_averages"] as String?;
+    if (subjectAveragesJson == null) return [];
+    List<SubjectAverage> subjectAverages =
+        (jsonDecode(subjectAveragesJson) as List)
+            .map((e) => SubjectAverage.fromJson(e))
+            .toList();
+    return subjectAverages;
   }
 
   Future<SubjectLessonCount> getSubjectLessonCount(
