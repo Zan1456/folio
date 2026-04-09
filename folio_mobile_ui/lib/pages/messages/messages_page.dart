@@ -73,6 +73,7 @@ class MessagesPageState extends State<MessagesPage>
                     padding: const EdgeInsets.fromLTRB(20.0, 12.0, 20.0, 0.0),
                     child: Row(
                       children: [
+                        if (Navigator.of(context).canPop()) ...[
                         GestureDetector(
                           onTap: () {
                             performHapticFeedback(settings.vibrate);
@@ -97,6 +98,7 @@ class MessagesPageState extends State<MessagesPage>
                           ),
                         ),
                         const SizedBox(width: 12.0),
+                        ],
                         Expanded(
                           child: Text(
                             "Messages".i18n,

@@ -1,7 +1,8 @@
 import 'package:i18n_extension/i18n_extension.dart';
 
 extension SettingsLocalization on String {
-  static final _t = Translations.byLocale("hu-HU") +
+  static final _t =
+      Translations.byLocale("hu-HU") +
       {
         "en-US": {
           "heads_up": "Heads up!",
@@ -72,7 +73,8 @@ extension SettingsLocalization on String {
           "devsettings": "Developer Settings",
           "devmode": "Developer Mode",
           "dev_fake_lessons": "Fake Live Activity Lessons",
-          "dev_fake_lessons_desc": "Generate test lessons around current time for Live Activity testing",
+          "dev_fake_lessons_desc":
+              "Generate test lessons around current time for Live Activity testing",
           "copy_jwt": "Copy JWT",
           "welcome_msg": "Welcome Message",
           "default": "Dynamic",
@@ -103,7 +105,8 @@ extension SettingsLocalization on String {
           "grades": "Grades",
           "search": "Search...",
           "goodstudent": "Good Student Mode",
-          "goodstudent_disclaimer": "Folio can not be held liable for the usage of this feature.\n\n(if your mother beats you up because you showed her fake grades, you can only blame yourself for it)",
+          "goodstudent_disclaimer":
+              "Folio can not be held liable for the usage of this feature.\n\n(if your mother beats you up because you showed her fake grades, you can only blame yourself for it)",
           "presentation": "Presentation Mode",
           "show_breaks": "Show Breaks",
           "live_activity_enabled": "Live Activity",
@@ -111,16 +114,21 @@ extension SettingsLocalization on String {
           "android_notification_type": "Notification Type",
           "native_android": "Native Android",
           "live_activity_consent_title": "Live Activity – Data Privacy",
-          "live_activity_consent_body": "The Live Activity feature sends data to our server for real-time push notification updates.\n\nData sent:\n• Device identifier\n• APNs push token\n• Your timetable\n\nPurpose:\n• Real-time Live Activity updates via push notifications\n\nData is stored on an encrypted server. You can disable this at any time in Settings > General.",
+          "live_activity_consent_body":
+              "The Live Activity feature sends data to our server for real-time push notification updates.\n\nData sent:\n• Device identifier\n• APNs push token\n• Your timetable\n\nPurpose:\n• Real-time Live Activity updates via push notifications\n\nData is stored on an encrypted server. You can disable this at any time in Settings > General.",
           "live_activity_accept": "Accept",
           "live_activity_decline": "Decline",
           // Live Activity consent screen
-          "la_consent_subtitle": "Display your timetable live on your device's lock screen",
+          "la_consent_subtitle":
+              "Display your timetable live on your device's lock screen",
           "la_privacy_policy": "Privacy Policy",
-          "la_privacy_warning": "To use Live Activity, you must accept the privacy policy",
-          "la_consent_intro": "To use the Live Activity feature, we need to store and process certain data. Please read the following information carefully.",
+          "la_privacy_warning":
+              "To use Live Activity, you must accept the privacy policy",
+          "la_consent_intro":
+              "To use the Live Activity feature, we need to store and process certain data. Please read the following information carefully.",
           "la_what_data": "What data do we store?",
-          "la_what_data_desc": "Device tokens, Live Activity tokens, timetable data",
+          "la_what_data_desc":
+              "Device tokens, Live Activity tokens, timetable data",
           "la_how_protect": "How do we protect your data?",
           "la_how_protect_desc": "Encrypted storage, secure servers",
           "la_how_long": "How long do we store the data?",
@@ -128,9 +136,11 @@ extension SettingsLocalization on String {
           "la_learn_more": "Learn more",
           // Live Activity privacy policy detail
           "la_pp_title": "Live Activity Privacy Policy",
-          "la_pp_intro": "To use the Live Activity feature, we need to store and process certain data. Please read the following information carefully.",
+          "la_pp_intro":
+              "To use the Live Activity feature, we need to store and process certain data. Please read the following information carefully.",
           "la_pp_what_title": "What data do we store?",
-          "la_pp_what_intro": "To enable Live Activity, we store the following data along with your device identifier:",
+          "la_pp_what_intro":
+              "To enable Live Activity, we store the following data along with your device identifier:",
           "la_pp_d1": "Device identifier (UUID)",
           "la_pp_d2": "Device token",
           "la_pp_d3": "Live Activity push token",
@@ -138,7 +148,8 @@ extension SettingsLocalization on String {
           "la_pp_d5": "Device hash",
           "la_pp_d6": "Language preference",
           "la_pp_d7": "Bell delay offset",
-          "la_pp_timetable_intro": "Your timetable data (lessons table) includes:",
+          "la_pp_timetable_intro":
+              "Your timetable data (lessons table) includes:",
           "la_pp_t1": "Lesson subject and time",
           "la_pp_t2": "Teacher's name",
           "la_pp_t3": "Room name",
@@ -146,25 +157,33 @@ extension SettingsLocalization on String {
           "la_pp_t5": "Lesson theme",
           "la_pp_t6": "Substitution info",
           "la_pp_t7": "Cancelled lesson status",
-          "la_pp_notifications_intro": "Scheduled notifications data (scheduled_notifications table) includes:",
+          "la_pp_notifications_intro":
+              "Scheduled notifications data (scheduled_notifications table) includes:",
           "la_pp_n1": "Identifier",
           "la_pp_n2": "Device identifier",
           "la_pp_n3": "Scheduled time",
           "la_pp_n4": "Sent status and time",
           "la_pp_n5": "Creation and update times",
           "la_pp_purpose_title": "Why do we use this data?",
-          "la_pp_purpose_intro": "We use the data exclusively for operating the Live Activity feature:",
+          "la_pp_purpose_intro":
+              "We use the data exclusively for operating the Live Activity feature:",
           "la_pp_p1": "Displaying live timetable on the lock screen",
           "la_pp_p2": "Sending push notifications when lessons change",
           "la_pp_p3": "Syncing your timetable on your device",
-          "la_pp_p4": "Ensuring Monday morning notifications are delivered even after the weekly database clearance",
-          "la_pp_no_third_party": "We do not share your data with third parties and do not use it for marketing purposes.",
+          "la_pp_p4":
+              "Ensuring Monday morning notifications are delivered even after the weekly database clearance",
+          "la_pp_no_third_party":
+              "We do not share your data with third parties and do not use it for marketing purposes.",
           "la_pp_rights_title": "Your Rights",
           "la_pp_rights_intro": "Under GDPR, you have the following rights:",
-          "la_pp_r1": "Right to access: You can review the types of data stored in this privacy policy.",
-          "la_pp_r2": "Right to erasure: By disabling the Live Activity feature, all data related to the feature (device identifiers, timetable) is immediately and permanently deleted from our servers.",
-          "la_pp_r3": "Right to rectification: Timetable data is modified in the Kréta system by authorized persons (e.g., teachers).",
-          "la_pp_r4": "Right to object: You can object to data processing at any time by disabling the Live Activity feature.",
+          "la_pp_r1":
+              "Right to access: You can review the types of data stored in this privacy policy.",
+          "la_pp_r2":
+              "Right to erasure: By disabling the Live Activity feature, all data related to the feature (device identifiers, timetable) is immediately and permanently deleted from our servers.",
+          "la_pp_r3":
+              "Right to rectification: Timetable data is modified in the Kréta system by authorized persons (e.g., teachers).",
+          "la_pp_r4":
+              "Right to object: You can object to data processing at any time by disabling the Live Activity feature.",
           "la_pp_updated": "Privacy policy last updated: November 2025",
           "la_pp_contact": "Have questions? Contact us at support@firka.app.",
           "fonts": "Fonts",
@@ -211,6 +230,12 @@ extension SettingsLocalization on String {
           "developer_settings": "Developer Settings",
           "material_you_color": "Theme Color",
           "material_you_system": "System",
+          "navbar_order": "Customize Navbar",
+          "navbar_section": "NAVBAR ITEMS",
+          "more_section": "MORE MENU ITEMS",
+          "navbar_slots": "%s / %s navbar slots used",
+          "navbar_more_fixed": "Always shown as last item",
+          "more_empty": "All pages are in the navbar",
         },
         "hu-HU": {
           "heads_up": "Figyelem!",
@@ -281,7 +306,8 @@ extension SettingsLocalization on String {
           "devsettings": "Fejlesztői Beállítások",
           "devmode": "Fejlesztői mód",
           "dev_fake_lessons": "Fake Live Activity órák",
-          "dev_fake_lessons_desc": "Teszt órákat generál a jelenlegi idő köré a Live Activity teszteléshez",
+          "dev_fake_lessons_desc":
+              "Teszt órákat generál a jelenlegi idő köré a Live Activity teszteléshez",
           "copy_jwt": "JWT másolása",
           "welcome_msg": "Üdvözlő üzenet",
           "default": "Dinamikus",
@@ -289,7 +315,7 @@ extension SettingsLocalization on String {
           "shadow_effect": "Árnyékhatás",
           "app_icon": "Alkalmazásikon",
           "settings": "Beállítások",
-          "personalization": "Személyre szabás",
+          "personalization": "Megjelenés",
           "edit": "Szerkesztés",
           "switch_account": "Fiókváltás",
           "subjects": "Tantárgyak",
@@ -297,7 +323,7 @@ extension SettingsLocalization on String {
           "own_paints": "Saját témák",
           "dl_paint": "Beszerzett",
           "public_paint": "Nyilvános témák",
-          "no_pub_paint": "Nincsenek nyilvános festékek",
+          "no_pub_paint": "Nincsenek nyilvános témák",
           "enter_id": "Azonosító megadása",
           "paint_id": "Téma azonosító...",
           "set_as_current": "Beállítás jelenleginek",
@@ -312,7 +338,8 @@ extension SettingsLocalization on String {
           "grades": "Jegyek",
           "search": "Keresés...",
           "goodstudent": "Jó tanuló mód",
-          "goodstudent_disclaimer": "A Folio nem vállal felelősséget a funkció használatáért.\n\n(ha anyád megver, mert hamis jegyeket mutattál neki, csak magadat okolhatod érte)",
+          "goodstudent_disclaimer":
+              "A Folio nem vállal felelősséget a funkció használatáért.\n\n(ha anyád megver, mert hamis jegyeket mutattál neki, csak magadat okolhatod érte)",
           "presentation": "Bemutató mód",
           "show_breaks": "Szünetek megjelenítése",
           "live_activity_enabled": "Live Activity",
@@ -320,26 +347,34 @@ extension SettingsLocalization on String {
           "android_notification_type": "Értesítés típusa",
           "native_android": "Natív Android",
           "live_activity_consent_title": "Live Activity – Adatvédelem",
-          "live_activity_consent_body": "A Live Activity funkció adatokat küld a szerverünkre a valós idejű push értesítés frissítésekhez.\n\nKüldött adatok:\n• Eszközazonosító\n• APNs push token\n• Órarendjeid\n\nCél:\n• Valós idejű Live Activity frissítések push értesítéssel\n\nAz adatokat titkosított szerveren tároljuk. Bármikor kikapcsolhatod a Beállítások > Általános menüben.",
+          "live_activity_consent_body":
+              "A Live Activity funkció adatokat küld a szerverünkre a valós idejű push értesítés frissítésekhez.\n\nKüldött adatok:\n• Eszközazonosító\n• APNs push token\n• Órarendjeid\n\nCél:\n• Valós idejű Live Activity frissítések push értesítéssel\n\nAz adatokat titkosított szerveren tároljuk. Bármikor kikapcsolhatod a Beállítások > Általános menüben.",
           "live_activity_accept": "Elfogadom",
           "live_activity_decline": "Elutasítom",
           // Live Activity consent screen
-          "la_consent_subtitle": "Jelenítsd meg az órarendedet élőben a zárolási képernyődön",
+          "la_consent_subtitle":
+              "Jelenítsd meg az órarendedet élőben a zárolási képernyődön",
           "la_privacy_policy": "Adatvédelmi szabályzat",
-          "la_privacy_warning": "A Live Activity használatához el kell fogadnod az adatvédelmi szabályzatot",
-          "la_consent_intro": "A Live Activity funkció használatához bizonyos adatokat kell tárolnunk és feldolgoznunk. Kérjük, olvasd el figyelmesen az alábbi tájékoztatást.",
+          "la_privacy_warning":
+              "A Live Activity használatához el kell fogadnod az adatvédelmi szabályzatot",
+          "la_consent_intro":
+              "A Live Activity funkció használatához bizonyos adatokat kell tárolnunk és feldolgoznunk. Kérjük, olvasd el figyelmesen az alábbi tájékoztatást.",
           "la_what_data": "Milyen adatokat tárolunk?",
-          "la_what_data_desc": "Eszköz tokenek, Live Activity tokenek, órarend adatok",
+          "la_what_data_desc":
+              "Eszköz tokenek, Live Activity tokenek, órarend adatok",
           "la_how_protect": "Hogyan védjük az adataidat?",
           "la_how_protect_desc": "Titkosított tárolás, biztonságos szerverek",
           "la_how_long": "Meddig tároljuk az adatokat?",
-          "la_how_long_desc": "Az adatok automatikusan törlődnek, ha már nincs rájuk szükség",
+          "la_how_long_desc":
+              "Az adatok automatikusan törlődnek, ha már nincs rájuk szükség",
           "la_learn_more": "Részletek",
           // Live Activity privacy policy detail
           "la_pp_title": "Live Activity Adatvédelmi Szabályzat",
-          "la_pp_intro": "A Live Activity funkció használatához bizonyos adatokat kell tárolnunk és feldolgoznunk. Kérjük, olvasd el figyelmesen az alábbi tájékoztatást.",
+          "la_pp_intro":
+              "A Live Activity funkció használatához bizonyos adatokat kell tárolnunk és feldolgoznunk. Kérjük, olvasd el figyelmesen az alábbi tájékoztatást.",
           "la_pp_what_title": "Milyen adatokat tárolunk?",
-          "la_pp_what_intro": "A Live Activity működéséhez az alábbi adatokat tároljuk az eszközazonosítóddal együtt:",
+          "la_pp_what_intro":
+              "A Live Activity működéséhez az alábbi adatokat tároljuk az eszközazonosítóddal együtt:",
           "la_pp_d1": "Eszközazonosító (UUID)",
           "la_pp_d2": "Eszköz token",
           "la_pp_d3": "Live Activity push token",
@@ -347,7 +382,8 @@ extension SettingsLocalization on String {
           "la_pp_d5": "Eszköz hash",
           "la_pp_d6": "Nyelvi beállítás",
           "la_pp_d7": "Csengő eltolódás értéke",
-          "la_pp_timetable_intro": "Az órarend adataid (lessons tábla) tartalmazzák:",
+          "la_pp_timetable_intro":
+              "Az órarend adataid (lessons tábla) tartalmazzák:",
           "la_pp_t1": "Óra tantárgya és időpontja",
           "la_pp_t2": "Tanár neve",
           "la_pp_t3": "Terem neve",
@@ -355,26 +391,35 @@ extension SettingsLocalization on String {
           "la_pp_t5": "Óra témája",
           "la_pp_t6": "Helyettesítési információ",
           "la_pp_t7": "Elmaradt óra státusz",
-          "la_pp_notifications_intro": "Ütemezett értesítések adatai (scheduled_notifications tábla) tartalmazzák:",
+          "la_pp_notifications_intro":
+              "Ütemezett értesítések adatai (scheduled_notifications tábla) tartalmazzák:",
           "la_pp_n1": "Azonosító",
           "la_pp_n2": "Eszközazonosító",
           "la_pp_n3": "Ütemezett időpont",
           "la_pp_n4": "Küldési státusz és időpont",
           "la_pp_n5": "Létrehozási és frissítési időpontok",
           "la_pp_purpose_title": "Miért használjuk ezeket az adatokat?",
-          "la_pp_purpose_intro": "Az adatokat kizárólag a Live Activity funkció működtetéséhez használjuk:",
+          "la_pp_purpose_intro":
+              "Az adatokat kizárólag a Live Activity funkció működtetéséhez használjuk:",
           "la_pp_p1": "Élő órarend megjelenítése a zárolási képernyőn",
           "la_pp_p2": "Push értesítések küldése óraváltozáskor",
           "la_pp_p3": "Órarend szinkronizálása az eszközödön",
-          "la_pp_p4": "Hétfő reggeli értesítések kézbesítésének biztosítása a heti adatbázis törlés után is",
-          "la_pp_no_third_party": "Adataidat nem adjuk át harmadik félnek és nem használjuk marketing célokra.",
+          "la_pp_p4":
+              "Hétfő reggeli értesítések kézbesítésének biztosítása a heti adatbázis törlés után is",
+          "la_pp_no_third_party":
+              "Adataidat nem adjuk át harmadik félnek és nem használjuk marketing célokra.",
           "la_pp_rights_title": "Jogaid",
           "la_pp_rights_intro": "A GDPR alapján az alábbi jogok illetnek meg:",
-          "la_pp_r1": "Hozzáférés joga: Áttekintheted a tárolt adatok típusait ebben az adatvédelmi szabályzatban.",
-          "la_pp_r2": "Törlés joga: A Live Activity funkció kikapcsolásával a funkcióhoz kapcsolódó összes adat (eszközazonosítók, órarend) azonnal és véglegesen törlődik a szervereinkről.",
-          "la_pp_r3": "Helyesbítés joga: Az órarend adatokat a Kréta rendszerben az arra jogosult személyek (pl. tanárok) módosítják.",
-          "la_pp_r4": "Tiltakozás joga: Bármikor tiltakozhatsz az adatfeldolgozás ellen a Live Activity funkció kikapcsolásával.",
-          "la_pp_updated": "Adatvédelmi szabályzat utolsó frissítése: 2025. november",
+          "la_pp_r1":
+              "Hozzáférés joga: Áttekintheted a tárolt adatok típusait ebben az adatvédelmi szabályzatban.",
+          "la_pp_r2":
+              "Törlés joga: A Live Activity funkció kikapcsolásával a funkcióhoz kapcsolódó összes adat (eszközazonosítók, órarend) azonnal és véglegesen törlődik a szervereinkről.",
+          "la_pp_r3":
+              "Helyesbítés joga: Az órarend adatokat a Kréta rendszerben az arra jogosult személyek (pl. tanárok) módosítják.",
+          "la_pp_r4":
+              "Tiltakozás joga: Bármikor tiltakozhatsz az adatfeldolgozás ellen a Live Activity funkció kikapcsolásával.",
+          "la_pp_updated":
+              "Adatvédelmi szabályzat utolsó frissítése: 2025. november",
           "la_pp_contact": "Kérdésed van? Írj nekünk: support@firka.app.",
           "fonts": "Betűk",
           "font_family": "Betűtípus",
@@ -420,6 +465,12 @@ extension SettingsLocalization on String {
           "success": "Siker!",
           "versiontext": "v%s, módosítva a Firka csapat által",
           "packagetext": "Folio, módosítva a Firka csapat által",
+          "navbar_order": "Navbar testreszabása",
+          "navbar_section": "NAVBAR ELEMEK",
+          "more_section": "TÖBB MENÜ ELEMEK",
+          "navbar_slots": "%s / %s navbar hely foglalt",
+          "navbar_more_fixed": "Mindig az utolsó helyen jelenik meg",
+          "more_empty": "Minden oldal a navbaron van",
         },
         "de-DE": {
           "heads_up": "Achtung!",
@@ -490,7 +541,8 @@ extension SettingsLocalization on String {
           "devsettings": "Entwickleroptionen",
           "devmode": "Entwicklermodus",
           "dev_fake_lessons": "Fake Live Activity Stunden",
-          "dev_fake_lessons_desc": "Generiert Teststunden um die aktuelle Zeit für Live Activity Tests",
+          "dev_fake_lessons_desc":
+              "Generiert Teststunden um die aktuelle Zeit für Live Activity Tests",
           "copy_jwt": "JWT kopieren",
           "welcome_msg": "Willkommensnachricht",
           "default": "Dynamisch",
@@ -521,7 +573,8 @@ extension SettingsLocalization on String {
           "grades": "Noten",
           "search": "Suchen...",
           "goodstudent": "Guter Student Modus",
-          "goodstudent_disclaimer": "Folio kann nicht für die Nutzung dieser Funktion haftbar gemacht werden.\n\n(Wenn deine Mutter dich verprügelt, weil du ihr falsche Noten gezeigt hast, kannst du dir nur die Schuld dafür geben)",
+          "goodstudent_disclaimer":
+              "Folio kann nicht für die Nutzung dieser Funktion haftbar gemacht werden.\n\n(Wenn deine Mutter dich verprügelt, weil du ihr falsche Noten gezeigt hast, kannst du dir nur die Schuld dafür geben)",
           "presentation": "Präsentationsmodus",
           "show_breaks": "Pausen anzeigen",
           "live_activity_enabled": "Live Activity",
@@ -529,26 +582,34 @@ extension SettingsLocalization on String {
           "android_notification_type": "Benachrichtigungstyp",
           "native_android": "Natives Android",
           "live_activity_consent_title": "Live Activity – Datenschutz",
-          "live_activity_consent_body": "Die Live Activity-Funktion sendet Daten an unseren Server für Echtzeit-Push-Benachrichtigungen.\n\nGesendete Daten:\n• Gerätekennung\n• APNs Push-Token\n• Ihr Stundenplan\n\nZweck:\n• Echtzeit Live Activity-Updates über Push-Benachrichtigungen\n\nDaten werden auf einem verschlüsselten Server gespeichert. Sie können dies jederzeit unter Einstellungen > Allgemein deaktivieren.",
+          "live_activity_consent_body":
+              "Die Live Activity-Funktion sendet Daten an unseren Server für Echtzeit-Push-Benachrichtigungen.\n\nGesendete Daten:\n• Gerätekennung\n• APNs Push-Token\n• Ihr Stundenplan\n\nZweck:\n• Echtzeit Live Activity-Updates über Push-Benachrichtigungen\n\nDaten werden auf einem verschlüsselten Server gespeichert. Sie können dies jederzeit unter Einstellungen > Allgemein deaktivieren.",
           "live_activity_accept": "Akzeptieren",
           "live_activity_decline": "Ablehnen",
           // Live Activity consent screen
-          "la_consent_subtitle": "Zeigen Sie Ihren Stundenplan live auf Ihrem Sperrbildschirm an",
+          "la_consent_subtitle":
+              "Zeigen Sie Ihren Stundenplan live auf Ihrem Sperrbildschirm an",
           "la_privacy_policy": "Datenschutzrichtlinie",
-          "la_privacy_warning": "Um Live Activity zu nutzen, müssen Sie die Datenschutzrichtlinie akzeptieren",
-          "la_consent_intro": "Um die Live Activity-Funktion zu nutzen, müssen wir bestimmte Daten speichern und verarbeiten. Bitte lesen Sie die folgenden Informationen sorgfältig durch.",
+          "la_privacy_warning":
+              "Um Live Activity zu nutzen, müssen Sie die Datenschutzrichtlinie akzeptieren",
+          "la_consent_intro":
+              "Um die Live Activity-Funktion zu nutzen, müssen wir bestimmte Daten speichern und verarbeiten. Bitte lesen Sie die folgenden Informationen sorgfältig durch.",
           "la_what_data": "Welche Daten speichern wir?",
-          "la_what_data_desc": "Geräte-Tokens, Live Activity-Tokens, Stundenplan-Daten",
+          "la_what_data_desc":
+              "Geräte-Tokens, Live Activity-Tokens, Stundenplan-Daten",
           "la_how_protect": "Wie schützen wir Ihre Daten?",
           "la_how_protect_desc": "Verschlüsselte Speicherung, sichere Server",
           "la_how_long": "Wie lange speichern wir die Daten?",
-          "la_how_long_desc": "Daten werden automatisch gelöscht, wenn sie nicht mehr benötigt werden",
+          "la_how_long_desc":
+              "Daten werden automatisch gelöscht, wenn sie nicht mehr benötigt werden",
           "la_learn_more": "Mehr erfahren",
           // Live Activity privacy policy detail
           "la_pp_title": "Live Activity Datenschutzrichtlinie",
-          "la_pp_intro": "Um die Live Activity-Funktion zu nutzen, müssen wir bestimmte Daten speichern und verarbeiten. Bitte lesen Sie die folgenden Informationen sorgfältig durch.",
+          "la_pp_intro":
+              "Um die Live Activity-Funktion zu nutzen, müssen wir bestimmte Daten speichern und verarbeiten. Bitte lesen Sie die folgenden Informationen sorgfältig durch.",
           "la_pp_what_title": "Welche Daten speichern wir?",
-          "la_pp_what_intro": "Um Live Activity zu aktivieren, speichern wir die folgenden Daten zusammen mit Ihrer Gerätekennung:",
+          "la_pp_what_intro":
+              "Um Live Activity zu aktivieren, speichern wir die folgenden Daten zusammen mit Ihrer Gerätekennung:",
           "la_pp_d1": "Gerätekennung (UUID)",
           "la_pp_d2": "Geräte-Token",
           "la_pp_d3": "Live Activity Push-Token",
@@ -556,7 +617,8 @@ extension SettingsLocalization on String {
           "la_pp_d5": "Geräte-Hash",
           "la_pp_d6": "Spracheinstellung",
           "la_pp_d7": "Klingelverzögerungswert",
-          "la_pp_timetable_intro": "Ihre Stundenplan-Daten (Unterrichtstabelle) umfassen:",
+          "la_pp_timetable_intro":
+              "Ihre Stundenplan-Daten (Unterrichtstabelle) umfassen:",
           "la_pp_t1": "Unterrichtsfach und -zeit",
           "la_pp_t2": "Name des Lehrers",
           "la_pp_t3": "Raumname",
@@ -564,27 +626,38 @@ extension SettingsLocalization on String {
           "la_pp_t5": "Unterrichtsthema",
           "la_pp_t6": "Vertretungsinformationen",
           "la_pp_t7": "Status ausgefallener Stunden",
-          "la_pp_notifications_intro": "Geplante Benachrichtigungsdaten (scheduled_notifications Tabelle) umfassen:",
+          "la_pp_notifications_intro":
+              "Geplante Benachrichtigungsdaten (scheduled_notifications Tabelle) umfassen:",
           "la_pp_n1": "Kennung",
           "la_pp_n2": "Gerätekennung",
           "la_pp_n3": "Geplante Zeit",
           "la_pp_n4": "Sendestatus und -zeit",
           "la_pp_n5": "Erstellungs- und Aktualisierungszeiten",
           "la_pp_purpose_title": "Warum verwenden wir diese Daten?",
-          "la_pp_purpose_intro": "Wir verwenden die Daten ausschließlich für den Betrieb der Live Activity-Funktion:",
+          "la_pp_purpose_intro":
+              "Wir verwenden die Daten ausschließlich für den Betrieb der Live Activity-Funktion:",
           "la_pp_p1": "Anzeige des Live-Stundenplans auf dem Sperrbildschirm",
-          "la_pp_p2": "Senden von Push-Benachrichtigungen bei Stundenänderungen",
+          "la_pp_p2":
+              "Senden von Push-Benachrichtigungen bei Stundenänderungen",
           "la_pp_p3": "Synchronisation Ihres Stundenplans auf Ihrem Gerät",
-          "la_pp_p4": "Sicherstellung der Montagmorgen-Benachrichtigungen auch nach der wöchentlichen Datenbankbereinigung",
-          "la_pp_no_third_party": "Wir geben Ihre Daten nicht an Dritte weiter und verwenden sie nicht für Marketingzwecke.",
+          "la_pp_p4":
+              "Sicherstellung der Montagmorgen-Benachrichtigungen auch nach der wöchentlichen Datenbankbereinigung",
+          "la_pp_no_third_party":
+              "Wir geben Ihre Daten nicht an Dritte weiter und verwenden sie nicht für Marketingzwecke.",
           "la_pp_rights_title": "Ihre Rechte",
           "la_pp_rights_intro": "Gemäß DSGVO haben Sie folgende Rechte:",
-          "la_pp_r1": "Recht auf Auskunft: Sie können die in dieser Datenschutzrichtlinie gespeicherten Datentypen einsehen.",
-          "la_pp_r2": "Recht auf Löschung: Durch Deaktivierung der Live Activity-Funktion werden alle funktionsbezogenen Daten (Gerätekennungen, Stundenplan) sofort und dauerhaft von unseren Servern gelöscht.",
-          "la_pp_r3": "Recht auf Berichtigung: Stundenplan-Daten werden im Kréta-System von autorisierten Personen (z.B. Lehrern) geändert.",
-          "la_pp_r4": "Widerspruchsrecht: Sie können der Datenverarbeitung jederzeit widersprechen, indem Sie die Live Activity-Funktion deaktivieren.",
-          "la_pp_updated": "Datenschutzrichtlinie zuletzt aktualisiert: November 2025",
-          "la_pp_contact": "Fragen? Kontaktieren Sie uns unter support@firka.app.",
+          "la_pp_r1":
+              "Recht auf Auskunft: Sie können die in dieser Datenschutzrichtlinie gespeicherten Datentypen einsehen.",
+          "la_pp_r2":
+              "Recht auf Löschung: Durch Deaktivierung der Live Activity-Funktion werden alle funktionsbezogenen Daten (Gerätekennungen, Stundenplan) sofort und dauerhaft von unseren Servern gelöscht.",
+          "la_pp_r3":
+              "Recht auf Berichtigung: Stundenplan-Daten werden im Kréta-System von autorisierten Personen (z.B. Lehrern) geändert.",
+          "la_pp_r4":
+              "Widerspruchsrecht: Sie können der Datenverarbeitung jederzeit widersprechen, indem Sie die Live Activity-Funktion deaktivieren.",
+          "la_pp_updated":
+              "Datenschutzrichtlinie zuletzt aktualisiert: November 2025",
+          "la_pp_contact":
+              "Fragen? Kontaktieren Sie uns unter support@firka.app.",
           "fonts": "Schriftarten",
           "font_family": "Schriftfamilie",
           "calendar_sync": "Kalender-Synchronisation",
@@ -629,6 +702,12 @@ extension SettingsLocalization on String {
           "developer_settings": "Entwickleroptionen",
           "material_you_color": "Themenfarbe",
           "material_you_system": "System",
+          "navbar_order": "Navbar anpassen",
+          "navbar_section": "NAVBAR ELEMENTE",
+          "more_section": "MEHR MENÜ ELEMENTE",
+          "navbar_slots": "%s / %s Navbar-Slots belegt",
+          "navbar_more_fixed": "Wird immer als letztes Element angezeigt",
+          "more_empty": "Alle Seiten sind in der Navbar",
         },
       };
 
@@ -637,4 +716,3 @@ extension SettingsLocalization on String {
   String plural(int value) => localizePlural(value, this, _t);
   String version(Object modifier) => localizeVersion(modifier, this, _t);
 }
-

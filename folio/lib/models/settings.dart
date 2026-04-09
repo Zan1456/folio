@@ -130,6 +130,8 @@ class SettingsProvider extends ChangeNotifier {
   bool _liveCountdownDuringBreak;
   // material you seed color (0 = use system)
   int _adaptiveSeedColor;
+  // navbar order (JSON-encoded list of page names)
+  String _navbarOrder;
 
   SettingsProvider({
     DatabaseProvider? database,
@@ -218,6 +220,7 @@ class SettingsProvider extends ChangeNotifier {
     required bool liveCountdownDuringLesson,
     required bool liveCountdownDuringBreak,
     int adaptiveSeedColor = 0,
+    String navbarOrder = '["home","grades","timetable"]',
   })  : _database = database,
         _language = language,
         _startPage = startPage,
@@ -303,7 +306,8 @@ class SettingsProvider extends ChangeNotifier {
         _liveCountdownBeforeMinutes = liveCountdownBeforeMinutes,
         _liveCountdownDuringLesson = liveCountdownDuringLesson,
         _liveCountdownDuringBreak = liveCountdownDuringBreak,
-        _adaptiveSeedColor = adaptiveSeedColor;
+        _adaptiveSeedColor = adaptiveSeedColor,
+        _navbarOrder = navbarOrder;
 
   factory SettingsProvider.fromMap(Map map,
       {required DatabaseProvider database}) {
@@ -411,6 +415,7 @@ class SettingsProvider extends ChangeNotifier {
           (map['live_countdown_during_lesson'] ?? 1) == 1,
       liveCountdownDuringBreak: (map['live_countdown_during_break'] ?? 1) == 1,
       adaptiveSeedColor: map['adaptive_seed_color'] ?? 0,
+      navbarOrder: map['navbar_order'] ?? '["home","grades","timetable"]',
     );
   }
 
@@ -504,6 +509,7 @@ class SettingsProvider extends ChangeNotifier {
       "live_countdown_during_lesson": _liveCountdownDuringLesson ? 1 : 0,
       "live_countdown_during_break": _liveCountdownDuringBreak ? 1 : 0,
       "adaptive_seed_color": _adaptiveSeedColor,
+      "navbar_order": _navbarOrder,
     };
   }
 
@@ -690,6 +696,13 @@ class SettingsProvider extends ChangeNotifier {
   // null means "use system color"
   Color? get adaptiveSeedColor =>
       _adaptiveSeedColor == 0 ? null : Color(_adaptiveSeedColor);
+  List<String> get navbarOrder {
+    try {
+      return (jsonDecode(_navbarOrder) as List).cast<String>();
+    } catch (_) {
+      return ["home", "grades", "timetable"];
+    }
+  }
 
   Future<void> update({
     bool store = true,
@@ -774,6 +787,7 @@ class SettingsProvider extends ChangeNotifier {
     bool? liveCountdownDuringLesson,
     bool? liveCountdownDuringBreak,
     int? adaptiveSeedColor,
+    String? navbarOrder,
   }) async {
     if (language != null && language != _language) _language = language;
     if (startPage != null && startPage != _startPage) _startPage = startPage;
@@ -1031,6 +1045,9 @@ class SettingsProvider extends ChangeNotifier {
     }
     if (adaptiveSeedColor != null && adaptiveSeedColor != _adaptiveSeedColor) {
       _adaptiveSeedColor = adaptiveSeedColor;
+    }
+    if (navbarOrder != null && navbarOrder != _navbarOrder) {
+      _navbarOrder = navbarOrder;
     }
     // change updated at time
     _updatedAt = DateTime.now();

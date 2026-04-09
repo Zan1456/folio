@@ -239,6 +239,7 @@ class AbsencesPageState extends State<AbsencesPage>
                     padding: const EdgeInsets.fromLTRB(20.0, 12.0, 8.0, 0.0),
                     child: Row(
                       children: [
+                        if (Navigator.of(context).canPop()) ...[
                         GestureDetector(
                           onTap: () => Navigator.of(context).maybePop(),
                           child: Container(
@@ -260,6 +261,7 @@ class AbsencesPageState extends State<AbsencesPage>
                           ),
                         ),
                         const SizedBox(width: 12.0),
+                        ],
                         Expanded(
                           child: Text(
                             "Absences".i18n,

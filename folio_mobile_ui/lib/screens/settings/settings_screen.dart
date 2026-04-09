@@ -42,6 +42,7 @@ import 'package:folio_mobile_ui/common/panel/panel_button.dart';
 import 'package:folio_mobile_ui/common/splitted_panel/splitted_panel.dart';
 import 'package:folio_mobile_ui/common/widgets/update/update_viewable.dart';
 import 'package:folio_mobile_ui/screens/settings/live_activity_consent_dialog.dart';
+import 'package:folio_mobile_ui/screens/settings/navbar_order_screen.dart';
 import 'package:folio_mobile_ui/screens/settings/privacy_view.dart';
 import 'package:folio_mobile_ui/screens/settings/settings_helper.dart';
 import 'package:flutter/cupertino.dart';
@@ -1732,6 +1733,33 @@ class SettingsScreenState extends State<SettingsScreen>
                   value: settings.shadowEffect,
                   activeColor: Theme.of(context).colorScheme.secondary,
                 ),
+                borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(12.0), bottom: Radius.circular(12.0)),
+              ),
+            ],
+          ),
+        ),
+      ),
+
+      // Navbar order
+      _SettingsSection(
+        category: 'appearance',
+        searchTerms: [
+          'navbar',
+          'navigáció',
+          'navigation',
+          'átrendezés',
+          'reorder',
+          'menü',
+          'menu',
+        ],
+        widget: Padding(
+          padding: const EdgeInsets.only(top: 2.0),
+          child: SplittedPanel(
+            cardPadding: const EdgeInsets.all(4.0),
+            isSeparated: false,
+            children: [
+              MenuNavbarOrder(
                 borderRadius: const BorderRadius.vertical(
                     top: Radius.circular(12.0), bottom: Radius.circular(12.0)),
               ),

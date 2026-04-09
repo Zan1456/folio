@@ -10,6 +10,7 @@ import 'package:folio_mobile_ui/common/screens.i18n.dart';
 import 'package:folio_mobile_ui/pages/absences/absences_page.dart';
 import 'package:folio_mobile_ui/pages/messages/messages_page.dart';
 import 'package:folio_mobile_ui/pages/notes/notes_page.dart';
+import 'package:folio_mobile_ui/screens/navigation/navigation_screen.dart';
 import 'package:folio_mobile_ui/screens/settings/profile_screen.dart';
 import 'package:folio_mobile_ui/screens/settings/settings_screen.dart';
 
@@ -123,62 +124,68 @@ class MoreMenu extends StatelessWidget {
             ),
           ),
 
-          const SizedBox(height: 12.0),
+          // Action cards: all pages NOT in the navbar
+          Builder(builder: (context) {
+            const allPages = [
+              "home", "grades", "timetable", "messages", "absences", "notes"
+            ];
+            final navbarOrder = settings.navbarOrder;
+            final morePages = allPages
+                .where((p) => !navbarOrder.contains(p))
+                .toList();
+            if (morePages.isEmpty) return const SizedBox.shrink();
 
-          // Action cards row
-          Row(
-            children: [
-              Expanded(
-                child: _ActionCard(
-                  icon: Icons.chat_bubble_outline_rounded,
-                  title: "messages".i18n,
-                  color: colorScheme.secondaryContainer,
-                  iconColor: colorScheme.onSecondaryContainer,
-                  onTap: () {
-                    performHapticFeedback(settings.vibrate);
-                    Navigator.of(context).pop();
-                    Navigator.of(outsideContext, rootNavigator: true).push(
-                      CupertinoPageRoute(
-                          builder: (_) => const MessagesPage()),
-                    );
-                  },
-                ),
-              ),
-              const SizedBox(width: 10.0),
-              Expanded(
-                child: _ActionCard(
-                  icon: Icons.person_off_rounded,
-                  title: "absences".i18n,
-                  color: colorScheme.tertiaryContainer,
-                  iconColor: colorScheme.onTertiaryContainer,
-                  onTap: () {
-                    performHapticFeedback(settings.vibrate);
-                    Navigator.of(context).pop();
-                    Navigator.of(outsideContext, rootNavigator: true).push(
-                      CupertinoPageRoute(
-                          builder: (_) => const AbsencesPage()),
-                    );
-                  },
-                ),
-              ),
-              const SizedBox(width: 10.0),
-              Expanded(
-                child: _ActionCard(
-                  icon: Icons.menu_book_rounded,
-                  title: "notes".i18n,
-                  color: colorScheme.primaryContainer,
-                  iconColor: colorScheme.onPrimaryContainer,
-                  onTap: () {
-                    performHapticFeedback(settings.vibrate);
-                    Navigator.of(context).pop();
-                    Navigator.of(outsideContext, rootNavigator: true).push(
-                      CupertinoPageRoute(builder: (_) => const NotesPage()),
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
+            // Split into rows of max 3
+            final rows = <List<String>>[];
+            for (var i = 0; i < morePages.length; i += 3) {
+              rows.add(morePages.sublist(
+                  i, i + 3 > morePages.length ? morePages.length : i + 3));
+            }
+
+            return Column(
+              children: rows.map((rowPages) {
+                return Padding(
+                  padding: const EdgeInsets.only(top: 12.0),
+                  child: Row(
+                    children: rowPages
+                        .asMap()
+                        .entries
+                        .expand((entry) {
+                          final i = entry.key;
+                          final page = entry.value;
+                          return [
+                            if (i > 0) const SizedBox(width: 10.0),
+                            Expanded(
+                              child: _ActionCard(
+                                icon: _pageIcon(page),
+                                title: page.i18n,
+                                color: _pageColor(page, colorScheme),
+                                iconColor: _pageIconColor(page, colorScheme),
+                                onTap: () {
+                                  performHapticFeedback(settings.vibrate);
+                                  Navigator.of(context).pop();
+                                  if (page == "home" ||
+                                      page == "grades" ||
+                                      page == "timetable") {
+                                    NavigationScreen.of(outsideContext)
+                                        ?.navigateToPage(page);
+                                  } else {
+                                    Navigator.of(outsideContext,
+                                            rootNavigator: true)
+                                        .push(CupertinoPageRoute(
+                                            builder: (_) => _buildPage(page)));
+                                  }
+                                },
+                              ),
+                            ),
+                          ];
+                        })
+                        .toList(),
+                  ),
+                );
+              }).toList(),
+            );
+          }),
 
           const SizedBox(height: 12.0),
 
@@ -236,6 +243,76 @@ class MoreMenu extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+IconData _pageIcon(String page) {
+  switch (page) {
+    case "home":
+      return Icons.today_rounded;
+    case "grades":
+      return Icons.school_rounded;
+    case "timetable":
+      return Icons.calendar_today_rounded;
+    case "messages":
+      return Icons.chat_bubble_outline_rounded;
+    case "absences":
+      return Icons.person_off_rounded;
+    case "notes":
+      return Icons.menu_book_rounded;
+    default:
+      return Icons.circle_outlined;
+  }
+}
+
+Color _pageColor(String page, ColorScheme colorScheme) {
+  switch (page) {
+    case "home":
+      return colorScheme.primaryContainer;
+    case "grades":
+      return colorScheme.secondaryContainer;
+    case "timetable":
+      return colorScheme.tertiaryContainer;
+    case "messages":
+      return colorScheme.secondaryContainer;
+    case "absences":
+      return colorScheme.tertiaryContainer;
+    case "notes":
+      return colorScheme.primaryContainer;
+    default:
+      return colorScheme.surfaceContainerHigh;
+  }
+}
+
+Color _pageIconColor(String page, ColorScheme colorScheme) {
+  switch (page) {
+    case "home":
+      return colorScheme.onPrimaryContainer;
+    case "grades":
+      return colorScheme.onSecondaryContainer;
+    case "timetable":
+      return colorScheme.onTertiaryContainer;
+    case "messages":
+      return colorScheme.onSecondaryContainer;
+    case "absences":
+      return colorScheme.onTertiaryContainer;
+    case "notes":
+      return colorScheme.onPrimaryContainer;
+    default:
+      return colorScheme.onSurface;
+  }
+}
+
+Widget _buildPage(String page) {
+  switch (page) {
+    case "messages":
+      return const MessagesPage();
+    case "absences":
+      return const AbsencesPage();
+    case "notes":
+      return const NotesPage();
+    default:
+      return const MessagesPage();
   }
 }
 

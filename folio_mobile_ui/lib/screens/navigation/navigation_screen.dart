@@ -113,9 +113,11 @@ class NavigationScreenState extends State<NavigationScreen>
     super.initState();
 
     settings = Provider.of<SettingsProvider>(context, listen: false);
-    selected = NavigationRoute();
-    // Clamp to valid page indices (0-2, index 3 is the "Több" popup)
-    final startIndex = settings.startPage.index.clamp(0, 2);
+    final navbarOrder = settings.navbarOrder;
+    selected = NavigationRoute(pageMap: navbarOrder);
+    // Find start page in navbar order, default to 0
+    int startIndex = navbarOrder.indexOf(settings.startPage.name);
+    if (startIndex < 0) startIndex = 0;
     selected.index = startIndex;
 
     // add brightness observer
@@ -182,6 +184,11 @@ class NavigationScreenState extends State<NavigationScreen>
 
   void setPage(String page) => setState(() => selected.name = page);
 
+  void navigateToPage(String page) {
+    setState(() => selected.name = page);
+    _navigatorState.currentState?.pushReplacementNamed(selected.name);
+  }
+
   @override
   Widget build(BuildContext context) {
     setSystemChrome(context);
@@ -189,6 +196,10 @@ class NavigationScreenState extends State<NavigationScreen>
     newsProvider = Provider.of<NewsProvider>(context);
     goalProvider = Provider.of<GoalProvider>(context);
     final user = Provider.of<UserProvider>(context);
+
+    // Sync selected route with current navbar order
+    final navbarOrder = settings.navbarOrder;
+    selected.updatePageMap(navbarOrder);
     final navUpdateProvider = Provider.of<UpdateProvider>(context);
     final navNameParts = user.displayName?.split(" ") ?? ["?"];
     final navFirstName = settings.presentationMode
@@ -249,77 +260,13 @@ class NavigationScreenState extends State<NavigationScreen>
               selectedIndex: selected.index,
               onSelected: onPageSelected,
               items: [
-                NavItem(
-                  title: "home".i18n,
-                  icon: Stack(
-                    alignment: AlignmentDirectional.center,
-                    children: [
-                      SvgPicture.asset(
-                        'assets/svg/menu_icons/today.svg',
-                        color: Theme.of(context).colorScheme.secondary,
-                        height: 24,
-                      ),
-                      Transform.translate(
-                        offset: const Offset(0, 1.6),
-                        child: Text(
-                          DateTime.now().day.toString(),
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.secondary,
-                            fontWeight: FontWeight.w600,
-                            fontSize: DateTime.now().day > 9 ? 12.1 : null,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  activeIcon: Stack(
-                    alignment: AlignmentDirectional.center,
-                    children: [
-                      SvgPicture.asset(
-                        'assets/svg/menu_icons/today_selected.svg',
-                        color: Theme.of(context).colorScheme.secondary,
-                        height: 24,
-                      ),
-                      Transform.translate(
-                        offset: const Offset(0, 1.8),
-                        child: Text(
-                          DateTime.now().day.toString(),
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.background,
-                            fontWeight: FontWeight.w500,
-                            fontSize: DateTime.now().day > 9 ? 12.1 : null,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                NavItem(
-                  title: "grades".i18n,
-                  icon: SvgPicture.asset(
-                    'assets/svg/menu_icons/grades.svg',
-                    color: Theme.of(context).colorScheme.secondary,
-                    height: 22,
-                  ),
-                  activeIcon: SvgPicture.asset(
-                    'assets/svg/menu_icons/grades_selected.svg',
-                    color: Theme.of(context).colorScheme.secondary,
-                    height: 22,
-                  ),
-                ),
-                NavItem(
-                  title: "timetable".i18n,
-                  icon: SvgPicture.asset(
-                    'assets/svg/menu_icons/timetable.svg',
-                    color: Theme.of(context).colorScheme.secondary,
-                    height: 22,
-                  ),
-                  activeIcon: SvgPicture.asset(
-                    'assets/svg/menu_icons/timetable_selected.svg',
-                    color: Theme.of(context).colorScheme.secondary,
-                    height: 22,
-                  ),
-                ),
+                ...navbarOrder.map((page) => _buildNavItem(
+                      context,
+                      page: page,
+                      navFirstName: navFirstName,
+                      navUpdateProvider: navUpdateProvider,
+                      user: user,
+                    )),
                 NavItem(
                   title: "more".i18n,
                   icon: ProfileImage(
@@ -349,9 +296,144 @@ class NavigationScreenState extends State<NavigationScreen>
     );
   }
 
+  NavItem _buildNavItem(
+    BuildContext context, {
+    required String page,
+    required String navFirstName,
+    required UpdateProvider navUpdateProvider,
+    required UserProvider user,
+  }) {
+    final color = Theme.of(context).colorScheme.secondary;
+    switch (page) {
+      case "home":
+        return NavItem(
+          title: "home".i18n,
+          icon: Stack(
+            alignment: AlignmentDirectional.center,
+            children: [
+              SvgPicture.asset(
+                'assets/svg/menu_icons/today.svg',
+                color: color,
+                height: 24,
+              ),
+              Transform.translate(
+                offset: const Offset(0, 1.6),
+                child: Text(
+                  DateTime.now().day.toString(),
+                  style: TextStyle(
+                    color: color,
+                    fontWeight: FontWeight.w600,
+                    fontSize: DateTime.now().day > 9 ? 12.1 : null,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          activeIcon: Stack(
+            alignment: AlignmentDirectional.center,
+            children: [
+              SvgPicture.asset(
+                'assets/svg/menu_icons/today_selected.svg',
+                color: color,
+                height: 24,
+              ),
+              Transform.translate(
+                offset: const Offset(0, 1.8),
+                child: Text(
+                  DateTime.now().day.toString(),
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.background,
+                    fontWeight: FontWeight.w500,
+                    fontSize: DateTime.now().day > 9 ? 12.1 : null,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      case "grades":
+        return NavItem(
+          title: "grades".i18n,
+          icon: SvgPicture.asset(
+            'assets/svg/menu_icons/grades.svg',
+            color: color,
+            height: 22,
+          ),
+          activeIcon: SvgPicture.asset(
+            'assets/svg/menu_icons/grades_selected.svg',
+            color: color,
+            height: 22,
+          ),
+        );
+      case "timetable":
+        return NavItem(
+          title: "timetable".i18n,
+          icon: SvgPicture.asset(
+            'assets/svg/menu_icons/timetable.svg',
+            color: color,
+            height: 22,
+          ),
+          activeIcon: SvgPicture.asset(
+            'assets/svg/menu_icons/timetable_selected.svg',
+            color: color,
+            height: 22,
+          ),
+        );
+      case "messages":
+        return NavItem(
+          title: "messages".i18n,
+          icon: SvgPicture.asset(
+            'assets/svg/menu_icons/inbox.svg',
+            color: color,
+            height: 22,
+          ),
+          activeIcon: SvgPicture.asset(
+            'assets/svg/menu_icons/inbox_selected.svg',
+            color: color,
+            height: 22,
+          ),
+        );
+      case "absences":
+        return NavItem(
+          title: "absences".i18n,
+          icon: SvgPicture.asset(
+            'assets/svg/menu_icons/absences.svg',
+            color: color,
+            height: 22,
+          ),
+          activeIcon: SvgPicture.asset(
+            'assets/svg/menu_icons/absences_selected.svg',
+            color: color,
+            height: 22,
+          ),
+        );
+      case "notes":
+        return NavItem(
+          title: "notes".i18n,
+          icon: SvgPicture.asset(
+            'assets/svg/menu_icons/notes.svg',
+            color: color,
+            height: 22,
+          ),
+          activeIcon: SvgPicture.asset(
+            'assets/svg/menu_icons/notes_selected.svg',
+            color: color,
+            height: 22,
+          ),
+        );
+      default:
+        return NavItem(
+          title: page,
+          icon: const Icon(Icons.circle_outlined),
+          activeIcon: const Icon(Icons.circle),
+        );
+    }
+  }
+
   void onPageSelected(int index) {
-    // "Több" button (index 3) opens popup, does not navigate
-    if (index == 3) {
+    final navbarOrder = settings.navbarOrder;
+    // "Több" button is always the last item
+    if (index == navbarOrder.length) {
       switch (settings.vibrate) {
         case VibrationStrength.light:
           HapticFeedback.lightImpact();

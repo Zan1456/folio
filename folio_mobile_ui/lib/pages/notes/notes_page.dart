@@ -299,6 +299,7 @@ if (selfNoteProvider.todos.isNotEmpty) {
                     padding: const EdgeInsets.fromLTRB(20.0, 12.0, 20.0, 12.0),
                     child: Row(
                       children: [
+                        if (Navigator.of(context).canPop()) ...[
                         GestureDetector(
                           onTap: () {
                             performHapticFeedback(settings.vibrate);
@@ -318,6 +319,7 @@ if (selfNoteProvider.todos.isNotEmpty) {
                           ),
                         ),
                         const SizedBox(width: 12.0),
+                        ],
                         Expanded(
                           child: Text(
                             "notes".i18n,
