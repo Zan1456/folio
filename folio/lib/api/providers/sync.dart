@@ -120,11 +120,13 @@ Future<void> syncAll(BuildContext context) async {
       Student student = Student.fromJson(studentJson);
 
       user.user?.name = student.name;
+      user.user?.student = student;
 
       // Store user
       await Provider.of<DatabaseProvider>(context, listen: false)
           .store
           .storeUser(user.user!);
+      user.refresh();
     }()),
   ];
 
