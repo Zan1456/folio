@@ -1,7 +1,7 @@
-# /refilc
-refilc/debug-info/
+# /folio
+folio/debug-info/
 
-# /refilc/android
+# /folio/android
 folio/android/*.jks
 folio/android/*key.properties
 **/.gradle/
