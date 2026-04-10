@@ -1,6 +1,7 @@
 import 'package:folio_kreta_api/models/event.dart';
+import 'package:folio/theme/colors/colors.dart';
 import 'package:folio/utils/format.dart';
-import 'package:folio_mobile_ui/common/profile_image/profile_image.dart';
+import 'package:folio_mobile_ui/common/round_border_icon.dart';
 import 'package:flutter/material.dart';
 
 class EventTile extends StatelessWidget {
@@ -13,8 +14,7 @@ class EventTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Theme.of(context).colorScheme.surface,
-      borderRadius: BorderRadius.circular(14.0),
+      type: MaterialType.transparency,
       child: Padding(
         padding: padding ?? const EdgeInsets.symmetric(horizontal: 8.0),
         child: Theme(
@@ -24,13 +24,17 @@ class EventTile extends StatelessWidget {
           ),
           child: ListTile(
             visualDensity: VisualDensity.compact,
-            contentPadding: const EdgeInsets.only(left: 8.0, right: 12.0),
+            contentPadding: const EdgeInsets.only(left: 8.0, right: 10.0),
             onTap: onTap,
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(14.0)),
-            leading: const ProfileImage(
-              name: "!",
-              radius: 19.2,
+            leading: RoundBorderIcon(
+              icon: const Icon(
+                Icons.campaign_outlined,
+                size: 22.0,
+              ),
+              padding: 6.0,
+              width: 1.0,
             ),
             title: Text(
               event.title,
@@ -43,6 +47,14 @@ class EventTile extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(fontWeight: FontWeight.w500),
+            ),
+            trailing: Text(
+              event.start.format(context),
+              style: TextStyle(
+                fontWeight: FontWeight.w500,
+                fontSize: 14.0,
+                color: AppColors.of(context).text.withValues(alpha: .75),
+              ),
             ),
             minLeadingWidth: 0,
           ),

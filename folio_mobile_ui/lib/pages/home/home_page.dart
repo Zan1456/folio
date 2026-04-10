@@ -3,8 +3,8 @@ import 'dart:math';
 
 import 'package:google_fonts/google_fonts.dart';
 import 'package:folio/api/providers/live_card_provider.dart';
-import 'package:folio/theme/colors/colors.dart';
 import 'package:folio/ui/date_widget.dart';
+import 'package:folio/theme/colors/colors.dart';
 import 'package:folio/utils/format.dart';
 import 'package:i18n_extension/i18n_extension.dart';
 import 'package:intl/intl.dart';
@@ -164,7 +164,9 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
       greeting = "goodmorning";
     }
 
-    greeting = customWelcome ? greeting : Localization(greeting.i18n).fill([firstName]);
+    greeting = customWelcome
+        ? greeting
+        : Localization(greeting.i18n).fill([firstName]);
   }
 
   @override
@@ -203,7 +205,8 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
                           return SliverAppBar(
                             automaticallyImplyLeading: false,
-                            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                            backgroundColor:
+                                Theme.of(context).scaffoldBackgroundColor,
                             surfaceTintColor: Colors.transparent,
                             scrolledUnderElevation: 0.0,
                             shape: const RoundedRectangleBorder(),
@@ -261,14 +264,18 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
                             expandedHeight: _liveCardAnimation.value *
                                 (_liveCard.currentState == LiveCardState.morning
-                                    ? 286.0
-                                    : (_liveCard.currentState == LiveCardState.duringLesson
-                                        ? (_liveCard.currentLesson?.description.isNotEmpty == true
-                                            ? 326.0
-                                            : 300.0)
-                                        : (_liveCard.currentState == LiveCardState.duringBreak
-                                            ? 300.0
-                                            : 230.0))),
+                                    ? 254.0
+                                    : (_liveCard.currentState ==
+                                            LiveCardState.duringLesson
+                                        ? (_liveCard.currentLesson?.description
+                                                    .isNotEmpty ==
+                                                true
+                                            ? 288.0
+                                            : 262.0)
+                                        : (_liveCard.currentState ==
+                                                LiveCardState.duringBreak
+                                            ? 262.0
+                                            : 156.0))),
 
                             // Live Card
                             flexibleSpace: FlexibleSpaceBar(
@@ -276,17 +283,17 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                 padding: EdgeInsets.only(
                                   left: 24.0,
                                   right: 24.0,
-                                  top: 64.0 +
-                                      MediaQuery.of(context).padding.top,
+                                  top:
+                                      32.0 + MediaQuery.of(context).padding.top,
                                   bottom: (_liveCard.currentState ==
                                           LiveCardState.morning)
-                                      ? 10.0
+                                      ? 20.0
                                       : ((_liveCard.currentState ==
                                                   LiveCardState.duringLesson ||
                                               _liveCard.currentState ==
                                                   LiveCardState.duringBreak)
-                                          ? 14.0
-                                          : 52.0),
+                                          ? 20.0
+                                          : 16.0),
                                 ),
                                 child: Transform.scale(
                                   scale: _liveCardAnimation.value,
@@ -309,6 +316,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
                               ],
                               controller: _tabController,
                               disableFading: true,
+                              pillStyle: true,
                               onTap: (i) async {
                                 performHapticFeedback(settings.vibrate);
                                 int selectedPage =
@@ -377,36 +385,49 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                     null
                                 ? Column(
                                     children: [
-                                      if (index == 0 && updateProvider.available)
+                                      if (index == 0 &&
+                                          updateProvider.available)
                                         Padding(
-                                          padding: const EdgeInsets.fromLTRB(24.0, 4.0, 24.0, 4.0),
+                                          padding: const EdgeInsets.fromLTRB(
+                                              24.0, 4.0, 24.0, 4.0),
                                           child: UpdateTile(
                                             updateProvider.releases.first,
                                             padding: EdgeInsets.zero,
-                                            onTap: () => UpdateDialog.show(context, updateProvider.releases.first),
+                                            onTap: () => UpdateDialog.show(
+                                                context,
+                                                updateProvider.releases.first),
                                           ),
                                         ),
                                       Expanded(
                                         child: RefreshIndicator(
-                                          color: Theme.of(context).colorScheme.secondary,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .secondary,
                                           onRefresh: () => syncAll(context),
                                           child: ImplicitlyAnimatedList<Widget>(
                                             items: [
                                               if (index == 0)
-                                                const SizedBox(key: Key("\$premium")),
+                                                const SizedBox(
+                                                    key: Key("\$premium")),
                                               ...sortDateWidgets(context,
-                                                  dateWidgets: dateWidgets.data!,
+                                                  dateWidgets:
+                                                      dateWidgets.data!,
                                                   padding: EdgeInsets.zero),
                                             ],
                                             itemBuilder: filterItemBuilder,
                                             spawnIsolate: false,
-                                            areItemsTheSame: (a, b) => a.key == b.key,
+                                            areItemsTheSame: (a, b) =>
+                                                a.key == b.key,
                                             physics: const BouncingScrollPhysics(
-                                                parent: AlwaysScrollableScrollPhysics()),
+                                                parent:
+                                                    AlwaysScrollableScrollPhysics()),
                                             padding: EdgeInsets.only(
                                               left: 24.0,
                                               right: 24.0,
-                                              bottom: MediaQuery.of(context).padding.bottom + 8.0,
+                                              bottom: MediaQuery.of(context)
+                                                      .padding
+                                                      .bottom +
+                                                  8.0,
                                             ),
                                           ),
                                         ),

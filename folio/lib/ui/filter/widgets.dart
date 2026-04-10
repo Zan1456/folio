@@ -234,27 +234,14 @@ Widget filterItemBuilder(
       : (len > 0
           ? Padding(
               padding: EdgeInsets.only(
-                  top: index == 0
-                      ? 0.0
-                      : (separated || isAfterSeparated ? 9.0 : 6.0)),
+                  top: index == 0 ? 0.0 : (separated || isAfterSeparated ? 9.0 : 6.0)),
               child: Container(
                 padding: item is NoteViewable
                     ? const EdgeInsets.symmetric(vertical: 8.0)
                     : const EdgeInsets.symmetric(vertical: 4.0),
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.surface,
-                  borderRadius: BorderRadius.vertical(
-                    top: separated || isAfterSeparated
-                        ? const Radius.circular(16.0)
-                        : (index == 0
-                            ? const Radius.circular(16.0)
-                            : const Radius.circular(8.0)),
-                    bottom: separated || isBeforeSeparated
-                        ? const Radius.circular(16.0)
-                        : (index + 1 == len
-                            ? const Radius.circular(16.0)
-                            : const Radius.circular(8.0)),
-                  ),
+                  borderRadius: BorderRadius.circular(16.0),
                 ),
                 child: wrappedItem,
               ),

@@ -14,6 +14,7 @@ class FilterBar extends StatefulWidget implements PreferredSizeWidget {
     this.scrollable = true,
     this.censored = false,
     this.tabAlignment = TabAlignment.start,
+    this.pillStyle = false,
   }) : assert(items.length == controller.length);
 
   final List<Widget> items;
@@ -24,9 +25,10 @@ class FilterBar extends StatefulWidget implements PreferredSizeWidget {
   final bool scrollable;
   final bool censored;
   final TabAlignment tabAlignment;
+  final bool pillStyle;
 
   @override
-  final Size preferredSize = const Size.fromHeight(42.0);
+  Size get preferredSize => Size.fromHeight(pillStyle ? 48.0 : 42.0);
 
   @override
   State<FilterBar> createState() => _FilterBarState();
@@ -45,6 +47,7 @@ class _FilterBarState extends State<FilterBar> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final tabbar = TabBar(
       controller: widget.controller,
       isScrollable: widget.scrollable,
@@ -55,11 +58,23 @@ class _FilterBarState extends State<FilterBar> {
             fontSize: 15.0,
           ),
       labelPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
-      labelColor: Theme.of(context).colorScheme.primary,
+      labelColor:
+          widget.pillStyle ? colorScheme.secondary : colorScheme.primary,
       unselectedLabelColor: AppColors.of(context).text.withValues(alpha: 0.55),
       // indicator
-      indicatorColor: Theme.of(context).colorScheme.primary,
-      indicatorSize: TabBarIndicatorSize.label,
+      indicatorColor: colorScheme.primary,
+      indicatorSize: widget.pillStyle
+          ? TabBarIndicatorSize.tab
+          : TabBarIndicatorSize.label,
+      indicator: widget.pillStyle
+          ? BoxDecoration(
+              color: colorScheme.secondary.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(14.0),
+            )
+          : null,
+      indicatorPadding: widget.pillStyle
+          ? const EdgeInsets.symmetric(horizontal: 4.0, vertical: 8.0)
+          : EdgeInsets.zero,
       // underline (bottom border)
       dividerColor: Colors.transparent,
       overlayColor: WidgetStateProperty.all(const Color(0x00000000)),
@@ -87,7 +102,7 @@ class _FilterBarState extends State<FilterBar> {
 
     return Container(
       width: MediaQuery.of(context).size.width,
-      height: 48.0,
+      height: widget.pillStyle ? 48.0 : 48.0,
       padding: widget.padding,
       child: widget.disableFading
           ? tabbar

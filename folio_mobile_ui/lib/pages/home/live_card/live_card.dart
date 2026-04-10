@@ -93,7 +93,8 @@ class LiveCardStateA extends State<LiveCard> {
           width: 38.0,
           height: 38.0,
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.12),
+            color:
+                Theme.of(context).colorScheme.secondary.withValues(alpha: 0.12),
             borderRadius: BorderRadius.circular(10.0),
           ),
           child: Icon(
@@ -199,8 +200,9 @@ class LiveCardStateA extends State<LiveCard> {
     final name = subjectName != null
         ? subjectName()
         : ((nextLesson.subject?.isRenamed ?? false)
-            ? nextLesson.subject.renamedTo
-            : nextLesson.subject?.name?.capital()) ?? '';
+                ? nextLesson.subject.renamedTo
+                : nextLesson.subject?.name?.capital()) ??
+            '';
     final room = nextLesson.room as String? ?? '';
     final start = nextLesson.start as DateTime?;
 
@@ -232,9 +234,13 @@ class LiveCardStateA extends State<LiveCard> {
             const SizedBox(width: 6.0),
             Container(
               constraints: const BoxConstraints(maxWidth: 72.0),
-              padding: const EdgeInsets.symmetric(horizontal: 5.0, vertical: 2.0),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 5.0, vertical: 2.0),
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.tertiary.withValues(alpha: 0.12),
+                color: Theme.of(context)
+                    .colorScheme
+                    .tertiary
+                    .withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(6.0),
               ),
               child: Text(
@@ -243,7 +249,10 @@ class LiveCardStateA extends State<LiveCard> {
                 style: TextStyle(
                   fontSize: 11.0,
                   fontWeight: FontWeight.w700,
-                  color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.8),
+                  color: Theme.of(context)
+                      .colorScheme
+                      .secondary
+                      .withValues(alpha: 0.8),
                 ),
               ),
             ),
@@ -305,7 +314,8 @@ class LiveCardStateA extends State<LiveCard> {
       case LiveCardState.summary:
         child = LiveCardWidget(
           key: const Key('livecard.summary'),
-          onTap: () => SummaryScreen.show(context: context, currentPage: 'start'),
+          onTap: () =>
+              SummaryScreen.show(context: context, currentPage: 'start'),
           child: Padding(
             padding: const EdgeInsets.all(18.0),
             child: Row(
@@ -324,7 +334,8 @@ class LiveCardStateA extends State<LiveCard> {
                         'year_end_action'.i18n,
                         style: TextStyle(
                           fontSize: 14.0,
-                          color: AppColors.of(context).text.withValues(alpha: 0.6),
+                          color:
+                              AppColors.of(context).text.withValues(alpha: 0.6),
                         ),
                       ),
                     ],
@@ -364,7 +375,8 @@ class LiveCardStateA extends State<LiveCard> {
                       style: TextStyle(
                         fontSize: 13.5,
                         fontWeight: FontWeight.w500,
-                        color: AppColors.of(context).text.withValues(alpha: 0.55),
+                        color:
+                            AppColors.of(context).text.withValues(alpha: 0.55),
                       ),
                     ),
                     const SizedBox(height: 12.0),
@@ -435,25 +447,23 @@ class LiveCardStateA extends State<LiveCard> {
         }
 
         final lessonName = (liveCard.currentLesson!.subject.isRenamed &&
-                settingsProvider.renamedSubjectsEnabled
-            ? liveCard.currentLesson!.subject.renamedTo
-            : liveCard.currentLesson!.subject.name.capital()) ?? '';
+                    settingsProvider.renamedSubjectsEnabled
+                ? liveCard.currentLesson!.subject.renamedTo
+                : liveCard.currentLesson!.subject.name.capital()) ??
+            '';
         final lessonItalic = liveCard.currentLesson!.subject.isRenamed &&
             settingsProvider.renamedSubjectsEnabled &&
             settingsProvider.renamedSubjectsItalics;
 
-        final nextSubjectName = (liveCard.nextLesson?.subject.isRenamed == true &&
-                settingsProvider.renamedSubjectsEnabled
-            ? liveCard.nextLesson?.subject.renamedTo
-            : liveCard.nextLesson?.subject.name.capital()) ?? '';
+        final nextSubjectName =
+            (liveCard.nextLesson?.subject.isRenamed == true &&
+                        settingsProvider.renamedSubjectsEnabled
+                    ? liveCard.nextLesson?.subject.renamedTo
+                    : liveCard.nextLesson?.subject.name.capital()) ??
+                '';
         final nextItalic = liveCard.nextLesson?.subject.isRenamed == true &&
             settingsProvider.renamedSubjectsEnabled &&
             settingsProvider.renamedSubjectsItalics;
-
-        final indexLabel = liveCard.currentLesson!.lessonIndex.isNotEmpty
-            ? '${liveCard.currentLesson!.lessonIndex}. · '
-            : '';
-        final endLabel = '$indexLabel${DateFormat("H:mm").format(liveCard.currentLesson!.end)}-ig';
 
         child = LiveCardWidget(
           key: const Key('livecard.duringLesson'),
@@ -465,11 +475,6 @@ class LiveCardStateA extends State<LiveCard> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _labelRow(
-                      'currently'.i18n,
-                      trailing: endLabel,
-                    ),
-                    const SizedBox(height: 12.0),
                     _subjectRow(
                       lessonName,
                       icon: SubjectIcon.resolveVariant(
@@ -487,7 +492,9 @@ class LiveCardStateA extends State<LiveCard> {
                           liveCard.currentLesson!.description,
                           style: TextStyle(
                             fontSize: 13.0,
-                            color: AppColors.of(context).text.withValues(alpha: 0.5),
+                            color: AppColors.of(context)
+                                .text
+                                .withValues(alpha: 0.5),
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -524,21 +531,23 @@ class LiveCardStateA extends State<LiveCard> {
 
         final diff = liveCard.getFloorDifference();
 
-        final breakDescription = liveCard.nextLesson!.room != liveCard.prevLesson!.room
-            ? localizeFill("go $diff".i18n, [
-                diff != "to room"
-                    ? (liveCard.nextLesson!.getFloor() ?? 0)
-                    : liveCard.nextLesson!.room
-              ])
-            : "stay".i18n;
+        final breakDescription =
+            liveCard.nextLesson!.room != liveCard.prevLesson!.room
+                ? localizeFill("go $diff".i18n, [
+                    diff != "to room"
+                        ? (liveCard.nextLesson!.getFloor() ?? 0)
+                        : liveCard.nextLesson!.room
+                  ])
+                : "stay".i18n;
 
         final breakTimes =
             '${DateFormat("H:mm").format(liveCard.prevLesson!.end)} – ${DateFormat("H:mm").format(liveCard.nextLesson!.start)}';
 
         final nextSubjectName = (liveCard.nextLesson!.subject.isRenamed &&
-                settingsProvider.renamedSubjectsEnabled
-            ? liveCard.nextLesson!.subject.renamedTo
-            : liveCard.nextLesson!.subject.name.capital()) ?? '';
+                    settingsProvider.renamedSubjectsEnabled
+                ? liveCard.nextLesson!.subject.renamedTo
+                : liveCard.nextLesson!.subject.name.capital()) ??
+            '';
         final nextItalic = liveCard.nextLesson!.subject.isRenamed &&
             settingsProvider.renamedSubjectsEnabled &&
             settingsProvider.renamedSubjectsItalics;
@@ -672,8 +681,7 @@ class _LiveCardProgressState extends State<_LiveCardProgress> {
 
   @override
   Widget build(BuildContext context) {
-    final maxTime =
-        widget.end.difference(widget.start).inSeconds.toDouble();
+    final maxTime = widget.end.difference(widget.start).inSeconds.toDouble();
     final elapsedTime =
         DateTime.now().difference(widget.start).inSeconds.toDouble() +
             widget.bellDelay.inSeconds;

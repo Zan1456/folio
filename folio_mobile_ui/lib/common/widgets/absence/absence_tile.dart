@@ -2,6 +2,7 @@ import 'package:folio/models/settings.dart';
 import 'package:folio/theme/colors/colors.dart';
 import 'package:folio/utils/format.dart';
 import 'package:folio_kreta_api/models/absence.dart';
+import 'package:folio_mobile_ui/common/round_border_icon.dart';
 import 'package:folio_mobile_ui/common/widgets/absence_group/absence_group_container.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -52,15 +53,24 @@ class AbsenceTile extends StatelessWidget {
                 left: 15.5, right: 12.0, top: 2.0, bottom: 2.0),
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(!group ? 14.0 : 12.0)),
-            leading: Container(
-              width: 39,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: !group ? color.withValues(alpha: .25) : null,
-              ),
-              child: Center(
-                  child: Icon(justificationIcon(absence.state), color: color)),
-            ),
+            leading: group
+                ? Container(
+                    width: 39,
+                    decoration: const BoxDecoration(shape: BoxShape.circle),
+                    child: Center(
+                        child: Icon(justificationIcon(absence.state),
+                            color: color)),
+                  )
+                : RoundBorderIcon(
+                    color: color.withValues(alpha: 0.9),
+                    width: 1.5,
+                    padding: 6.0,
+                    icon: Icon(
+                      justificationIcon(absence.state),
+                      color: color,
+                      size: 22.0,
+                    ),
+                  ),
             title: !group
                 ? Text.rich(TextSpan(
                     text: "${absence.delay == 0 ? "" : absence.delay}",
@@ -99,13 +109,23 @@ class AbsenceTile extends StatelessWidget {
                     absence.subject.renamedTo ?? absence.subject.name.capital(),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    // DateFormat("MM. dd. (EEEEE)", I18n.of(context).locale.toString()).format(absence.date),
                     style: TextStyle(
                         fontWeight: FontWeight.w500,
                         fontStyle: absence.subject.isRenamed &&
                                 settingsProvider.renamedSubjectsItalics
                             ? FontStyle.italic
                             : null),
+                  )
+                : null,
+            trailing: !group
+                ? Text(
+                    absence.date.format(context),
+                    style: TextStyle(
+                      fontWeight: FontWeight.w500,
+                      fontSize: 14.0,
+                      color:
+                          AppColors.of(context).text.withValues(alpha: .75),
+                    ),
                   )
                 : null,
           ),

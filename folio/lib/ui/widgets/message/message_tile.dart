@@ -2,7 +2,7 @@ import 'package:folio/models/settings.dart';
 import 'package:folio/theme/colors/colors.dart';
 import 'package:folio/utils/format.dart';
 import 'package:folio_kreta_api/models/message.dart';
-import 'package:folio_mobile_ui/common/profile_image/profile_image.dart';
+import 'package:folio_mobile_ui/common/round_border_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -34,21 +34,22 @@ class MessageTile extends StatelessWidget {
           contentPadding: const EdgeInsets.only(left: 8.0, right: 4.0),
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.0)),
-          leading: !Provider.of<SettingsProvider>(context, listen: false)
-                  .presentationMode
-              ? ProfileImage(
-                  name: message.author,
-                  radius: 19.2,
-                  backgroundColor: Theme.of(context).colorScheme.secondary,
-                  censored: censored,
-                  isNotePfp: true,
+          leading: censored
+              ? Container(
+                  width: 38,
+                  height: 38,
+                  decoration: BoxDecoration(
+                    color: AppColors.of(context).text.withValues(alpha: .25),
+                    borderRadius: BorderRadius.circular(60.0),
+                  ),
                 )
-              : ProfileImage(
-                  name: "Béla",
-                  radius: 19.2,
-                  backgroundColor: Theme.of(context).colorScheme.secondary,
-                  censored: censored,
-                  isNotePfp: true,
+              : RoundBorderIcon(
+                  icon: const Icon(
+                    Icons.mail_outline_rounded,
+                    size: 22.0,
+                  ),
+                  padding: 6.0,
+                  width: 1.0,
                 ),
           title: censored
               ? Wrap(

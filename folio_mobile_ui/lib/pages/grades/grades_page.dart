@@ -322,140 +322,204 @@ class _GradesPageState extends State<GradesPage>
     final subjectAvg = subjectAvgMap.isEmpty
         ? 0.0
         : subjectAvgMap.entries.map((e) {
-            final threshold = (e.key.customRounding ?? settings.rounding.toDouble()) / 10;
-            final base = e.value.floor();
-            return (e.value - base) >= threshold ? (base + 1).toDouble() : base.toDouble();
-          }).fold(0.0, (a, b) => a + b) /
+              final threshold =
+                  (e.key.customRounding ?? settings.rounding.toDouble()) / 10;
+              final base = e.value.floor();
+              return (e.value - base) >= threshold
+                  ? (base + 1).toDouble()
+                  : base.toDouble();
+            }).fold(0.0, (a, b) => a + b) /
             subjectAvgMap.length;
 
     final currentPeriodKey = _periodKeys[_periods.indexOf(_periodDays)];
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
       key: _scaffoldKey,
-      appBar: AppBar(
-        centerTitle: false,
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        surfaceTintColor: Colors.transparent,
-        scrolledUnderElevation: 0,
-        elevation: 0,
-        automaticallyImplyLeading: false,
-        title: Row(
-          children: [
-            const SizedBox(width: 8),
-            Text(
-              'page_title_grades'.i18n,
-              style: TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.w800,
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
-            ),
-            if (currentAvg > 0) ...[
-              const Spacer(),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primaryContainer,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  currentAvg.toStringAsFixed(2),
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: Theme.of(context).colorScheme.onPrimaryContainer,
-                  ),
-                ),
-              ),
-            ],
-          ],
-        ),
-        actions: [
-          if (_sheetController == null &&
-              _tabController.index == 1 &&
-              !isCalcMode)
-            Padding(
-              padding: const EdgeInsets.only(right: 4),
-              child: IconButton(
-                icon: Icon(
-                  isCalcMode
-                      ? Icons.calculate_rounded
-                      : Icons.calculate_outlined,
-                  color: isCalcMode
-                      ? Theme.of(context).colorScheme.secondary
-                      : Theme.of(context).colorScheme.onSurface,
-                ),
-                onPressed: () => _openCalculator(context),
-              ),
-            ),
-        ],
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: [
-            Tab(text: 'subjects_tab'.i18n),
-            Tab(text: 'grades_tab'.i18n),
-          ],
-        ),
-      ),
-      body: TabBarView(
-        controller: _tabController,
+      body: Column(
         children: [
-          _SubjectsTab(
-            gradeProvider: gradeProvider,
-            settings: settings,
-            subjects: subjects,
-            subjectAvgMap: subjectAvgMap,
-            currentAvg: currentAvg,
-            prevAvg: prevAvg,
-            totalClassAvg: totalClassAvg,
-            subjectAvg: subjectAvg,
-            filteredGrades: filtered,
-            periodDays: _periodDays,
-            currentPeriodKey: currentPeriodKey,
-            onPeriodTap: () => _showPeriodModal(context),
-            onSubjectTap: (subject, groupAvg) {
-              setState(() {
-                _selectedSubject = subject;
-                _selectedGroupAvg = groupAvg;
-              });
-              _tabController.animateTo(1);
-            },
-            onShowStats: (grades) =>
-                _showStatsModal(context, grades, totalClassAvg),
-          ),
-          _selectedSubject != null
-              ? _SubjectGradesView(
-                  key: ValueKey(_selectedSubject),
-                  subject: _selectedSubject!,
-                  groupAverage: _selectedGroupAvg,
-                )
-              : Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.school_outlined,
-                        size: 52,
-                        color: Theme.of(context)
-                            .colorScheme
-                            .onSurface
-                            .withValues(alpha: 0.2),
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        'select_subject'.i18n,
-                        style: TextStyle(
-                          fontWeight: FontWeight.w500,
-                          color: Theme.of(context)
-                              .colorScheme
-                              .onSurface
-                              .withValues(alpha: 0.4),
+          Container(
+            decoration: BoxDecoration(
+              color: colorScheme.primaryContainer,
+              borderRadius:
+                  const BorderRadius.vertical(bottom: Radius.circular(28.0)),
+            ),
+            child: SafeArea(
+              bottom: false,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20.0, 12.0, 20.0, 0.0),
+                    child: Row(
+                      children: [
+                        if (Navigator.of(context).canPop()) ...[
+                          GestureDetector(
+                            onTap: () => Navigator.of(context).maybePop(),
+                            child: Container(
+                              padding: const EdgeInsets.all(8.0),
+                              decoration: BoxDecoration(
+                                color: colorScheme.onPrimaryContainer
+                                    .withValues(alpha: 0.15),
+                                borderRadius: BorderRadius.circular(12.0),
+                              ),
+                              child: Icon(
+                                Icons.arrow_back_ios_new_rounded,
+                                size: 18.0,
+                                color: colorScheme.onPrimaryContainer,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12.0),
+                        ],
+                        Text(
+                          'page_title_grades'.i18n,
+                          style: TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.w800,
+                            color: colorScheme.onPrimaryContainer,
+                          ),
                         ),
-                      ),
+                        if (currentAvg > 0) ...[
+                          const SizedBox(width: 10.0),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: colorScheme.onPrimaryContainer
+                                  .withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              currentAvg.toStringAsFixed(2),
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                                color: colorScheme.onPrimaryContainer,
+                              ),
+                            ),
+                          ),
+                        ],
+                        const Spacer(),
+                        if (_sheetController == null &&
+                            _tabController.index == 1 &&
+                            !isCalcMode)
+                          GestureDetector(
+                            onTap: () => _openCalculator(context),
+                            child: Container(
+                              padding: const EdgeInsets.all(8.0),
+                              decoration: BoxDecoration(
+                                color: colorScheme.onPrimaryContainer
+                                    .withValues(alpha: 0.15),
+                                borderRadius: BorderRadius.circular(12.0),
+                              ),
+                              child: Icon(
+                                Icons.calculate_outlined,
+                                size: 18.0,
+                                color: colorScheme.onPrimaryContainer,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                  TabBar(
+                    controller: _tabController,
+                    dividerColor: Colors.transparent,
+                    labelColor: colorScheme.secondary,
+                    unselectedLabelColor:
+                        colorScheme.onPrimaryContainer.withValues(alpha: 0.65),
+                    labelStyle: const TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 13.5,
+                    ),
+                    unselectedLabelStyle: const TextStyle(
+                      fontWeight: FontWeight.w500,
+                      fontSize: 13.5,
+                    ),
+                    indicatorSize: TabBarIndicatorSize.tab,
+                    indicatorPadding: const EdgeInsets.symmetric(
+                        horizontal: 8.0, vertical: 6.0),
+                    isScrollable: false,
+                    indicator: BoxDecoration(
+                      color: colorScheme.secondary.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(14.0),
+                    ),
+                    overlayColor: WidgetStateProperty.all(
+                      colorScheme.secondary.withValues(alpha: 0.08),
+                    ),
+                    padding: const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 14.0),
+                    tabs: [
+                      Tab(text: 'subjects_tab'.i18n),
+                      Tab(text: 'grades_tab'.i18n),
                     ],
                   ),
+                ],
+              ),
+            ),
+          ),
+          Expanded(
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                _SubjectsTab(
+                  gradeProvider: gradeProvider,
+                  settings: settings,
+                  subjects: subjects,
+                  subjectAvgMap: subjectAvgMap,
+                  currentAvg: currentAvg,
+                  prevAvg: prevAvg,
+                  totalClassAvg: totalClassAvg,
+                  subjectAvg: subjectAvg,
+                  filteredGrades: filtered,
+                  periodDays: _periodDays,
+                  currentPeriodKey: currentPeriodKey,
+                  onPeriodTap: () => _showPeriodModal(context),
+                  onSubjectTap: (subject, groupAvg) {
+                    setState(() {
+                      _selectedSubject = subject;
+                      _selectedGroupAvg = groupAvg;
+                    });
+                    _tabController.animateTo(1);
+                  },
+                  onShowStats: (grades) =>
+                      _showStatsModal(context, grades, totalClassAvg),
                 ),
+                _selectedSubject != null
+                    ? _SubjectGradesView(
+                        key: ValueKey(_selectedSubject),
+                        subject: _selectedSubject!,
+                        groupAverage: _selectedGroupAvg,
+                      )
+                    : Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.school_outlined,
+                              size: 52,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurface
+                                  .withValues(alpha: 0.2),
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              'select_subject'.i18n,
+                              style: TextStyle(
+                                fontWeight: FontWeight.w500,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurface
+                                    .withValues(alpha: 0.4),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+              ],
+            ),
+          ),
         ],
       ),
     );
