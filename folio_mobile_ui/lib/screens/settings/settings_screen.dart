@@ -98,6 +98,7 @@ class SettingsScreenState extends State<SettingsScreen>
     'grades': GlobalKey(),
     'notifications': GlobalKey(),
     'other': GlobalKey(),
+    'about': GlobalKey(),
   };
 
   final Map<String, GlobalKey> _chipKeys = {
@@ -106,6 +107,7 @@ class SettingsScreenState extends State<SettingsScreen>
     'grades': GlobalKey(),
     'notifications': GlobalKey(),
     'other': GlobalKey(),
+    'about': GlobalKey(),
   };
 
   double? _tempRounding;
@@ -116,6 +118,7 @@ class SettingsScreenState extends State<SettingsScreen>
   @override
   void initState() {
     super.initState();
+    _activeNavCategory = 'general';
     _hideContainersController = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 200));
     _searchController.addListener(() {
@@ -143,6 +146,21 @@ class SettingsScreenState extends State<SettingsScreen>
   }
 
   void _updateActiveCategory() {
+    // If scrolled to the very bottom, force the last rendered section active.
+    if (_scrollController.hasClients &&
+        _scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent - 80) {
+      final last = _sectionKeys.keys.lastWhere(
+          (k) => _sectionKeys[k]?.currentContext != null,
+          orElse: () => 'about');
+      if (last != _activeNavCategory) {
+        _haptic();
+        setState(() => _activeNavCategory = last);
+        _scrollChipIntoView(last);
+      }
+      return;
+    }
+
     String? topmost;
     double topmostY = -double.maxFinite;
     for (final entry in _sectionKeys.entries) {
@@ -151,12 +169,13 @@ class SettingsScreenState extends State<SettingsScreen>
       final box = ctx.findRenderObject() as RenderBox?;
       if (box == null) continue;
       final dy = box.localToGlobal(Offset.zero).dy;
-      if (dy <= 180 && dy > topmostY) {
+      if (dy <= 280 && dy > topmostY) {
         topmostY = dy;
         topmost = entry.key;
       }
     }
     if (topmost != null && topmost != _activeNavCategory) {
+      _haptic();
       setState(() => _activeNavCategory = topmost);
       _scrollChipIntoView(topmost);
     }
@@ -181,7 +200,11 @@ class SettingsScreenState extends State<SettingsScreen>
       duration: const Duration(milliseconds: 350),
       curve: Curves.easeInOut,
       alignment: 0.0,
-    );
+    ).then((_) {
+      if (_activeNavCategory != category) {
+        setState(() => _activeNavCategory = category);
+      }
+    });
   }
 
   // ── Rename helpers ────────────────────────────────────────
@@ -471,7 +494,7 @@ class SettingsScreenState extends State<SettingsScreen>
   Widget _buildSectionHeader(String catKey, String label) {
     return Padding(
       key: _sectionKeys[catKey],
-      padding: const EdgeInsets.only(top: 8.0, bottom: 4.0),
+      padding: const EdgeInsets.only(top: 8.0, bottom: 4.0, left: 24.0),
       child: Row(
         children: [
           Container(
@@ -495,6 +518,18 @@ class SettingsScreenState extends State<SettingsScreen>
           ),
         ],
       ),
+    );
+  }
+
+  Widget _subSetting(Widget child) {
+    return Container(
+      margin: const EdgeInsets.only(left: 10.0),
+      decoration: BoxDecoration(
+        color:
+            Theme.of(context).colorScheme.secondary.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(4.0),
+      ),
+      child: child,
     );
   }
 
@@ -675,6 +710,7 @@ class SettingsScreenState extends State<SettingsScreen>
       'grades': [],
       'notifications': [],
       'other': [],
+      'about': [],
     };
     final List<Widget> searchResults = [];
 
@@ -711,6 +747,11 @@ class SettingsScreenState extends State<SettingsScreen>
         'icon': Icons.notifications_outlined
       },
       {'key': 'other', 'label': 'other'.i18n, 'icon': Icons.more_horiz_rounded},
+      {
+        'key': 'about',
+        'label': 'about'.i18n,
+        'icon': Icons.info_outline_rounded
+      },
     ];
 
     return Scaffold(
@@ -975,6 +1016,10 @@ class SettingsScreenState extends State<SettingsScreen>
                             _buildSectionHeader('other', 'other'.i18n),
                             ...grouped['other']!,
                           ],
+                          if (grouped['about']!.isNotEmpty) ...[
+                            _buildSectionHeader('about', 'about'.i18n),
+                            ...grouped['about']!,
+                          ],
                         ],
 
                         const SizedBox(height: 20.0),
@@ -1073,16 +1118,15 @@ class SettingsScreenState extends State<SettingsScreen>
           'breaks',
           'szünetek'
         ],
-        widget: Padding(
-          padding: const EdgeInsets.only(top: 2.0),
-          child: SplittedPanel(
-            cardPadding: const EdgeInsets.all(4.0),
-            isSeparated: false,
-            children: [
-              PanelButton(
-                padding: const EdgeInsets.only(left: 14.0, right: 6.0),
-                onPressed: () {
-                  SettingsHelper.bellDelay(context);
+        widget: SplittedPanel(
+          padding: const EdgeInsets.only(bottom: 14.0, left: 24.0, right: 24.0),
+          cardPadding: const EdgeInsets.all(4.0),
+          isSeparated: false,
+          children: [
+            PanelButton(
+              padding: const EdgeInsets.only(left: 14.0, right: 6.0),
+              onPressed: () {
+                SettingsHelper.bellDelay(context);
                   setState(() {});
                 },
                 title: Text("bell_delay".i18n,
@@ -1140,7 +1184,6 @@ class SettingsScreenState extends State<SettingsScreen>
                     top: Radius.circular(4.0), bottom: Radius.circular(12.0)),
               ),
             ],
-          ),
         ),
       ),
 
@@ -1150,8 +1193,9 @@ class SettingsScreenState extends State<SettingsScreen>
           category: 'general',
           searchTerms: ['live activity', 'élő tevékenység', 'dinamikus'],
           widget: Padding(
-            padding: const EdgeInsets.only(top: 5.0),
+            padding: EdgeInsets.zero,
             child: SplittedPanel(
+              padding: const EdgeInsets.only(bottom: 14.0, left: 24.0, right: 24.0),
               cardPadding: const EdgeInsets.all(4.0),
               isSeparated: true,
               children: [
@@ -1225,8 +1269,9 @@ class SettingsScreenState extends State<SettingsScreen>
           'firebase',
         ],
         widget: Padding(
-          padding: const EdgeInsets.only(top: 5.0),
+          padding: EdgeInsets.zero,
           child: SplittedPanel(
+            padding: const EdgeInsets.only(bottom: 14.0, left: 24.0, right: 24.0),
             cardPadding: const EdgeInsets.all(4.0),
             isSeparated: false,
             children: [
@@ -1272,7 +1317,7 @@ class SettingsScreenState extends State<SettingsScreen>
               ),
               if (settings.notificationsEnabled) ...[
                 // Grades
-                PanelButton(
+                _subSetting(PanelButton(
                   padding: const EdgeInsets.only(left: 14.0, right: 6.0),
                   onPressed: () {
                     _haptic();
@@ -1308,9 +1353,9 @@ class SettingsScreenState extends State<SettingsScreen>
                   borderRadius: const BorderRadius.vertical(
                       top: Radius.circular(4.0),
                       bottom: Radius.circular(4.0)),
-                ),
+                )),
                 // Absences
-                PanelButton(
+                _subSetting(PanelButton(
                   padding: const EdgeInsets.only(left: 14.0, right: 6.0),
                   onPressed: () {
                     _haptic();
@@ -1346,9 +1391,9 @@ class SettingsScreenState extends State<SettingsScreen>
                   borderRadius: const BorderRadius.vertical(
                       top: Radius.circular(4.0),
                       bottom: Radius.circular(4.0)),
-                ),
+                )),
                 // Messages
-                PanelButton(
+                _subSetting(PanelButton(
                   padding: const EdgeInsets.only(left: 14.0, right: 6.0),
                   onPressed: () {
                     _haptic();
@@ -1384,9 +1429,9 @@ class SettingsScreenState extends State<SettingsScreen>
                   borderRadius: const BorderRadius.vertical(
                       top: Radius.circular(4.0),
                       bottom: Radius.circular(4.0)),
-                ),
+                )),
                 // Lessons
-                PanelButton(
+                _subSetting(PanelButton(
                   padding: const EdgeInsets.only(left: 14.0, right: 6.0),
                   onPressed: () {
                     _haptic();
@@ -1422,7 +1467,7 @@ class SettingsScreenState extends State<SettingsScreen>
                   borderRadius: const BorderRadius.vertical(
                       top: Radius.circular(4.0),
                       bottom: Radius.circular(12.0)),
-                ),
+                )),
               ],
             ],
           ),
@@ -1444,8 +1489,9 @@ class SettingsScreenState extends State<SettingsScreen>
             'óra értesítés'
           ],
           widget: Padding(
-            padding: const EdgeInsets.only(top: 5.0),
+            padding: EdgeInsets.zero,
             child: SplittedPanel(
+              padding: const EdgeInsets.only(bottom: 14.0, left: 24.0, right: 24.0),
               cardPadding: const EdgeInsets.all(4.0),
               isSeparated: false,
               children: [
@@ -1488,7 +1534,7 @@ class SettingsScreenState extends State<SettingsScreen>
                   ),
                 ),
                 if (settings.androidLiveActivityEnabled)
-                  PanelButton(
+                  _subSetting(PanelButton(
                     leading: Icon(Icons.smartphone_rounded,
                         size: 22.0,
                         color:
@@ -1530,7 +1576,7 @@ class SettingsScreenState extends State<SettingsScreen>
                     borderRadius: const BorderRadius.vertical(
                         top: Radius.circular(4.0),
                         bottom: Radius.circular(12.0)),
-                  ),
+                  )),
               ],
             ),
           ),
@@ -1550,8 +1596,9 @@ class SettingsScreenState extends State<SettingsScreen>
             'előtte',
           ],
           widget: Padding(
-            padding: const EdgeInsets.only(top: 2.0),
+            padding: EdgeInsets.zero,
             child: SplittedPanel(
+              padding: const EdgeInsets.only(bottom: 14.0, left: 24.0, right: 24.0),
               cardPadding: const EdgeInsets.all(4.0),
               isSeparated: false,
               children: [
@@ -1590,7 +1637,7 @@ class SettingsScreenState extends State<SettingsScreen>
                 ),
                 if (settings.liveCountdownEnabled) ...[
                   // Before lesson toggle
-                  PanelButton(
+                  _subSetting(PanelButton(
                     padding: const EdgeInsets.only(left: 14.0, right: 6.0),
                     onPressed: () {
                       _haptic();
@@ -1623,10 +1670,10 @@ class SettingsScreenState extends State<SettingsScreen>
                     borderRadius: const BorderRadius.vertical(
                         top: Radius.circular(4.0),
                         bottom: Radius.circular(4.0)),
-                  ),
+                  )),
                   // Minutes before (shown when before-lesson is enabled)
                   if (settings.liveCountdownBeforeLesson)
-                    _buildSliderCard(
+                    _subSetting(_buildSliderCard(
                       icon: Icons.access_time_rounded,
                       label: 'countdown_before_minutes'.i18n,
                       valueText: 'min_before'.i18n.replaceFirst(
@@ -1645,9 +1692,9 @@ class SettingsScreenState extends State<SettingsScreen>
                         settings.update(liveCountdownBeforeMinutes: v.toInt());
                         setState(() => _tempCountdownMinutes = null);
                       },
-                    ),
+                    )),
                   // During lesson toggle
-                  PanelButton(
+                  _subSetting(PanelButton(
                     padding: const EdgeInsets.only(left: 14.0, right: 6.0),
                     onPressed: () {
                       _haptic();
@@ -1680,9 +1727,9 @@ class SettingsScreenState extends State<SettingsScreen>
                     borderRadius: const BorderRadius.vertical(
                         top: Radius.circular(4.0),
                         bottom: Radius.circular(4.0)),
-                  ),
+                  )),
                   // During break toggle
-                  PanelButton(
+                  _subSetting(PanelButton(
                     padding: const EdgeInsets.only(left: 14.0, right: 6.0),
                     onPressed: () {
                       _haptic();
@@ -1714,7 +1761,7 @@ class SettingsScreenState extends State<SettingsScreen>
                     borderRadius: const BorderRadius.vertical(
                         top: Radius.circular(4.0),
                         bottom: Radius.circular(12.0)),
-                  ),
+                  )),
                 ],
               ],
             ),
@@ -1726,8 +1773,9 @@ class SettingsScreenState extends State<SettingsScreen>
         category: 'general',
         searchTerms: ['kezdőlap', 'start page', 'kezdőoldal'],
         widget: Padding(
-          padding: const EdgeInsets.only(top: 2.0),
+          padding: EdgeInsets.zero,
           child: SplittedPanel(
+            padding: const EdgeInsets.only(bottom: 14.0, left: 24.0, right: 24.0),
             cardPadding: const EdgeInsets.all(4.0),
             isSeparated: false,
             children: [
@@ -1778,8 +1826,9 @@ class SettingsScreenState extends State<SettingsScreen>
         category: 'general',
         searchTerms: ['nyelv', 'language', 'Hungarian', 'English'],
         widget: Padding(
-          padding: const EdgeInsets.only(top: 2.0),
+          padding: EdgeInsets.zero,
           child: SplittedPanel(
+            padding: const EdgeInsets.only(bottom: 14.0, left: 24.0, right: 24.0),
             cardPadding: const EdgeInsets.all(4.0),
             isSeparated: false,
             children: [
@@ -1833,8 +1882,9 @@ class SettingsScreenState extends State<SettingsScreen>
         category: 'general',
         searchTerms: ['rezgés', 'vibrate', 'vibráció'],
         widget: Padding(
-          padding: const EdgeInsets.only(top: 2.0),
+          padding: EdgeInsets.zero,
           child: SplittedPanel(
+            padding: const EdgeInsets.only(bottom: 14.0, left: 24.0, right: 24.0),
             cardPadding: const EdgeInsets.all(4.0),
             isSeparated: false,
             children: [
@@ -1902,8 +1952,9 @@ class SettingsScreenState extends State<SettingsScreen>
         category: 'appearance',
         searchTerms: ['téma', 'theme', 'sötét', 'világos', 'dark', 'light'],
         widget: Padding(
-          padding: const EdgeInsets.only(top: 2.0),
+          padding: EdgeInsets.zero,
           child: SplittedPanel(
+            padding: const EdgeInsets.only(bottom: 14.0, left: 24.0, right: 24.0),
             cardPadding: const EdgeInsets.all(4.0),
             isSeparated: false,
             children: [
@@ -1970,7 +2021,7 @@ class SettingsScreenState extends State<SettingsScreen>
           'material you',
         ],
         widget: Padding(
-          padding: const EdgeInsets.only(top: 2.0),
+          padding: EdgeInsets.zero,
           child: _ThemeColorPicker(
             isOpen: _themeColorOpen,
             onToggle: () => setState(() => _themeColorOpen = !_themeColorOpen),
@@ -1991,8 +2042,9 @@ class SettingsScreenState extends State<SettingsScreen>
         category: 'appearance',
         searchTerms: ['árnyék', 'shadow', 'effect'],
         widget: Padding(
-          padding: const EdgeInsets.only(top: 2.0),
+          padding: EdgeInsets.zero,
           child: SplittedPanel(
+            padding: const EdgeInsets.only(bottom: 14.0, left: 24.0, right: 24.0),
             cardPadding: const EdgeInsets.all(4.0),
             isSeparated: false,
             children: [
@@ -2042,8 +2094,9 @@ class SettingsScreenState extends State<SettingsScreen>
           'menu',
         ],
         widget: Padding(
-          padding: const EdgeInsets.only(top: 2.0),
+          padding: EdgeInsets.zero,
           child: SplittedPanel(
+            padding: const EdgeInsets.only(bottom: 14.0, left: 24.0, right: 24.0),
             cardPadding: const EdgeInsets.all(4.0),
             isSeparated: false,
             children: [
@@ -2068,8 +2121,9 @@ class SettingsScreenState extends State<SettingsScreen>
           'teacher'
         ],
         widget: Padding(
-          padding: const EdgeInsets.only(top: 2.0),
+          padding: EdgeInsets.zero,
           child: SplittedPanel(
+            padding: const EdgeInsets.only(bottom: 14.0, left: 24.0, right: 24.0),
             cardPadding: const EdgeInsets.all(4.0),
             isSeparated: false,
             children: [
@@ -2136,8 +2190,9 @@ class SettingsScreenState extends State<SettingsScreen>
           category: 'appearance',
           searchTerms: ['live activity', 'szín', 'color'],
           widget: Padding(
-            padding: const EdgeInsets.only(top: 9.0),
+            padding: EdgeInsets.zero,
             child: SplittedPanel(
+              padding: const EdgeInsets.only(bottom: 14.0, left: 24.0, right: 24.0),
               cardPadding: const EdgeInsets.all(4.0),
               isSeparated: true,
               children: [
@@ -2186,8 +2241,9 @@ class SettingsScreenState extends State<SettingsScreen>
           'class avg'
         ],
         widget: Padding(
-          padding: const EdgeInsets.only(top: 2.0),
+          padding: EdgeInsets.zero,
           child: SplittedPanel(
+            padding: const EdgeInsets.only(bottom: 14.0, left: 24.0, right: 24.0),
             cardPadding: const EdgeInsets.all(4.0),
             isSeparated: false,
             children: [
@@ -2252,8 +2308,9 @@ class SettingsScreenState extends State<SettingsScreen>
           'good student'
         ],
         widget: Padding(
-          padding: const EdgeInsets.only(top: 2.0),
+          padding: EdgeInsets.zero,
           child: SplittedPanel(
+            padding: const EdgeInsets.only(bottom: 14.0, left: 24.0, right: 24.0),
             cardPadding: const EdgeInsets.all(4.0),
             isSeparated: false,
             children: [
@@ -2399,8 +2456,9 @@ class SettingsScreenState extends State<SettingsScreen>
           'adatok elrejtése'
         ],
         widget: Padding(
-          padding: const EdgeInsets.only(top: 2.0),
+          padding: EdgeInsets.zero,
           child: SplittedPanel(
+            padding: const EdgeInsets.only(bottom: 14.0, left: 24.0, right: 24.0),
             cardPadding: const EdgeInsets.all(4.0),
             isSeparated: true,
             children: [
@@ -2447,8 +2505,9 @@ class SettingsScreenState extends State<SettingsScreen>
           'hibajelentés'
         ],
         widget: Padding(
-          padding: const EdgeInsets.only(top: 2.0),
+          padding: EdgeInsets.zero,
           child: SplittedPanel(
+            padding: const EdgeInsets.only(bottom: 14.0, left: 24.0, right: 24.0),
             cardPadding: const EdgeInsets.all(4.0),
             children: [
               Tooltip(
@@ -2514,7 +2573,7 @@ class SettingsScreenState extends State<SettingsScreen>
 
       // About
       _SettingsSection(
-        category: 'other',
+        category: 'about',
         searchTerms: [
           'adatvédelem',
           'privacy',
@@ -2525,12 +2584,10 @@ class SettingsScreenState extends State<SettingsScreen>
           'névjegy',
           'about'
         ],
-        widget: Padding(
-          padding: const EdgeInsets.only(top: 2.0),
-          child: SplittedPanel(
-            title: Text("about".i18n),
-            cardPadding: const EdgeInsets.all(4.0),
-            children: [
+        widget: SplittedPanel(
+          padding: const EdgeInsets.only(bottom: 14.0, left: 24.0, right: 24.0),
+          cardPadding: const EdgeInsets.all(4.0),
+          children: [
               PanelButton(
                 leading: Icon(Icons.lock_outline_rounded,
                     size: 22.0,
@@ -2573,7 +2630,6 @@ class SettingsScreenState extends State<SettingsScreen>
               ),
             ],
           ),
-        ),
       ),
     ];
   }
@@ -2621,100 +2677,108 @@ class _ThemeColorPicker extends StatelessWidget {
     final accentColor = Theme.of(context).colorScheme.secondary;
     final isSystem = selectedColor == null;
 
-    return SplittedPanel(
-      cardPadding: const EdgeInsets.all(4.0),
-      isSeparated: false,
-      children: [
-        PanelButton(
-          onPressed: onToggle,
-          title: Text(
-            'material_you_color'.i18n,
-            style: TextStyle(color: textColor.withValues(alpha: .95)),
-          ),
-          leading: Icon(Icons.color_lens_outlined,
-              size: 22.0, color: textColor.withValues(alpha: .95)),
-          trailing: Row(
+    return Padding(
+      padding: const EdgeInsets.only(left: 24.0, right: 24.0, bottom: 14.0),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16.0),
+        child: Container(
+          color: Theme.of(context).colorScheme.surface,
+          child: Column(
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Container(
-                width: 12.0,
-                height: 12.0,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Theme.of(context).colorScheme.primary,
+              Padding(
+                padding: const EdgeInsets.all(4.0),
+                child: PanelButton(
+                  onPressed: onToggle,
+                  title: Text(
+                    'material_you_color'.i18n,
+                    style: TextStyle(color: textColor.withValues(alpha: .95)),
+                  ),
+                  leading: Icon(Icons.color_lens_outlined,
+                      size: 22.0, color: textColor.withValues(alpha: .95)),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 12.0,
+                        height: 12.0,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                      ),
+                      const SizedBox(width: 6.0),
+                      AnimatedRotation(
+                        turns: isOpen ? 0.5 : 0.0,
+                        duration: const Duration(milliseconds: 200),
+                        child: Icon(Icons.keyboard_arrow_down_rounded,
+                            size: 20.0, color: textColor.withValues(alpha: .6)),
+                      ),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.vertical(
+                    top: const Radius.circular(12.0),
+                    bottom: Radius.circular(isOpen ? 4.0 : 12.0),
+                  ),
                 ),
               ),
-              const SizedBox(width: 6.0),
-              AnimatedRotation(
-                turns: isOpen ? 0.5 : 0.0,
-                duration: const Duration(milliseconds: 200),
-                child: Icon(Icons.keyboard_arrow_down_rounded,
-                    size: 20.0, color: textColor.withValues(alpha: .6)),
+              AnimatedSize(
+                duration: const Duration(milliseconds: 220),
+                curve: Curves.easeInOut,
+                child: isOpen
+                    ? Container(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 12.0, horizontal: 8.0),
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                          child: Row(
+                            children: [
+                              // System (reset) option
+                              _ColorDot(
+                                color: Theme.of(context).colorScheme.primary,
+                                isSelected: isSystem,
+                                isSystem: true,
+                                onTap: () => onColorSelected(null),
+                                accentColor: accentColor,
+                              ),
+                              const SizedBox(width: 8.0),
+                              // Divider
+                              Container(
+                                width: 1.5,
+                                height: 32.0,
+                                margin:
+                                    const EdgeInsets.symmetric(horizontal: 4.0),
+                                decoration: BoxDecoration(
+                                  color: textColor.withValues(alpha: .15),
+                                  borderRadius: BorderRadius.circular(1.0),
+                                ),
+                              ),
+                              const SizedBox(width: 8.0),
+                              // Color circles
+                              for (final c in _colors) ...[
+                                _ColorDot(
+                                  color: c,
+                                  isSelected: !isSystem &&
+                                      selectedColor != null &&
+                                      selectedColor!.value == c.value,
+                                  isSystem: false,
+                                  onTap: () => onColorSelected(c),
+                                  accentColor: accentColor,
+                                ),
+                                const SizedBox(width: 8.0),
+                              ],
+                            ],
+                          ),
+                        ),
+                      )
+                    : const SizedBox.shrink(),
               ),
             ],
           ),
-          borderRadius: BorderRadius.vertical(
-            top: const Radius.circular(12.0),
-            bottom: Radius.circular(isOpen ? 4.0 : 12.0),
-          ),
         ),
-        AnimatedSize(
-          duration: const Duration(milliseconds: 220),
-          curve: Curves.easeInOut,
-          child: isOpen
-              ? Container(
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surface,
-                    borderRadius: const BorderRadius.vertical(
-                        bottom: Radius.circular(12.0)),
-                  ),
-                  padding: const EdgeInsets.symmetric(
-                      vertical: 12.0, horizontal: 8.0),
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                    child: Row(
-                      children: [
-                        // System (reset) option
-                        _ColorDot(
-                          color: Theme.of(context).colorScheme.primary,
-                          isSelected: isSystem,
-                          isSystem: true,
-                          onTap: () => onColorSelected(null),
-                          accentColor: accentColor,
-                        ),
-                        const SizedBox(width: 8.0),
-                        // Divider
-                        Container(
-                          width: 1.5,
-                          height: 32.0,
-                          margin: const EdgeInsets.symmetric(horizontal: 4.0),
-                          decoration: BoxDecoration(
-                            color: textColor.withValues(alpha: .15),
-                            borderRadius: BorderRadius.circular(1.0),
-                          ),
-                        ),
-                        const SizedBox(width: 8.0),
-                        // Color circles
-                        for (final c in _colors) ...[
-                          _ColorDot(
-                            color: c,
-                            isSelected: !isSystem &&
-                                selectedColor != null &&
-                                selectedColor!.value == c.value,
-                            isSystem: false,
-                            onTap: () => onColorSelected(c),
-                            accentColor: accentColor,
-                          ),
-                          const SizedBox(width: 8.0),
-                        ],
-                      ],
-                    ),
-                  ),
-                )
-              : const SizedBox.shrink(),
-        ),
-      ],
+      ),
     );
   }
 }
