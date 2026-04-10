@@ -295,6 +295,7 @@ class _GradesPageState extends State<GradesPage>
               teacher: g.teacher,
             ))
         .toSet()
+        .where((s) => s.name != 'All')
         .toList()
       ..sort((a, b) => a.name.compareTo(b.name));
 
