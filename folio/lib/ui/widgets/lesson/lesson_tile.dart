@@ -66,9 +66,9 @@ class LessonTile extends StatelessWidget {
       accentColor = colorScheme.error;
       onCardColor = colorScheme.onErrorContainer;
     } else if (isSubstitute) {
-      cardColor = colorScheme.tertiaryContainer;
-      accentColor = colorScheme.tertiary;
-      onCardColor = colorScheme.onTertiaryContainer;
+      cardColor = AppColors.of(context).orange.withValues(alpha: 0.18);
+      accentColor = AppColors.of(context).orange;
+      onCardColor = Theme.of(context).colorScheme.onSurface;
     } else if (isCurrent) {
       cardColor = colorScheme.secondaryContainer;
       accentColor = colorScheme.secondary;
