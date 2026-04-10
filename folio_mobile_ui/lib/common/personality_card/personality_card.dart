@@ -362,10 +362,12 @@ class _PersonalityCardState extends State<PersonalityCard> {
             ],
           ),
           child: DottedBorder(
-            color: Colors.black.withValues(alpha: 0.9),
-            dashPattern: const [12, 12],
-            padding:
-                const EdgeInsets.only(top: 20, bottom: 20, left: 20, right: 20),
+            options: const RectDottedBorderOptions(
+              color: Colors.black,
+              dashPattern: [12, 12],
+              padding:
+                  EdgeInsets.only(top: 20, bottom: 20, left: 20, right: 20),
+            ),
             child: cardInnerBuilder(),
           ),
         ),

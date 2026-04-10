@@ -58,12 +58,13 @@ class AverageDisplay extends StatelessWidget {
       ),
       child: (border && dashed)
           ? DottedBorder(
-              strokeWidth: 1.0 * scale,
-              padding: EdgeInsets.all(4.0 * scale),
-              color: color.withValues(alpha: .5),
-              dashPattern: const [6, 6],
-              radius: Radius.circular(45.0 * scale),
-              borderType: BorderType.RRect,
+              options: RoundedRectDottedBorderOptions(
+                strokeWidth: 1.0 * scale,
+                padding: EdgeInsets.all(4.0 * scale),
+                color: color.withValues(alpha: .5),
+                dashPattern: const [6, 6],
+                radius: Radius.circular(45.0 * scale),
+              ),
               child: Center(
                 child: txtWidget,
               ),

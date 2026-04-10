@@ -59,6 +59,7 @@ subprojects {
 
 android {
     namespace = "app.zan1456.folio"
+    ndkVersion = "28.2.13676358"
 
     flavorDimensions "distribution"
     productFlavors {
@@ -69,8 +70,6 @@ android {
             dimension "distribution"
         }
     }
-
-    ndkVersion "27.2.12479018"
 
     // compileSdkVersion rootProject.ext.compileSdkVersion
     compileSdkVersion 36
