@@ -2,8 +2,8 @@
 refilc/debug-info/
 
 # /refilc/android
-refilc/android/*.jks
-refilc/android/*key.properties
+folio/android/*.jks
+folio/android/*key.properties
 **/.gradle/
 **/.kotlin/
 
@@ -95,4 +95,5 @@ refilc/android/*key.properties
 tool_logs/build/*.log
 tool_logs/d8dx_fix/*.log
 tool_logs/pub_fix/*.log
-refilc/android/app/key.jks
+folio/android/app/key.jks
+folio/android/app/google-services.json
