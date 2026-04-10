@@ -19,10 +19,21 @@ class SendMessageSheet extends StatefulWidget {
   final List<SendRecipient> availableRecipients;
 
   static void show(BuildContext context, List<SendRecipient> recipients) =>
-      showRoundedModalBottomSheet(
-        context,
-        child: SendMessageSheet(recipients),
-        showHandle: false,
+      showModalBottomSheet<void>(
+        context: context,
+        backgroundColor: const Color(0x00000000),
+        elevation: 0,
+        isDismissible: true,
+        useRootNavigator: true,
+        isScrollControlled: true,
+        builder: (ctx) => Padding(
+          padding: EdgeInsets.only(
+              bottom: MediaQuery.of(ctx).viewInsets.bottom),
+          child: RoundedBottomSheet(
+            showHandle: false,
+            child: SendMessageSheet(recipients),
+          ),
+        ),
       );
 
   @override
@@ -188,9 +199,7 @@ class SendMessageSheetState extends State<SendMessageSheet> {
               child: SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
                 child: Padding(
-                  padding: EdgeInsets.fromLTRB(
-                      18.0, 18.0, 18.0,
-                      18.0 + MediaQuery.of(context).viewInsets.bottom),
+                  padding: const EdgeInsets.fromLTRB(18.0, 18.0, 18.0, 18.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
@@ -495,11 +504,16 @@ class _NeutralTextField extends StatelessWidget {
       ),
       padding:
           const EdgeInsets.symmetric(horizontal: 14.0, vertical: 4.0),
-      child: TextSelectionTheme(
-        data: TextSelectionThemeData(
-          cursorColor: neutralColor,
-          selectionColor: textColor.withValues(alpha: 0.15),
-          selectionHandleColor: neutralColor,
+      child: Theme(
+        data: Theme.of(context).copyWith(
+          colorScheme: Theme.of(context).colorScheme.copyWith(
+            primary: neutralColor,
+          ),
+          textSelectionTheme: TextSelectionThemeData(
+            cursorColor: neutralColor,
+            selectionColor: textColor.withValues(alpha: 0.15),
+            selectionHandleColor: neutralColor,
+          ),
         ),
         child: TextField(
           controller: controller,
