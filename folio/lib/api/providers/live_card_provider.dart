@@ -68,7 +68,7 @@ class LiveCardProvider extends ChangeNotifier {
     required SettingsProvider settings,
   })  : _timetable = timetable,
         _settings = settings {
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) => update());
+    _timer = Timer.periodic(const Duration(seconds: 5), (timer) => update());
     _delay = settings.bellDelayEnabled
         ? Duration(seconds: settings.bellDelay)
         : Duration.zero;

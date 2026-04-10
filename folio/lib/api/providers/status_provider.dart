@@ -17,12 +17,18 @@ class StatusProvider extends ChangeNotifier {
 
   StatusProvider() {
     _handleNetworkChanges();
-    _handleDNSFailure();
-    Connectivity().checkConnectivity().then((value) => _networkType = value[0]);
+    // Initial check: verify actual internet connectivity on startup.
+    Connectivity().checkConnectivity().then((results) {
+      _networkType = results[0];
+      if (results[0] == ConnectivityResult.none) {
+        _setOffline();
+      } else {
+        _verifyInternet();
+      }
+    });
   }
 
   Status? getStatus() => _stack.isNotEmpty ? _stack[0] : null;
-  // Status progress from 0.0 to 1.0
   double get progress => _progress;
 
   void _handleNetworkChanges() {
@@ -30,48 +36,35 @@ class StatusProvider extends ChangeNotifier {
         Connectivity().onConnectivityChanged.listen((event) {
       _networkType = event[0];
       if (event[0] == ConnectivityResult.none) {
-        if (!_stack.contains(Status.network)) {
-          _stack.remove(Status.apiError);
-          _stack.insert(0, Status.network);
-          notifyListeners();
-        }
+        _setOffline();
       } else {
-        if (_stack.contains(Status.network)) {
-          _stack.remove(Status.network);
-          notifyListeners();
-        }
+        // Connected to a network – verify there is actual internet access.
+        _verifyInternet();
       }
     });
   }
 
-  @override
-  void dispose() {
-    _connectivitySubscription?.cancel();
-    super.dispose();
+  /// Performs a lightweight DNS lookup to confirm real internet access.
+  /// Called whenever connectivity_plus reports a non-none network.
+  void _verifyInternet() {
+    InternetAddress.lookup('google.com').then((result) {
+      if (result.isNotEmpty && result.first.rawAddress.isNotEmpty) {
+        // Real internet confirmed – clear the network error if present.
+        if (_stack.contains(Status.network)) {
+          _stack.remove(Status.network);
+          notifyListeners();
+        }
+      } else {
+        _setOffline();
+      }
+    }).catchError((_) => _setOffline());
   }
 
-  void _handleDNSFailure() {
-    try {
-      InternetAddress.lookup('firka.app').then((status) { // koszonjuk klima a hardcoded checket
-        if (status.isEmpty) {
-          if (!_stack.contains(Status.network)) {
-            _stack.remove(Status.apiError);
-            _stack.insert(0, Status.network);
-            notifyListeners();
-          }
-        } else {
-          if (_stack.contains(Status.network)) {
-            _stack.remove(Status.network);
-            notifyListeners();
-          }
-        }
-      });
-    } on SocketException catch (_) {
-      if (!_stack.contains(Status.network)) {
-        _stack.remove(Status.apiError);
-        _stack.insert(0, Status.network);
-        notifyListeners();
-      }
+  void _setOffline() {
+    if (!_stack.contains(Status.network)) {
+      _stack.remove(Status.apiError);
+      _stack.insert(0, Status.network);
+      notifyListeners();
     }
   }
 
@@ -124,7 +117,6 @@ class StatusProvider extends ChangeNotifier {
 
     if (_progress == 1.0) {
       notifyListeners();
-      // Wait for animation
       Future.delayed(const Duration(milliseconds: 250), () {
         _stack.remove(Status.syncing);
         notifyListeners();
@@ -132,5 +124,11 @@ class StatusProvider extends ChangeNotifier {
     } else if (progress != prev) {
       notifyListeners();
     }
+  }
+
+  @override
+  void dispose() {
+    _connectivitySubscription?.cancel();
+    super.dispose();
   }
 }

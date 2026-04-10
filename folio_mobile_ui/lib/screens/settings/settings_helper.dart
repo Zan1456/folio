@@ -47,11 +47,7 @@ class SettingsHelper {
 
   static const List<String> fontList = [
     "Montserrat",
-    "Merienda",
-    "M PLUS Code Latin",
     "Figtree",
-    "Fira Code",
-    "Vollkorn",
   ];
 
   static const Map<Pages, String> pageTitle = {

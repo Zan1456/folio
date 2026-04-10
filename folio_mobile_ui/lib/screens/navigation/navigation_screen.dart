@@ -30,7 +30,6 @@ import 'package:folio/api/providers/news_provider.dart';
 import 'package:folio/api/providers/sync.dart';
 import 'package:background_fetch/background_fetch.dart';
 import 'package:folio/providers/goal_provider.dart';
-import 'package:folio/api/providers/ad_provider.dart';
 import 'dart:io' show Platform;
 
 class NavigationScreen extends StatefulWidget {
@@ -54,7 +53,6 @@ class NavigationScreenState extends State<NavigationScreen>
   late GoalProvider goalProvider;
   late UpdateProvider updateProvider;
   late GradeProvider gradeProvicer;
-  late AdProvider adProvider;
 
   NavigatorState? get navigator => _navigatorState.currentState;
 
@@ -147,10 +145,6 @@ class NavigationScreenState extends State<NavigationScreen>
         });
       }
     });
-
-    // get advertisements
-    adProvider = Provider.of<AdProvider>(context, listen: false);
-    adProvider.fetch();
 
     // initial sync
     syncAll(context);

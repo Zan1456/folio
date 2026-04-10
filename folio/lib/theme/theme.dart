@@ -35,11 +35,8 @@ class AppTheme {
       palette != null ? Color(palette.neutralVariant.get(20)) : null;
 
   static Map<String, TextTheme?> googleFontsMap = {
-    "Merienda": GoogleFonts.meriendaTextTheme(),
-    "M PLUS Code Latin": GoogleFonts.mPlusCodeLatinTextTheme(),
+    "Montserrat": GoogleFonts.montserratTextTheme(),
     "Figtree": GoogleFonts.figtreeTextTheme(),
-    "Fira Code": GoogleFonts.firaCodeTextTheme(),
-    "Vollkorn": GoogleFonts.vollkornTextTheme(),
   };
 
   // Light Theme
