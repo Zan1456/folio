@@ -240,4 +240,29 @@ class UserDatabaseStore {
     await db.update("user_data", {"custom_lesson_desc": descJson},
         where: "id = ?", whereArgs: [userId]);
   }
+
+  Future<void> storeNotificationSubscription({
+    required String userId,
+    required String registrationId,
+    required String fcmToken,
+  }) async {
+    await db.update(
+      "user_data",
+      {
+        "notification_registration_id": registrationId,
+        "notification_fcm_token": fcmToken,
+      },
+      where: "id = ?",
+      whereArgs: [userId],
+    );
+  }
+
+  Future<void> clearNotificationSubscription({required String userId}) async {
+    await db.update(
+      "user_data",
+      {"notification_registration_id": "", "notification_fcm_token": ""},
+      where: "id = ?",
+      whereArgs: [userId],
+    );
+  }
 }

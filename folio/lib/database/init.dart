@@ -23,7 +23,6 @@ const settingsDB = DatabaseStruct("settings", {
   "grade_color4": int, "grade_color5": int, // grade colors
   "vibration_strength": int, "ab_weeks": int, "swap_ab_weeks": int,
   "notifications": int, "notifications_bitfield": int,
-  "notification_poll_interval": int,
   "notifications_grades": int,
   "notifications_absences": int,
   "notifications_messages": int,
@@ -119,6 +118,9 @@ const userDataDB = DatabaseStruct("user_data", {
   "linked_accounts": String,
   "custom_lesson_desc": String,
   "watch_data": String,
+  // FCM push notification subscription
+  "notification_registration_id": String,
+  "notification_fcm_token": String,
 });
 
 Future<void> createTable(Database db, DatabaseStruct struct) =>
@@ -200,6 +202,8 @@ Future<Database> initDB(DatabaseProvider database) async {
       "linked_accounts": "[]",
       "custom_lesson_desc": "{}",
       "watch_data": "{}",
+      "notification_registration_id": "",
+      "notification_fcm_token": "",
     });
   } catch (error) {
     print("ERROR: migrateDB: $error");

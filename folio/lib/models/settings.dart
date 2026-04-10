@@ -51,8 +51,6 @@ class SettingsProvider extends ChangeNotifier {
   1 << 7 exams and homework
   */
   int _notificationsBitfield;
-  // minutes: times 15
-  int _notificationPollInterval;
   bool _developerMode;
   bool _devLiveFakeLessons;
   VibrationStrength _vibrate;
@@ -151,7 +149,6 @@ class SettingsProvider extends ChangeNotifier {
     required int notificationsBitfield,
     required bool developerMode,
     required bool devLiveFakeLessons,
-    required int notificationPollInterval,
     required VibrationStrength vibrate,
     required bool abWeeks,
     required bool swapABweeks,
@@ -238,7 +235,6 @@ class SettingsProvider extends ChangeNotifier {
         _notificationsBitfield = notificationsBitfield,
         _developerMode = developerMode,
         _devLiveFakeLessons = devLiveFakeLessons,
-        _notificationPollInterval = notificationPollInterval,
         _vibrate = vibrate,
         _abWeeks = abWeeks,
         _swapABweeks = swapABweeks,
@@ -341,7 +337,6 @@ class SettingsProvider extends ChangeNotifier {
       notificationsMessagesEnabled: map["notifications_messages"] == 1,
       notificationsLessonsEnabled: map["notifications_lessons"] == 1,
       notificationsBitfield: map["notifications_bitfield"],
-      notificationPollInterval: map["notification_poll_interval"],
       developerMode: map["developer_mode"] == 1,
       devLiveFakeLessons: map["dev_live_fake_lessons"] == 1,
       vibrate: VibrationStrength.values[map["vibration_strength"]],
@@ -445,7 +440,6 @@ class SettingsProvider extends ChangeNotifier {
       "vibration_strength": _vibrate.index,
       "ab_weeks": _abWeeks ? 1 : 0,
       "swap_ab_weeks": _swapABweeks ? 1 : 0,
-      "notification_poll_interval": _notificationPollInterval,
       "config": jsonEncode(config.json),
       "x_filc_id": _xFilcId,
       "analytics_enabled": _analyticsEnabled ? 1 : 0,
@@ -538,7 +532,6 @@ class SettingsProvider extends ChangeNotifier {
       notificationsBitfield: 255,
       developerMode: true,
       devLiveFakeLessons: false,
-      notificationPollInterval: 1,
       vibrate: VibrationStrength.medium,
       abWeeks: false,
       swapABweeks: false,
@@ -626,7 +619,6 @@ class SettingsProvider extends ChangeNotifier {
   int get notificationsBitfield => _notificationsBitfield;
   bool get developerMode => _developerMode;
   bool get devLiveFakeLessons => _devLiveFakeLessons;
-  int get notificationPollInterval => _notificationPollInterval;
   VibrationStrength get vibrate => _vibrate;
   bool get abWeeks => _abWeeks;
   bool get swapABweeks => _swapABweeks;
@@ -723,7 +715,6 @@ class SettingsProvider extends ChangeNotifier {
     int? notificationsBitfield,
     bool? developerMode,
     bool? devLiveFakeLessons,
-    int? notificationPollInterval,
     VibrationStrength? vibrate,
     bool? abWeeks,
     bool? swapABweeks,
@@ -838,10 +829,6 @@ class SettingsProvider extends ChangeNotifier {
     if (devLiveFakeLessons != null &&
         devLiveFakeLessons != _devLiveFakeLessons) {
       _devLiveFakeLessons = devLiveFakeLessons;
-    }
-    if (notificationPollInterval != null &&
-        notificationPollInterval != _notificationPollInterval) {
-      _notificationPollInterval = notificationPollInterval;
     }
     if (vibrate != null && vibrate != _vibrate) _vibrate = vibrate;
     if (abWeeks != null && abWeeks != _abWeeks) _abWeeks = abWeeks;
@@ -1085,7 +1072,6 @@ class SettingsProvider extends ChangeNotifier {
       notificationsMessagesEnabled: map["notifications_messages"] == 1,
       notificationsLessonsEnabled: map["notifications_lessons"] == 1,
       notificationsBitfield: map["notifications_bitfield"],
-      notificationPollInterval: map["notification_poll_interval"],
       developerMode: map["developer_mode"] == 1,
       devLiveFakeLessons: map["dev_live_fake_lessons"] == 1,
       vibrate:

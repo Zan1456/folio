@@ -7,6 +7,7 @@ class PanelButton extends StatelessWidget {
   const PanelButton({
     super.key,
     this.onPressed,
+    this.onLongPress,
     this.padding = const EdgeInsets.symmetric(horizontal: 14.0),
     this.leading,
     this.title,
@@ -18,6 +19,7 @@ class PanelButton extends StatelessWidget {
   });
 
   final void Function()? onPressed;
+  final void Function()? onLongPress;
   final EdgeInsetsGeometry padding;
   final Widget? leading;
   final Widget? title;
@@ -31,7 +33,7 @@ class PanelButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final button = RawMaterialButton(
       onPressed: !longPressInstead ? onPressed : null,
-      onLongPress: longPressInstead ? onPressed : null,
+      onLongPress: longPressInstead ? onPressed : onLongPress,
       padding: padding,
       shape: RoundedRectangleBorder(
           borderRadius: borderRadius ?? BorderRadius.circular(12.0)),

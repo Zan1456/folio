@@ -20,6 +20,7 @@
 
 import 'dart:io';
 
+import 'package:folio/helpers/notification_helper.dart';
 import 'package:folio/api/providers/database_provider.dart';
 import 'package:i18n_extension/i18n_extension.dart';
 import 'package:folio/helpers/quick_actions.dart';
@@ -508,6 +509,74 @@ class SettingsScreenState extends State<SettingsScreen>
       case VibrationStrength.strong:
         HapticFeedback.mediumImpact();
     }
+  }
+
+  Future<void> _checkFirebaseStatus(BuildContext context) async {
+    HapticFeedback.heavyImpact();
+    final db = Provider.of<DatabaseProvider>(context, listen: false);
+    final currentUser = Provider.of<UserProvider>(context, listen: false).user;
+    if (currentUser == null) return;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        content: Row(
+          children: [
+            const SizedBox(
+              width: 24,
+              height: 24,
+              child: CircularProgressIndicator(strokeWidth: 2.5),
+            ),
+            const SizedBox(width: 16.0),
+            Text('firebase_checking'.i18n),
+          ],
+        ),
+      ),
+    );
+
+    final status = await NotificationHelper.checkStatus(currentUser, db);
+
+    if (!context.mounted) return;
+    Navigator.of(context, rootNavigator: true).pop();
+
+    final (IconData icon, Color color, String message) = switch (status) {
+      NotificationRegistrationStatus.registered => (
+          Icons.check_circle_rounded,
+          Colors.green,
+          'firebase_reg_registered'.i18n,
+        ),
+      NotificationRegistrationStatus.tokenMismatch => (
+          Icons.warning_rounded,
+          Colors.orange,
+          'firebase_reg_token_mismatch'.i18n,
+        ),
+      NotificationRegistrationStatus.notRegistered => (
+          Icons.cancel_rounded,
+          Colors.red,
+          'firebase_reg_not_registered'.i18n,
+        ),
+      NotificationRegistrationStatus.noToken => (
+          Icons.warning_rounded,
+          Colors.orange,
+          'firebase_reg_no_token'.i18n,
+        ),
+    };
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        icon: Icon(icon, color: color, size: 36.0),
+        title: Text('firebase_reg_title'.i18n),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: Text('done'.i18n),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildSliderCard({
@@ -1140,6 +1209,225 @@ class SettingsScreenState extends State<SettingsScreen>
             ),
           ),
         ),
+
+      // Push Notifications: master toggle + per-category
+      _SettingsSection(
+        category: 'notifications',
+        searchTerms: [
+          'push értesítés',
+          'értesítések',
+          'push notification',
+          'notifications',
+          'jegy értesítés',
+          'hiányzás értesítés',
+          'üzenet értesítés',
+          'óra értesítés',
+          'firebase',
+        ],
+        widget: Padding(
+          padding: const EdgeInsets.only(top: 5.0),
+          child: SplittedPanel(
+            cardPadding: const EdgeInsets.all(4.0),
+            isSeparated: false,
+            children: [
+              // Master on/off toggle (long press → Firebase registration check)
+              PanelButton(
+                padding: const EdgeInsets.only(left: 14.0, right: 6.0),
+                onPressed: () {
+                  _haptic();
+                  settings.update(
+                      notificationsEnabled: !settings.notificationsEnabled);
+                  setState(() {});
+                },
+                onLongPress: () => _checkFirebaseStatus(context),
+                title: Text(
+                  'push_notifications'.i18n,
+                  style: TextStyle(
+                      color: AppColors.of(context).text.withValues(
+                          alpha:
+                              settings.notificationsEnabled ? .95 : .25)),
+                ),
+                leading: Icon(
+                  settings.notificationsEnabled
+                      ? Icons.notifications_rounded
+                      : Icons.notifications_off_rounded,
+                  size: 22.0,
+                  color: AppColors.of(context).text.withValues(
+                      alpha: settings.notificationsEnabled ? .95 : .25),
+                ),
+                trailing: Switch(
+                  onChanged: (v) {
+                    _haptic();
+                    settings.update(notificationsEnabled: v);
+                    setState(() {});
+                  },
+                  value: settings.notificationsEnabled,
+                  activeColor: Theme.of(context).colorScheme.secondary,
+                ),
+                borderRadius: BorderRadius.vertical(
+                  top: const Radius.circular(12.0),
+                  bottom: Radius.circular(
+                      settings.notificationsEnabled ? 4.0 : 12.0),
+                ),
+              ),
+              if (settings.notificationsEnabled) ...[
+                // Grades
+                PanelButton(
+                  padding: const EdgeInsets.only(left: 14.0, right: 6.0),
+                  onPressed: () {
+                    _haptic();
+                    settings.update(
+                        notificationsGradesEnabled:
+                            !settings.notificationsGradesEnabled);
+                    setState(() {});
+                  },
+                  title: Text(
+                    'notification_grades'.i18n,
+                    style: TextStyle(
+                        color: AppColors.of(context).text.withValues(
+                            alpha: settings.notificationsGradesEnabled
+                                ? .95
+                                : .25)),
+                  ),
+                  leading: Icon(
+                    Icons.bookmark_rounded,
+                    size: 22.0,
+                    color: AppColors.of(context).text.withValues(
+                        alpha:
+                            settings.notificationsGradesEnabled ? .95 : .25),
+                  ),
+                  trailing: Switch(
+                    onChanged: (v) {
+                      _haptic();
+                      settings.update(notificationsGradesEnabled: v);
+                      setState(() {});
+                    },
+                    value: settings.notificationsGradesEnabled,
+                    activeColor: Theme.of(context).colorScheme.secondary,
+                  ),
+                  borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(4.0),
+                      bottom: Radius.circular(4.0)),
+                ),
+                // Absences
+                PanelButton(
+                  padding: const EdgeInsets.only(left: 14.0, right: 6.0),
+                  onPressed: () {
+                    _haptic();
+                    settings.update(
+                        notificationsAbsencesEnabled:
+                            !settings.notificationsAbsencesEnabled);
+                    setState(() {});
+                  },
+                  title: Text(
+                    'notification_absences'.i18n,
+                    style: TextStyle(
+                        color: AppColors.of(context).text.withValues(
+                            alpha: settings.notificationsAbsencesEnabled
+                                ? .95
+                                : .25)),
+                  ),
+                  leading: Icon(
+                    Icons.access_time_rounded,
+                    size: 22.0,
+                    color: AppColors.of(context).text.withValues(
+                        alpha:
+                            settings.notificationsAbsencesEnabled ? .95 : .25),
+                  ),
+                  trailing: Switch(
+                    onChanged: (v) {
+                      _haptic();
+                      settings.update(notificationsAbsencesEnabled: v);
+                      setState(() {});
+                    },
+                    value: settings.notificationsAbsencesEnabled,
+                    activeColor: Theme.of(context).colorScheme.secondary,
+                  ),
+                  borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(4.0),
+                      bottom: Radius.circular(4.0)),
+                ),
+                // Messages
+                PanelButton(
+                  padding: const EdgeInsets.only(left: 14.0, right: 6.0),
+                  onPressed: () {
+                    _haptic();
+                    settings.update(
+                        notificationsMessagesEnabled:
+                            !settings.notificationsMessagesEnabled);
+                    setState(() {});
+                  },
+                  title: Text(
+                    'notification_messages'.i18n,
+                    style: TextStyle(
+                        color: AppColors.of(context).text.withValues(
+                            alpha: settings.notificationsMessagesEnabled
+                                ? .95
+                                : .25)),
+                  ),
+                  leading: Icon(
+                    Icons.chat_bubble_outline_rounded,
+                    size: 22.0,
+                    color: AppColors.of(context).text.withValues(
+                        alpha:
+                            settings.notificationsMessagesEnabled ? .95 : .25),
+                  ),
+                  trailing: Switch(
+                    onChanged: (v) {
+                      _haptic();
+                      settings.update(notificationsMessagesEnabled: v);
+                      setState(() {});
+                    },
+                    value: settings.notificationsMessagesEnabled,
+                    activeColor: Theme.of(context).colorScheme.secondary,
+                  ),
+                  borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(4.0),
+                      bottom: Radius.circular(4.0)),
+                ),
+                // Lessons
+                PanelButton(
+                  padding: const EdgeInsets.only(left: 14.0, right: 6.0),
+                  onPressed: () {
+                    _haptic();
+                    settings.update(
+                        notificationsLessonsEnabled:
+                            !settings.notificationsLessonsEnabled);
+                    setState(() {});
+                  },
+                  title: Text(
+                    'notification_lessons'.i18n,
+                    style: TextStyle(
+                        color: AppColors.of(context).text.withValues(
+                            alpha: settings.notificationsLessonsEnabled
+                                ? .95
+                                : .25)),
+                  ),
+                  leading: Icon(
+                    Icons.school_rounded,
+                    size: 22.0,
+                    color: AppColors.of(context).text.withValues(
+                        alpha:
+                            settings.notificationsLessonsEnabled ? .95 : .25),
+                  ),
+                  trailing: Switch(
+                    onChanged: (v) {
+                      _haptic();
+                      settings.update(notificationsLessonsEnabled: v);
+                      setState(() {});
+                    },
+                    value: settings.notificationsLessonsEnabled,
+                    activeColor: Theme.of(context).colorScheme.secondary,
+                  ),
+                  borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(4.0),
+                      bottom: Radius.circular(12.0)),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
 
       // Android Live Activity
       if (Platform.isAndroid)

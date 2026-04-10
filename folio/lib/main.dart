@@ -13,12 +13,13 @@
     GNU Affero General Public License for more details.
 
     You should have received a copy of the GNU Affero General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+    along with this program, if not, see <https://www.gnu.org/licenses/>.
 */
 
 import 'dart:io';
 
 import 'package:background_fetch/background_fetch.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:folio/api/providers/user_provider.dart';
 import 'package:folio/api/providers/database_provider.dart';
@@ -31,7 +32,6 @@ import 'package:flutter/services.dart';
 import 'package:folio/utils/service_locator.dart';
 import 'package:folio_mobile_ui/screens/error_screen.dart';
 import 'package:folio_mobile_ui/screens/error_report_screen.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 import 'helpers/live_activity_helper.dart';
 
@@ -39,19 +39,23 @@ import 'helpers/live_activity_helper.dart';
 
 void main() async {
   try {
-    // Initalize
     WidgetsBinding binding = WidgetsFlutterBinding.ensureInitialized();
     // ignore: deprecated_member_use
     binding.renderView.automaticSystemUiAdjustment = false;
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-    // navigation
     setupLocator();
 
-    // Startup
+    if (!kIsWeb) {
+      try {
+        await Firebase.initializeApp();
+      } catch (e) {
+        debugPrint('Firebase init skipped: $e');
+      }
+    }
+
     Startup startup = Startup();
     await startup.start();
 
-    // Custom error page
     ErrorWidget.builder = errorBuilder;
 
     BackgroundFetch.registerHeadlessTask(backgroundHeadlessTask);
@@ -77,7 +81,6 @@ void main() async {
     svg.cache.putIfAbsent(
         absencesSvg.cacheKey(null), () => absencesSvg.loadBytes(null));
 
-    // Run App
     runApp(App(
       database: startup.database,
       settings: startup.settings,
@@ -117,73 +120,8 @@ class Startup {
     settings = await database.query.getSettings(database);
     user = await database.query.getUsers(settings);
 
-    // Set all notification categories to seen to avoid having notifications that the user has already seen in the app
-    // NotificationsHelper().setAllCategoriesSeen(user);
-
-    late FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
-    // Notifications setup
     if (!kIsWeb) {
-      initPlatformState();
       initAdditionalBackgroundFetch();
-      flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
-    }
-
-    // Get permission to show notifications
-    if (kIsWeb) {
-      // do nothing
-    } else if (Platform.isAndroid) {
-      await flutterLocalNotificationsPlugin
-          .resolvePlatformSpecificImplementation<
-              AndroidFlutterLocalNotificationsPlugin>()!
-          .requestNotificationsPermission();
-    } else if (Platform.isIOS) {
-      await flutterLocalNotificationsPlugin
-          .resolvePlatformSpecificImplementation<
-              IOSFlutterLocalNotificationsPlugin>()
-          ?.requestPermissions(
-            alert: false,
-            badge: true,
-            sound: true,
-          );
-    } else if (Platform.isMacOS) {
-      await flutterLocalNotificationsPlugin
-          .resolvePlatformSpecificImplementation<
-              MacOSFlutterLocalNotificationsPlugin>()
-          ?.requestPermissions(
-            alert: false,
-            badge: true,
-            sound: true,
-          );
-    } else if (Platform.isLinux) {
-      // no permissions are needed on linux
-    }
-
-    // Platform specific settings
-    if (!kIsWeb) {
-      // const DarwinInitializationSettings initializationSettingsDarwin =
-      //     DarwinInitializationSettings(
-      //   requestSoundPermission: true,
-      //   requestBadgePermission: true,
-      //   requestAlertPermission: false,
-      // );
-      // const AndroidInitializationSettings initializationSettingsAndroid =
-      //     AndroidInitializationSettings('ic_notification');
-      // const LinuxInitializationSettings initializationSettingsLinux =
-      //     LinuxInitializationSettings(defaultActionName: 'Open notification');
-      // const InitializationSettings initializationSettings =
-      //     InitializationSettings(
-      //   android: initializationSettingsAndroid,
-      //   iOS: initializationSettingsDarwin,
-      //   macOS: initializationSettingsDarwin,
-      //   linux: initializationSettingsLinux,
-      // );
-
-      // Initialize notifications
-      // await flutterLocalNotificationsPlugin.initialize(
-      //   initializationSettings,
-      //   onDidReceiveNotificationResponse:
-      //       NotificationsHelper().onDidReceiveNotificationResponse,
-      // );
     }
   }
 }
@@ -202,7 +140,6 @@ Widget errorBuilder(FlutterErrorDetails details) {
         Navigator.of(context, rootNavigator: true)
             .push(MaterialPageRoute(builder: (context) {
           if (kReleaseMode) {
-            // show error report screen
             return ErrorReportScreen(details);
           } else {
             return ErrorScreen(details);
@@ -227,11 +164,10 @@ Widget errorBuilder(FlutterErrorDetails details) {
   });
 }
 
-Future<void> initPlatformState() async {
-  // Configure BackgroundFetch.
+Future<void> initAdditionalBackgroundFetch() async {
   int status = await BackgroundFetch.configure(
       BackgroundFetchConfig(
-          minimumFetchInterval: 15,
+          minimumFetchInterval: 1,
           stopOnTerminate: false,
           enableHeadless: true,
           requiresBatteryNotLow: false,
@@ -240,19 +176,13 @@ Future<void> initPlatformState() async {
           requiresDeviceIdle: false,
           requiredNetworkType: NetworkType.ANY,
           startOnBoot: true), (String taskId) async {
-    // <-- Event handler
     if (kDebugMode) {
       print("[BackgroundFetch] Event received $taskId");
     }
-    if (taskId == "com.transistorsoft.folioliveactivity") {
-      if (!Platform.isIOS) return;
-      LiveActivityHelper().backgroundJob();
-    } else {
-      // NotificationsHelper().backgroundJob();
-    }
+    LiveActivityHelper liveActivityHelper = LiveActivityHelper();
+    liveActivityHelper.backgroundJob();
     BackgroundFetch.finish(taskId);
   }, (String taskId) async {
-    // <-- Task timeout handler.
     if (kDebugMode) {
       print("[BackgroundFetch] TASK TIMEOUT taskId: $taskId");
     }
@@ -262,8 +192,8 @@ Future<void> initPlatformState() async {
     print('[BackgroundFetch] configure success: $status');
   }
   BackgroundFetch.scheduleTask(TaskConfig(
-      taskId: "com.transistorsoft.folionotification",
-      delay: 900000, // 15 minutes
+      taskId: "com.transistorsoft.folioliveactivity",
+      delay: 300000, // 5 minutes
       periodic: true,
       forceAlarmManager: true,
       stopOnTerminate: false,
@@ -287,48 +217,6 @@ void backgroundHeadlessTask(HeadlessTask task) {
   if (taskId == "com.transistorsoft.folioliveactivity") {
     if (!Platform.isIOS) return;
     LiveActivityHelper().backgroundJob();
-  } else {
-    // NotificationsHelper().backgroundJob();
   }
   BackgroundFetch.finish(task.taskId);
-}
-
-Future<void> initAdditionalBackgroundFetch() async {
-  int status = await BackgroundFetch.configure(
-      BackgroundFetchConfig(
-          minimumFetchInterval: 1, // 1 minute
-          stopOnTerminate: false,
-          enableHeadless: true,
-          requiresBatteryNotLow: false,
-          requiresCharging: false,
-          requiresStorageNotLow: false,
-          requiresDeviceIdle: false,
-          requiredNetworkType: NetworkType.ANY,
-          startOnBoot: true), (String taskId) async {
-    // <-- Event handler
-
-    if (kDebugMode) {
-      print("[BackgroundFetch] Event received $taskId");
-    }
-    LiveActivityHelper liveActivityHelper = LiveActivityHelper();
-    liveActivityHelper.backgroundJob();
-
-    BackgroundFetch.finish(taskId);
-  }, (String taskId) async {
-    // <-- Task timeout handler.
-    if (kDebugMode) {
-      print("[BackgroundFetch] TASK TIMEOUT taskId: $taskId");
-    }
-    BackgroundFetch.finish(taskId);
-  });
-  if (kDebugMode) {
-    print('[BackgroundFetch] configure success: $status');
-  }
-  BackgroundFetch.scheduleTask(TaskConfig(
-      taskId: "com.transistorsoft.folioliveactivity",
-      delay: 300000, // 5 minute
-      periodic: true,
-      forceAlarmManager: true,
-      stopOnTerminate: false,
-      enableHeadless: true));
 }

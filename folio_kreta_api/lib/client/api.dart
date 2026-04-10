@@ -99,6 +99,10 @@ class KretaAPI {
       BaseKreta.kretaAdmin + KretaAdminEndpoints.trashMessage;
   static const deleteMessage =
       BaseKreta.kretaAdmin + KretaAdminEndpoints.deleteMessage;
+
+  // NOTIFICATION API
+  static const notificationRegistration =
+      BaseKreta.kretaNotification + '/Registration';
 }
 
 class BaseKreta {
@@ -106,6 +110,7 @@ class BaseKreta {
   static const kretaIdp = "https://idp.e-kreta.hu";
   static const kretaAdmin = "https://eugyintezes.e-kreta.hu";
   static const kretaFiles = "https://files.e-kreta.hu";
+  static const kretaNotification = "https://kretaglobalmobileapi2.ekreta.hu/api/v3";
 }
 
 class KretaApiEndpoints {

@@ -389,4 +389,16 @@ class UserDatabaseQuery {
     return (jsonDecode(descJson) as Map)
         .map((key, value) => MapEntry(key.toString(), value.toString()));
   }
+
+  /// Returns (registrationId, fcmToken). Both empty strings if not registered.
+  Future<({String registrationId, String fcmToken})> getNotificationSubscription(
+      {required String userId}) async {
+    List<Map> userData =
+        await db.query("user_data", where: "id = ?", whereArgs: [userId]);
+    if (userData.isEmpty) return (registrationId: '', fcmToken: '');
+    return (
+      registrationId: (userData.first["notification_registration_id"] as String?) ?? '',
+      fcmToken: (userData.first["notification_fcm_token"] as String?) ?? '',
+    );
+  }
 }

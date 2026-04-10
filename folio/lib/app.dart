@@ -29,6 +29,7 @@ import 'package:folio/api/providers/news_provider.dart';
 import 'package:folio/api/providers/database_provider.dart';
 import 'package:folio/api/providers/self_note_provider.dart';
 import 'package:folio/api/providers/status_provider.dart';
+import 'package:folio/helpers/notification_helper.dart';
 import 'package:folio/models/config.dart';
 import 'package:folio/providers/third_party_provider.dart';
 import 'package:folio/theme/observer.dart';
@@ -123,6 +124,10 @@ class _AppState extends State<App> {
       FilcAPI.getConfig(settings).then((Config? config) {
         if (config != null) settings.update(config: config);
       });
+      // Register device for push notifications if a user is already signed in
+      if (user.user != null && settings.notificationsEnabled) {
+        NotificationHelper.initialize(user.user!, database);
+      }
     });
 
     return MultiProvider(
