@@ -532,6 +532,7 @@ class _NeutralTextField extends StatelessWidget {
             border: InputBorder.none,
             enabledBorder: InputBorder.none,
             focusedBorder: InputBorder.none,
+            filled: false,
             hintText: hintText,
             hintStyle: TextStyle(
               color: textColor.withValues(alpha: 0.4),
