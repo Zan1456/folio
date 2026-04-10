@@ -19,8 +19,7 @@ class RoundedBottomSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 500),
+    return Container(
       decoration: BoxDecoration(
         color: backgroundColor ?? Theme.of(context).scaffoldBackgroundColor,
         borderRadius: BorderRadius.only(
