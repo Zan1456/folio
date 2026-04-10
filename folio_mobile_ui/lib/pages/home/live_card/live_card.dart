@@ -16,7 +16,6 @@ import 'package:flutter/material.dart';
 import 'package:folio/utils/format.dart';
 import 'package:folio/api/providers/live_card_provider.dart';
 import 'package:folio_mobile_ui/pages/home/live_card/live_card_widget.dart';
-import 'package:i18n_extension/i18n_extension.dart';
 import 'package:intl/intl.dart';
 import 'package:maps_launcher/maps_launcher.dart';
 import 'package:provider/provider.dart';
@@ -529,20 +528,6 @@ class LiveCardStateA extends State<LiveCard> {
           break;
         }
 
-        final diff = liveCard.getFloorDifference();
-
-        final breakDescription =
-            liveCard.nextLesson!.room != liveCard.prevLesson!.room
-                ? localizeFill("go $diff".i18n, [
-                    diff != "to room"
-                        ? (liveCard.nextLesson!.getFloor() ?? 0)
-                        : liveCard.nextLesson!.room
-                  ])
-                : "stay".i18n;
-
-        final breakTimes =
-            '${DateFormat("H:mm").format(liveCard.prevLesson!.end)} – ${DateFormat("H:mm").format(liveCard.nextLesson!.start)}';
-
         final nextSubjectName = (liveCard.nextLesson!.subject.isRenamed &&
                     settingsProvider.renamedSubjectsEnabled
                 ? liveCard.nextLesson!.subject.renamedTo
@@ -562,11 +547,6 @@ class LiveCardStateA extends State<LiveCard> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _labelRow(
-                      'break'.i18n,
-                      trailing: breakTimes,
-                    ),
-                    const SizedBox(height: 12.0),
                     Row(
                       children: [
                         Container(
@@ -588,12 +568,12 @@ class LiveCardStateA extends State<LiveCard> {
                         const SizedBox(width: 12.0),
                         Expanded(
                           child: Text(
-                            breakDescription,
+                            'break'.i18n,
                             style: const TextStyle(
-                              fontSize: 16.0,
-                              fontWeight: FontWeight.w600,
+                              fontSize: 20.0,
+                              fontWeight: FontWeight.w700,
                             ),
-                            maxLines: 2,
+                            maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),

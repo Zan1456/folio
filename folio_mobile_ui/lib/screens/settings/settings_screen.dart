@@ -89,7 +89,8 @@ class SettingsScreenState extends State<SettingsScreen>
   final ScrollController _scrollController = ScrollController();
   final ScrollController _chipScrollController = ScrollController();
   String _searchQuery = '';
-  String? _activeNavCategory;
+  final ValueNotifier<String?> _activeNavCategoryNotifier =
+      ValueNotifier<String?>('general');
   bool _themeColorOpen = false;
 
   final Map<String, GlobalKey> _sectionKeys = {
@@ -118,7 +119,6 @@ class SettingsScreenState extends State<SettingsScreen>
   @override
   void initState() {
     super.initState();
-    _activeNavCategory = 'general';
     _hideContainersController = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 200));
     _searchController.addListener(() {
@@ -128,8 +128,6 @@ class SettingsScreenState extends State<SettingsScreen>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       futureRelease = Provider.of<UpdateProvider>(context, listen: false)
           .installedVersion();
-      setState(() {});
-
       setState(() {});
     });
   }
@@ -142,6 +140,7 @@ class SettingsScreenState extends State<SettingsScreen>
     _editTeacherNameCtrl.dispose();
     _scrollController.dispose();
     _chipScrollController.dispose();
+    _activeNavCategoryNotifier.dispose();
     super.dispose();
   }
 
@@ -153,9 +152,9 @@ class SettingsScreenState extends State<SettingsScreen>
       final last = _sectionKeys.keys.lastWhere(
           (k) => _sectionKeys[k]?.currentContext != null,
           orElse: () => 'about');
-      if (last != _activeNavCategory) {
+      if (last != _activeNavCategoryNotifier.value) {
         _haptic();
-        setState(() => _activeNavCategory = last);
+        _activeNavCategoryNotifier.value = last;
         _scrollChipIntoView(last);
       }
       return;
@@ -174,9 +173,9 @@ class SettingsScreenState extends State<SettingsScreen>
         topmost = entry.key;
       }
     }
-    if (topmost != null && topmost != _activeNavCategory) {
+    if (topmost != null && topmost != _activeNavCategoryNotifier.value) {
       _haptic();
-      setState(() => _activeNavCategory = topmost);
+      _activeNavCategoryNotifier.value = topmost;
       _scrollChipIntoView(topmost);
     }
   }
@@ -201,9 +200,7 @@ class SettingsScreenState extends State<SettingsScreen>
       curve: Curves.easeInOut,
       alignment: 0.0,
     ).then((_) {
-      if (_activeNavCategory != category) {
-        setState(() => _activeNavCategory = category);
-      }
+      _activeNavCategoryNotifier.value = category;
     });
   }
 
@@ -879,56 +876,43 @@ class SettingsScreenState extends State<SettingsScreen>
 
                   // ── Category chips (inside header, messages-style) ──
                   if (!isSearching)
-                    SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      controller: _chipScrollController,
-                      padding: const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 14.0),
-                      child: Row(
-                        children: navCategories.map((c) {
-                          final catKey = c['key'] as String;
-                          final isActive = _activeNavCategory == catKey;
-                          return Padding(
-                            key: _chipKeys[catKey],
-                            padding: const EdgeInsets.only(right: 4.0),
-                            child: GestureDetector(
-                              onTap: () => _scrollToSection(catKey),
-                              child: AnimatedContainer(
-                                duration: const Duration(milliseconds: 180),
-                                curve: Curves.easeOutCubic,
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 14.0, vertical: 8.0),
-                                decoration: BoxDecoration(
-                                  color: isActive
-                                      ? Theme.of(context)
-                                          .colorScheme
-                                          .secondary
-                                          .withValues(alpha: 0.15)
-                                      : Colors.transparent,
-                                  borderRadius: BorderRadius.circular(14.0),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      c['icon'] as IconData,
-                                      size: 15.0,
-                                      color: isActive
-                                          ? Theme.of(context)
-                                              .colorScheme
-                                              .secondary
-                                          : Theme.of(context)
-                                              .colorScheme
-                                              .onPrimaryContainer
-                                              .withValues(alpha: 0.65),
-                                    ),
-                                    const SizedBox(width: 6.0),
-                                    Text(
-                                      c['label'] as String,
-                                      style: TextStyle(
-                                        fontSize: 13.5,
-                                        fontWeight: isActive
-                                            ? FontWeight.w700
-                                            : FontWeight.w500,
+                    ValueListenableBuilder<String?>(
+                      valueListenable: _activeNavCategoryNotifier,
+                      builder: (context, activeCategory, _) =>
+                          SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        controller: _chipScrollController,
+                        padding:
+                            const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 14.0),
+                        child: Row(
+                          children: navCategories.map((c) {
+                            final catKey = c['key'] as String;
+                            final isActive = activeCategory == catKey;
+                            return Padding(
+                              key: _chipKeys[catKey],
+                              padding: const EdgeInsets.only(right: 4.0),
+                              child: GestureDetector(
+                                onTap: () => _scrollToSection(catKey),
+                                child: AnimatedContainer(
+                                  duration: const Duration(milliseconds: 180),
+                                  curve: Curves.easeOutCubic,
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 14.0, vertical: 8.0),
+                                  decoration: BoxDecoration(
+                                    color: isActive
+                                        ? Theme.of(context)
+                                            .colorScheme
+                                            .secondary
+                                            .withValues(alpha: 0.15)
+                                        : Colors.transparent,
+                                    borderRadius: BorderRadius.circular(14.0),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        c['icon'] as IconData,
+                                        size: 15.0,
                                         color: isActive
                                             ? Theme.of(context)
                                                 .colorScheme
@@ -938,13 +922,31 @@ class SettingsScreenState extends State<SettingsScreen>
                                                 .onPrimaryContainer
                                                 .withValues(alpha: 0.65),
                                       ),
-                                    ),
-                                  ],
+                                      const SizedBox(width: 6.0),
+                                      Text(
+                                        c['label'] as String,
+                                        style: TextStyle(
+                                          fontSize: 13.5,
+                                          fontWeight: isActive
+                                              ? FontWeight.w700
+                                              : FontWeight.w500,
+                                          color: isActive
+                                              ? Theme.of(context)
+                                                  .colorScheme
+                                                  .secondary
+                                              : Theme.of(context)
+                                                  .colorScheme
+                                                  .onPrimaryContainer
+                                                  .withValues(alpha: 0.65),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
-                            ),
-                          );
-                        }).toList(),
+                            );
+                          }).toList(),
+                        ),
                       ),
                     ),
                 ],

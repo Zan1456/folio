@@ -15,7 +15,6 @@ import 'package:folio_mobile_ui/common/bottom_sheet_menu/rounded_bottom_sheet.da
 import 'package:folio_mobile_ui/common/dot.dart';
 import 'package:folio_mobile_ui/common/empty.dart';
 import 'package:folio_mobile_ui/common/system_chrome.dart';
-// import 'package:folio_mobile_ui/common/widgets/lesson/lesson_view.dart';
 import 'package:folio_kreta_api/controllers/timetable_controller.dart';
 import 'package:folio_mobile_ui/common/widgets/lesson/lesson_viewable.dart';
 import 'package:folio_mobile_ui/pages/timetable/fs_timetable.dart';
@@ -28,8 +27,6 @@ import 'package:folio_mobile_ui/common/haptic.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'timetable_page.i18n.dart';
-
-// todo: "fix" overflow (priority: -1)
 
 class TimetablePage extends StatefulWidget {
   const TimetablePage({super.key, this.initialDay, this.initialWeek});
@@ -203,7 +200,16 @@ class TimetablePageState extends State<TimetablePage>
 
     // Pre-compute per-day values once per build, not inside itemBuilder
     final now = DateTime.now();
-    final df = DateFormat("H:mm", I18n.of(context).locale.languageCode);
+    final locale = I18n.of(context).locale.languageCode;
+    final df = DateFormat("H:mm", locale);
+    final dayLabels = _controller.days != null
+        ? List<String>.generate(
+            _controller.days!.length,
+            (i) => DateFormat("EEEE", locale)
+                .format(_controller.days![i].first.date)
+                .capital(),
+          )
+        : <String>[];
     final swapDescPerDay = _controller.days != null
         ? List<bool>.generate(_controller.days!.length, (i) {
             final day = _controller.days![i];
@@ -385,8 +391,8 @@ class TimetablePageState extends State<TimetablePage>
                   ),
                   // Day tab bar
                   if (_tabController.length > 0)
-                    AnimatedBuilder(
-                      animation: _tabController,
+                    ListenableBuilder(
+                      listenable: _tabController,
                       builder: (context, _) => TabBar(
                         controller: _tabController,
                         dividerColor: Colors.transparent,
@@ -416,13 +422,13 @@ class TimetablePageState extends State<TimetablePage>
                             .colorScheme
                             .secondary
                             .withValues(alpha: 0.08)),
-                        onTap: (_) => performHapticFeedback(settingsProvider.vibrate),
+                        onTap: (_) =>
+                            performHapticFeedback(settingsProvider.vibrate),
                         padding:
                             const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 14.0),
                         tabs: List.generate(_tabController.length, (index) {
                           final isToday = _sameDate(
-                              _controller.days![index].first.date,
-                              DateTime.now());
+                              _controller.days![index].first.date, now);
                           final isSelected = _tabController.index == index;
                           final dotColor = isSelected
                               ? Theme.of(context)
@@ -433,10 +439,7 @@ class TimetablePageState extends State<TimetablePage>
                                   .colorScheme
                                   .onPrimaryContainer
                                   .withValues(alpha: 0.45);
-                          String label = DateFormat(
-                                  "EEEE", I18n.of(context).locale.languageCode)
-                              .format(_controller.days![index].first.date)
-                              .capital();
+                          final label = dayLabels[index];
                           return Tab(
                             height: 50.0,
                             child: Column(
@@ -667,27 +670,6 @@ class TimetablePageState extends State<TimetablePage>
   }
 
   void showQuickSettings(BuildContext context) {
-    // _sheetController = _scaffoldKey.currentState?.showBottomSheet(
-    //   (context) => RoundedBottomSheet(
-    //       borderRadius: 14.0,
-    //       child: BottomSheetMenu(items: [
-    //         SwitchListTile(
-    //             title: Text('show_lesson_num'.i18n),
-    //             value:
-    //                 Provider.of<SettingsProvider>(context).qTimetableLessonNum,
-    //             onChanged: (v) {
-    //               Provider.of<SettingsProvider>(context, listen: false)
-    //                   .update(qTimetableLessonNum: v);
-    //             })
-    //       ])),
-    //   backgroundColor: const Color(0x00000000),
-    //   elevation: 12.0,
-    // );
-
-    // _sheetController!.closed.then((value) {
-    //   // Show fab and grades
-    //   if (mounted) {}
-    // });
     showRoundedModalBottomSheet(
       context,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -794,9 +776,7 @@ class TimetablePageState extends State<TimetablePage>
             title: Row(
               children: [
                 const Icon(Icons.edit_document),
-                const SizedBox(
-                  width: 10.0,
-                ),
+                const SizedBox(width: 10.0),
                 Text('show_exams_homework'.i18n),
               ],
             ),
@@ -806,7 +786,6 @@ class TimetablePageState extends State<TimetablePage>
               performHapticFeedback(settingsProvider.vibrate);
               Provider.of<SettingsProvider>(context, listen: false)
                   .update(qTimetableSubTiles: v);
-
               Navigator.of(context, rootNavigator: true).pop();
             },
           ),
