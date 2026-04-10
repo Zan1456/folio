@@ -167,7 +167,7 @@ Widget errorBuilder(FlutterErrorDetails details) {
 Future<void> initAdditionalBackgroundFetch() async {
   int status = await BackgroundFetch.configure(
       BackgroundFetchConfig(
-          minimumFetchInterval: 1,
+          minimumFetchInterval: 15,
           stopOnTerminate: false,
           enableHeadless: true,
           requiresBatteryNotLow: false,

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -12,6 +13,8 @@ class StatusProvider extends ChangeNotifier {
   ConnectivityResult _networkType = ConnectivityResult.none;
   ConnectivityResult get networkType => _networkType;
 
+  StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
+
   StatusProvider() {
     _handleNetworkChanges();
     _handleDNSFailure();
@@ -23,7 +26,8 @@ class StatusProvider extends ChangeNotifier {
   double get progress => _progress;
 
   void _handleNetworkChanges() {
-    Connectivity().onConnectivityChanged.listen((event) {
+    _connectivitySubscription =
+        Connectivity().onConnectivityChanged.listen((event) {
       _networkType = event[0];
       if (event[0] == ConnectivityResult.none) {
         if (!_stack.contains(Status.network)) {
@@ -38,6 +42,12 @@ class StatusProvider extends ChangeNotifier {
         }
       }
     });
+  }
+
+  @override
+  void dispose() {
+    _connectivitySubscription?.cancel();
+    super.dispose();
   }
 
   void _handleDNSFailure() {
