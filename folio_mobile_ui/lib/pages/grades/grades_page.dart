@@ -320,7 +320,11 @@ class _GradesPageState extends State<GradesPage>
 
     final subjectAvg = subjectAvgMap.isEmpty
         ? 0.0
-        : subjectAvgMap.values.fold(0.0, (a, b) => a + b) /
+        : subjectAvgMap.entries.map((e) {
+            final threshold = (e.key.customRounding ?? settings.rounding.toDouble()) / 10;
+            final base = e.value.floor();
+            return (e.value - base) >= threshold ? (base + 1).toDouble() : base.toDouble();
+          }).fold(0.0, (a, b) => a + b) /
             subjectAvgMap.length;
 
     final currentPeriodKey = _periodKeys[_periods.indexOf(_periodDays)];
