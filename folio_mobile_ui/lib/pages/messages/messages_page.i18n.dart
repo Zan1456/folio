@@ -10,6 +10,7 @@ extension Localization on String {
           "Trash": "Trash",
           "Draft": "Draft",
           "empty": "You have no messages.",
+          "Send": "Send",
         },
         "hu-HU": {
           "Messages": "Üzenetek",
@@ -18,6 +19,7 @@ extension Localization on String {
           "Trash": "Kuka",
           "Draft": "Piszkozat",
           "empty": "Nincsenek üzeneteid.",
+          "Send": "Küldés",
         },
         "de-DE": {
           "Messages": "Nachrichten",
@@ -26,6 +28,7 @@ extension Localization on String {
           "Trash": "Müll",
           "Draft": "Entwurf",
           "empty": "Sie haben keine Nachrichten.",
+          "Send": "Senden",
         },
       };
 
